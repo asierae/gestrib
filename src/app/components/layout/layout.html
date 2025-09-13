@@ -1,0 +1,116 @@
+<div class="layout-container">
+  <!-- Sidebar -->
+  <aside class="sidebar" [class.sidebar-collapsed]="!isSidebarOpen()">
+    <div class="sidebar-header">
+      <div class="logo">
+        <span class="logo-icon">⚖️</span>
+        <span class="logo-text" *ngIf="isSidebarOpen()">Gestrib</span>
+      </div>
+      <button 
+        class="sidebar-toggle" 
+        (click)="toggleSidebar()"
+        [attr.aria-label]="isSidebarOpen() ? 'common.close' : 'common.menu' | translate">
+        <span class="material-icons">{{ isSidebarOpen() ? 'menu_open' : 'menu' }}</span>
+      </button>
+    </div>
+
+    <nav class="sidebar-nav">
+      <ul class="nav-list">
+        <li *ngFor="let item of menuItems()" class="nav-item">
+          <a 
+            [routerLink]="item.route" 
+            class="nav-link"
+            [class.active]="item.active"
+            (click)="setActiveMenuItem(item)"
+            [attr.title]="item.label | translate">
+            <span class="material-icons nav-icon">{{ item.icon }}</span>
+            <span class="nav-text" *ngIf="isSidebarOpen()">{{ item.label | translate }}</span>
+          </a>
+        </li>
+      </ul>
+    </nav>
+
+  </aside>
+
+  <!-- Main Content -->
+  <div class="main-content">
+    <!-- Top Bar -->
+    <header class="top-bar">
+      <div class="top-bar-left">
+        <nav class="breadcrumbs">
+          <ol class="breadcrumb-list">
+            <li *ngFor="let breadcrumb of breadcrumbs(); let last = last" class="breadcrumb-item">
+              <a 
+                *ngIf="!last" 
+                [routerLink]="breadcrumb.route" 
+                class="breadcrumb-link">
+                {{ breadcrumb.label }}
+              </a>
+              <span *ngIf="last" class="breadcrumb-current">
+                {{ breadcrumb.label }}
+              </span>
+              <span *ngIf="!last" class="breadcrumb-separator">/</span>
+            </li>
+          </ol>
+        </nav>
+      </div>
+
+      <div class="top-bar-right">
+        <div class="user-actions">
+          <!-- Notifications -->
+          <button class="notification-button" type="button">
+            <span class="material-icons">notifications</span>
+            <span class="notification-badge">3</span>
+          </button>
+
+          <!-- User Menu -->
+          <div class="user-menu">
+            <button class="user-button" type="button">
+              <div class="user-avatar">
+                <span class="material-icons">person</span>
+              </div>
+              <span class="user-name">{{ currentUser()?.nombre || 'Usuario' }}</span>
+              <span class="material-icons">arrow_drop_down</span>
+            </button>
+            
+            <div class="user-dropdown">
+              <a href="#" class="dropdown-item">
+                <span class="material-icons">person</span>
+                <app-user-menu-item translateKey="common.profile"></app-user-menu-item>
+              </a>
+              <a href="#" class="dropdown-item">
+                <span class="material-icons">settings</span>
+                <app-user-menu-item translateKey="common.settings"></app-user-menu-item>
+              </a>
+              <div class="dropdown-divider"></div>
+              <div class="dropdown-language">
+                <span class="material-icons">language</span>
+                <span class="language-label">
+                  <app-user-menu-item translateKey="common.language"></app-user-menu-item>:
+                </span>
+                <select 
+                  [value]="currentLanguage()" 
+                  (change)="changeLanguage($any($event.target).value)"
+                  class="language-select-dropdown">
+                  <option *ngFor="let lang of languages" [value]="lang.code">
+                    {{ lang.flag }} {{ lang.name }}
+                  </option>
+                </select>
+              </div>
+              <div class="dropdown-divider"></div>
+              <a href="#" class="dropdown-item logout" (click)="logout()">
+                <span class="material-icons">logout</span>
+                <app-user-menu-item translateKey="common.logout"></app-user-menu-item>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Page Content -->
+    <main class="page-content">
+      <router-outlet></router-outlet>
+    </main>
+  </div>
+</div>

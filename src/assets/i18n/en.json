@@ -1,0 +1,200 @@
+{
+  "common": {
+    "dashboard": "Dashboard",
+    "login": "Login",
+    "logout": "Logout",
+    "profile": "Profile",
+    "settings": "Settings",
+    "home": "Home",
+    "search": "Search",
+    "menu": "Menu",
+    "close": "Close",
+    "save": "Save",
+    "cancel": "Cancel",
+    "edit": "Edit",
+    "delete": "Delete",
+    "add": "Add",
+    "view": "View",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "warning": "Warning",
+    "info": "Information",
+    "welcome": "Welcome",
+    "language": "Language"
+  },
+  "navigation": {
+    "dashboard": "Dashboard",
+    "tribunals": "Tribunals",
+    "cases": "Cases",
+    "users": "Users",
+    "reports": "Reports",
+    "administration": "Administration",
+    "help": "Help",
+    "defensas": "Defenses"
+  },
+  "breadcrumbs": {
+    "home": "Home",
+    "dashboard": "Dashboard",
+    "tribunals": "Tribunals",
+    "cases": "Cases",
+    "users": "Users",
+    "reports": "Reports",
+    "administration": "Administration",
+    "help": "Help",
+    "defensas": "Defenses",
+    "login": "Login",
+    "profile": "Profile",
+    "settings": "Settings"
+  },
+  "login": {
+    "title": "Login",
+    "username": "Username",
+    "email": "Email",
+    "password": "Password",
+    "rememberMe": "Remember Me",
+    "forgotPassword": "Forgot Password?",
+    "loginButton": "Login",
+    "welcome": "Welcome",
+    "demoCredentials": "Demo Credentials"
+  },
+  "validation": {
+    "email": {
+      "required": "Email is required",
+      "email": "Email format is not valid"
+    },
+    "password": {
+      "required": "Password is required",
+      "minlength": "Password must be at least 6 characters"
+    },
+    "required": "This field is required",
+    "minlength": "Must be at least {0} characters",
+    "maxlength": "Cannot exceed {0} characters"
+  },
+  "defensas": {
+    "title": "Defense Management",
+    "createTitle": "Create New Defense",
+    "listTitle": "Defense List",
+    "course": "Course",
+    "specialty": "Specialty",
+    "selectSpecialty": "Select specialty",
+    "student": "Student",
+    "selectStudent": "Select student",
+    "director": "Tribunal Director",
+    "selectDirector": "Select director",
+    "vocal": "Tribunal Vocal",
+    "selectVocal": "Select vocal",
+    "supplement": "Supplement",
+    "selectSupplement": "Select supplement",
+    "vocalSpecialties": "Vocal Specialties",
+    "supplementSpecialties": "Supplement Specialties",
+    "directionComments": "Direction Comments",
+    "name": "Name",
+    "description": "Description",
+    "type": "Type",
+    "state": "State",
+    "observations": "Observations",
+    "creationDate": "Creation Date",
+    "modificationDate": "Modification Date",
+    "createdBy": "Created by",
+    "modifiedBy": "Modified by",
+    "active": "Active",
+    "inactive": "Inactive",
+    "selectType": "Select type",
+    "createButton": "Create Defense",
+    "creating": "Creating...",
+    "loadButton": "Load Defenses",
+    "loading": "Loading...",
+    "edit": "Edit",
+    "delete": "Delete",
+    "noDefensas": "No defenses available",
+    "success": {
+      "created": "Defense created successfully",
+      "updated": "Defense updated successfully",
+      "deleted": "Defense deleted successfully",
+      "loaded": "Defenses loaded successfully"
+    },
+    "error": {
+      "create": "Error creating defense",
+      "update": "Error updating defense",
+      "delete": "Error deleting defense",
+      "load": "Error loading defenses",
+      "required": "Please complete all required fields"
+    },
+    "types": {
+      "penal": "Criminal",
+      "civil": "Civil",
+      "administrativo": "Administrative",
+      "laboral": "Labor",
+      "mercantil": "Commercial",
+      "familia": "Family",
+      "otros": "Others"
+    },
+    "states": {
+      "borrador": "Draft",
+      "en_proceso": "In Process",
+      "presentada": "Submitted",
+      "admitida": "Admitted",
+      "rechazada": "Rejected",
+      "archivada": "Archived"
+    }
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "welcome": "Welcome to the court management system",
+    "stats": {
+      "totalTribunals": "Total Courts",
+      "totalCases": "Total Cases",
+      "totalUsers": "Total Users",
+      "activeDefensas": "Active Defenses"
+    }
+  },
+  "tribunals": {
+    "title": "Court Management",
+    "name": "Name",
+    "address": "Address",
+    "phone": "Phone",
+    "email": "Email",
+    "type": "Type",
+    "active": "Active"
+  },
+  "cases": {
+    "title": "Case Management",
+    "caseNumber": "Case Number",
+    "description": "Description",
+    "status": "Status",
+    "priority": "Priority",
+    "assignedTo": "Assigned to",
+    "createdDate": "Creation Date"
+  },
+  "users": {
+    "title": "User Management",
+    "name": "Name",
+    "email": "Email",
+    "role": "Role",
+    "active": "Active",
+    "lastLogin": "Last Login"
+  },
+  "reports": {
+    "title": "Reports and Analytics",
+    "generate": "Generate Report",
+    "export": "Export",
+    "dateRange": "Date Range",
+    "from": "From",
+    "to": "To"
+  },
+  "administration": {
+    "title": "Administration",
+    "systemSettings": "System Settings",
+    "userManagement": "User Management",
+    "backup": "Backup",
+    "logs": "Logs"
+  },
+  "help": {
+    "title": "Help and Support",
+    "documentation": "Documentation",
+    "faq": "Frequently Asked Questions",
+    "contact": "Contact",
+    "support": "Technical Support"
+  }
+}

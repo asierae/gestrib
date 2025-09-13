@@ -1,0 +1,98 @@
+<div class="login-container">
+  <!-- Translation Test -->
+  <div style="position: fixed; top: 10px; right: 10px; background: white; padding: 10px; border: 1px solid #ccc; z-index: 1000; font-size: 12px; max-width: 300px;">
+    <strong>Translation Test:</strong><br>
+    Language: {{ translationService.getCurrentLanguage() }}<br>
+    Loaded: {{ translationService.areTranslationsLoaded() }}<br>
+    Test: {{ 'login.welcome' | translate }}<br>
+    <button (click)="reloadTranslations()" style="margin-top: 5px;">Reload</button>
+    <button (click)="forceLoadTranslations()" style="margin-top: 5px; margin-left: 5px;">Force Load</button>
+  </div>
+
+  <div class="login-card">
+    <div class="login-header">
+      <div class="logo">
+        <span class="logo-icon">⚖️</span>
+        <h1>Gestrib</h1>
+      </div>
+      <p class="login-subtitle">{{ 'login.welcome' | translate }}</p>
+    </div>
+
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
+      <div class="form-group">
+        <label for="email" class="form-label">
+          <span class="material-icons">email</span>
+          {{ 'login.username' | translate }}
+        </label>
+        <input
+          type="email"
+          id="email"
+          formControlName="email"
+          class="form-input"
+          [class.error]="loginForm.get('email')?.invalid && loginForm.get('email')?.touched"
+          placeholder="{{ 'login.username' | translate }}"
+        />
+        <div class="error-message" *ngIf="getFieldError('email')">
+          {{ getFieldError('email') | translate }}
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="password" class="form-label">
+          <span class="material-icons">lock</span>
+          {{ 'login.password' | translate }}
+        </label>
+        <input
+          type="password"
+          id="password"
+          formControlName="password"
+          class="form-input"
+          [class.error]="loginForm.get('password')?.invalid && loginForm.get('password')?.touched"
+          placeholder="{{ 'login.password' | translate }}"
+        />
+        <div class="error-message" *ngIf="getFieldError('password')">
+          {{ getFieldError('password') | translate }}
+        </div>
+      </div>
+
+      <div class="form-group checkbox-group">
+        <label class="checkbox-label">
+          <input
+            type="checkbox"
+            formControlName="rememberMe"
+            class="checkbox-input"
+          />
+          <span class="checkbox-custom"></span>
+          {{ 'login.rememberMe' | translate }}
+        </label>
+      </div>
+
+      <div class="error-message main-error" *ngIf="errorMessage()">
+        {{ errorMessage() }}
+      </div>
+
+      <button
+        type="submit"
+        class="login-button"
+        [disabled]="isLoading()"
+        [class.loading]="isLoading()"
+      >
+        <span class="material-icons" *ngIf="!isLoading()">login</span>
+        <span class="spinner" *ngIf="isLoading()"></span>
+        {{ isLoading() ? ('common.loading' | translate) : ('login.loginButton' | translate) }}
+      </button>
+
+      <div class="login-footer">
+        <a href="#" class="forgot-password">
+          {{ 'login.forgotPassword' | translate }}
+        </a>
+      </div>
+    </form>
+
+    <div class="demo-credentials">
+      <h3>{{ 'login.demoCredentials' | translate }}</h3>
+      <p><strong>{{ 'login.email' | translate }}:</strong> admin@gestrib.com</p>
+      <p><strong>{{ 'login.password' | translate }}:</strong> admin123</p>
+    </div>
+  </div>
+</div>

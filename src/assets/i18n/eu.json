@@ -1,0 +1,200 @@
+{
+  "common": {
+    "dashboard": "Kontrol-panela",
+    "login": "Saioa hasi",
+    "logout": "Saioa itxi",
+    "profile": "Profila",
+    "settings": "Ezarpenak",
+    "home": "Hasiera",
+    "search": "Bilatu",
+    "menu": "Menua",
+    "close": "Itxi",
+    "save": "Gorde",
+    "cancel": "Utzi",
+    "edit": "Editatu",
+    "delete": "Ezabatu",
+    "add": "Gehitu",
+    "view": "Ikusi",
+    "loading": "Kargatzen...",
+    "error": "Errorea",
+    "success": "Arrakasta",
+    "warning": "Abisua",
+    "info": "Informazioa",
+    "welcome": "Ongi etorri",
+    "language": "Hizkuntza"
+  },
+  "navigation": {
+    "dashboard": "Kontrol-panela",
+    "tribunals": "Epaitegiak",
+    "cases": "Kasuak",
+    "users": "Erabiltzaileak",
+    "reports": "Txostenak",
+    "administration": "Administrazioa",
+    "help": "Laguntza",
+    "defensas": "Defentsak"
+  },
+  "breadcrumbs": {
+    "home": "Hasiera",
+    "dashboard": "Kontrol-panela",
+    "tribunals": "Epaitegiak",
+    "cases": "Kasuak",
+    "users": "Erabiltzaileak",
+    "reports": "Txostenak",
+    "administration": " enpresak",
+    "help": "Laguntza",
+    "defensas": "Defentsak",
+    "login": "Saioa hasi",
+    "profile": "Profila",
+    "settings": "Ezarpenak"
+  },
+  "login": {
+    "title": "Saioa hasi",
+    "username": "Erabiltzailea",
+    "email": "Helbide elektronikoa",
+    "password": "Pasahitza",
+    "rememberMe": "Gogoratu nazazu",
+    "forgotPassword": "Pasahitza ahaztu duzu?",
+    "loginButton": "Saioa hasi",
+    "welcome": "Ongi etorri",
+    "demoCredentials": "Froga kredentzialak"
+  },
+  "validation": {
+    "email": {
+      "required": "Helbide elektronikoa beharrezkoa da",
+      "email": "Helbide elektronikoaren formatua ez da baliozkoa"
+    },
+    "password": {
+      "required": "Pasahitza beharrezkoa da",
+      "minlength": "Pasahitzak gutxienez 6 karaktere izan behar ditu"
+    },
+    "required": "Eremu hau beharrezkoa da",
+    "minlength": "Gutxienez {0} karaktere izan behar ditu",
+    "maxlength": "Ezin du {0} karaktere baino gehiago izan"
+  },
+  "defensas": {
+    "title": "Defentsen Kudeaketa",
+    "createTitle": "Defentsa Berria Sortu",
+    "listTitle": "Defentsen Zerrenda",
+    "course": "Ikasturtea",
+    "specialty": "Espezialitatea",
+    "selectSpecialty": "Espezialitatea hautatu",
+    "student": "Ikaslea",
+    "selectStudent": "Ikaslea hautatu",
+    "director": "Epaitegiko Zuzendaria",
+    "selectDirector": "Zuzendaria hautatu",
+    "vocal": "Epaitegiko Bozkaria",
+    "selectVocal": "Bozkaria hautatu",
+    "supplement": "Ordezkoa",
+    "selectSupplement": "Ordezkoa hautatu",
+    "vocalSpecialties": "Bozkariaren Espezialitateak",
+    "supplementSpecialties": "Ordezkoaren Espezialitateak",
+    "directionComments": "Zuzendaritzaren Iruzkinak",
+    "name": "Izena",
+    "description": "Deskribapena",
+    "type": "Mota",
+    "state": "Egoera",
+    "observations": "Oharrak",
+    "creationDate": "Sortze Data",
+    "modificationDate": "Aldaketa Data",
+    "createdBy": "Sortzailea",
+    "modifiedBy": "Aldatzailea",
+    "active": "Aktibo",
+    "inactive": "Inaktibo",
+    "selectType": "Mota hautatu",
+    "createButton": "Defentsa Sortu",
+    "creating": "Sortzen...",
+    "loadButton": "Defentsak Kargatu",
+    "loading": "Kargatzen...",
+    "edit": "Editatu",
+    "delete": "Ezabatu",
+    "noDefensas": "Ez dago defentsarik eskuragarri",
+    "success": {
+      "created": "Defentsa ondo sortu da",
+      "updated": "Defentsa ondo eguneratu da",
+      "deleted": "Defentsa ondo ezabatu da",
+      "loaded": "Defentsak ondo kargatu dira"
+    },
+    "error": {
+      "create": "Errorea defentsa sortzerakoan",
+      "update": "Errorea defentsa eguneratzerakoan",
+      "delete": "Errorea defentsa ezabatzekoan",
+      "load": "Errorea defentsak kargatzekoan",
+      "required": "Mesedez, bete beharrezko eremu guztiak"
+    },
+    "types": {
+      "penal": "Penala",
+      "civil": "Zibila",
+      "administrativo": "Administratiboa",
+      "laboral": "Laborala",
+      "mercantil": "Merkantila",
+      "familia": "Familia",
+      "otros": "Besteak"
+    },
+    "states": {
+      "borrador": "Zirriborroa",
+      "en_proceso": "Prozesuan",
+      "presentada": "Aurkeztua",
+      "admitida": "Onartua",
+      "rechazada": "Baztertua",
+      "archivada": "Artxibatua"
+    }
+  },
+  "dashboard": {
+    "title": "Kontrol-panela",
+    "welcome": "Ongi etorri epaitegien kudeaketa sistemara",
+    "stats": {
+      "totalTribunals": "Epaitegi Guztiak",
+      "totalCases": "Kasu Guztiak",
+      "totalUsers": "Erabiltzaile Guztiak",
+      "activeDefensas": "Defentsa Aktiboak"
+    }
+  },
+  "tribunals": {
+    "title": "Epaitegien Kudeaketa",
+    "name": "Izena",
+    "address": "Helbidea",
+    "phone": "Telefonoa",
+    "email": "Emaila",
+    "type": "Mota",
+    "active": "Aktibo"
+  },
+  "cases": {
+    "title": "Kasuen Kudeaketa",
+    "caseNumber": "Kasu Zenbakia",
+    "description": "Deskribapena",
+    "status": "Egoera",
+    "priority": "Lehentasuna",
+    "assignedTo": "Esleitua",
+    "createdDate": "Sortze Data"
+  },
+  "users": {
+    "title": "Erabiltzaileen Kudeaketa",
+    "name": "Izena",
+    "email": "Emaila",
+    "role": "Rola",
+    "active": "Aktibo",
+    "lastLogin": "Azken Sarrera"
+  },
+  "reports": {
+    "title": "Txostenak eta Analitikak",
+    "generate": "Txostena Sortu",
+    "export": "Esportatu",
+    "dateRange": "Data Tartea",
+    "from": "Noiztik",
+    "to": "Noiz arte"
+  },
+  "administration": {
+    "title": " enpresak",
+    "systemSettings": "Sistemaren Ezarpenak",
+    "userManagement": "Erabiltzaileen Kudeaketa",
+    "backup": "Babeskopia",
+    "logs": "Erregistroak"
+  },
+  "help": {
+    "title": "Laguntza eta Euskarria",
+    "documentation": "Dokumentazioa",
+    "faq": "Ohiko Galderak",
+    "contact": "Kontaktua",
+    "support": "Laguntza Teknikoa"
+  }
+}

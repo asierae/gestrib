@@ -1,0 +1,76 @@
+<div class="dashboard-container">
+  <div class="dashboard-header">
+    <h1>{{ 'navigation.dashboard' | translate }}</h1>
+    <p>{{ 'common.welcome' | translate }} a {{ title() }}</p>
+  </div>
+  
+  <div class="dashboard-content">
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon">📊</div>
+        <div class="stat-content">
+          <h3>150</h3>
+          <p>Casos Activos</p>
+        </div>
+      </div>
+      
+      <div class="stat-card">
+        <div class="stat-icon">⚖️</div>
+        <div class="stat-content">
+          <h3>25</h3>
+          <p>Tribunales</p>
+        </div>
+      </div>
+      
+      <div class="stat-card">
+        <div class="stat-icon">👥</div>
+        <div class="stat-content">
+          <h3>89</h3>
+          <p>Usuarios</p>
+        </div>
+      </div>
+      
+      <div class="stat-card">
+        <div class="stat-icon">📈</div>
+        <div class="stat-content">
+          <h3>95%</h3>
+          <p>Eficiencia</p>
+        </div>
+      </div>
+    </div>
+    
+    <div class="dashboard-widgets">
+      <div class="widget">
+        <h3>Actividad Reciente</h3>
+        <div class="activity-list">
+          <div class="activity-item">
+            <span class="activity-time">10:30</span>
+            <span class="activity-text">Nuevo caso asignado</span>
+          </div>
+          <div class="activity-item">
+            <span class="activity-time">09:15</span>
+            <span class="activity-text">Audiencia programada</span>
+          </div>
+          <div class="activity-item">
+            <span class="activity-time">08:45</span>
+            <span class="activity-text">Documento actualizado</span>
+          </div>
+        </div>
+      </div>
+      
+      <div class="widget">
+        <h3>Próximas Audiencias</h3>
+        <div class="audience-list">
+          <div class="audience-item">
+            <span class="audience-time">14:00</span>
+            <span class="audience-case">Caso #2024-001</span>
+          </div>
+          <div class="audience-item">
+            <span class="audience-time">16:30</span>
+            <span class="audience-case">Caso #2024-002</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

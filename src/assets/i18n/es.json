@@ -1,0 +1,200 @@
+{
+  "common": {
+    "dashboard": "Panel de Control",
+    "login": "Iniciar Sesión",
+    "logout": "Cerrar Sesión",
+    "profile": "Perfil",
+    "settings": "Configuración",
+    "home": "Inicio",
+    "search": "Buscar",
+    "menu": "Menú",
+    "close": "Cerrar",
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "edit": "Editar",
+    "delete": "Eliminar",
+    "add": "Añadir",
+    "view": "Ver",
+    "loading": "Cargando...",
+    "error": "Error",
+    "success": "Éxito",
+    "warning": "Advertencia",
+    "info": "Información",
+    "welcome": "Bienvenido",
+    "language": "Idioma"
+  },
+  "navigation": {
+    "dashboard": "Panel de Control",
+    "tribunals": "Tribunales",
+    "cases": "Casos",
+    "users": "Usuarios",
+    "reports": "Informes",
+    "administration": "Administración",
+    "help": "Ayuda",
+    "defensas": "Defensas"
+  },
+  "breadcrumbs": {
+    "home": "Inicio",
+    "dashboard": "Panel de Control",
+    "tribunals": "Tribunales",
+    "cases": "Casos",
+    "users": "Usuarios",
+    "reports": "Informes",
+    "administration": "Administración",
+    "help": "Ayuda",
+    "defensas": "Defensas",
+    "login": "Iniciar Sesión",
+    "profile": "Perfil",
+    "settings": "Configuración"
+  },
+  "login": {
+    "title": "Iniciar Sesión",
+    "username": "Usuario",
+    "email": "Email",
+    "password": "Contraseña",
+    "rememberMe": "Recordarme",
+    "forgotPassword": "¿Olvidaste tu contraseña?",
+    "loginButton": "Iniciar Sesión",
+    "welcome": "Bienvenido",
+    "demoCredentials": "Credenciales de demostración"
+  },
+  "validation": {
+    "email": {
+      "required": "El email es obligatorio",
+      "email": "El formato del email no es válido"
+    },
+    "password": {
+      "required": "La contraseña es obligatoria",
+      "minlength": "La contraseña debe tener al menos 6 caracteres"
+    },
+    "required": "Este campo es obligatorio",
+    "minlength": "Debe tener al menos {0} caracteres",
+    "maxlength": "No puede tener más de {0} caracteres"
+  },
+  "defensas": {
+    "title": "Gestión de Defensas",
+    "createTitle": "Crear Nueva Defensa",
+    "listTitle": "Lista de Defensas",
+    "course": "Curso",
+    "specialty": "Especialidad",
+    "selectSpecialty": "Seleccionar especialidad",
+    "student": "Estudiante",
+    "selectStudent": "Seleccionar estudiante",
+    "director": "Director del Tribunal",
+    "selectDirector": "Seleccionar director",
+    "vocal": "Vocal del Tribunal",
+    "selectVocal": "Seleccionar vocal",
+    "supplement": "Suplente",
+    "selectSupplement": "Seleccionar suplente",
+    "vocalSpecialties": "Especialidades del Vocal",
+    "supplementSpecialties": "Especialidades del Suplente",
+    "directionComments": "Comentarios de la Dirección",
+    "name": "Nombre",
+    "description": "Descripción",
+    "type": "Tipo",
+    "state": "Estado",
+    "observations": "Observaciones",
+    "creationDate": "Fecha de Creación",
+    "modificationDate": "Fecha de Modificación",
+    "createdBy": "Creado por",
+    "modifiedBy": "Modificado por",
+    "active": "Activo",
+    "inactive": "Inactivo",
+    "selectType": "Seleccionar tipo",
+    "createButton": "Crear Defensa",
+    "creating": "Creando...",
+    "loadButton": "Cargar Defensas",
+    "loading": "Cargando...",
+    "edit": "Editar",
+    "delete": "Eliminar",
+    "noDefensas": "No hay defensas disponibles",
+    "success": {
+      "created": "Defensa creada exitosamente",
+      "updated": "Defensa actualizada exitosamente",
+      "deleted": "Defensa eliminada exitosamente",
+      "loaded": "Defensas cargadas exitosamente"
+    },
+    "error": {
+      "create": "Error al crear la defensa",
+      "update": "Error al actualizar la defensa",
+      "delete": "Error al eliminar la defensa",
+      "load": "Error al cargar las defensas",
+      "required": "Por favor complete todos los campos obligatorios"
+    },
+    "types": {
+      "penal": "Penal",
+      "civil": "Civil",
+      "administrativo": "Administrativo",
+      "laboral": "Laboral",
+      "mercantil": "Mercantil",
+      "familia": "Familia",
+      "otros": "Otros"
+    },
+    "states": {
+      "borrador": "Borrador",
+      "en_proceso": "En Proceso",
+      "presentada": "Presentada",
+      "admitida": "Admitida",
+      "rechazada": "Rechazada",
+      "archivada": "Archivada"
+    }
+  },
+  "dashboard": {
+    "title": "Panel de Control",
+    "welcome": "Bienvenido al sistema de gestión de tribunales",
+    "stats": {
+      "totalTribunals": "Total Tribunales",
+      "totalCases": "Total Casos",
+      "totalUsers": "Total Usuarios",
+      "activeDefensas": "Defensas Activas"
+    }
+  },
+  "tribunals": {
+    "title": "Gestión de Tribunales",
+    "name": "Nombre",
+    "address": "Dirección",
+    "phone": "Teléfono",
+    "email": "Email",
+    "type": "Tipo",
+    "active": "Activo"
+  },
+  "cases": {
+    "title": "Gestión de Casos",
+    "caseNumber": "Número de Caso",
+    "description": "Descripción",
+    "status": "Estado",
+    "priority": "Prioridad",
+    "assignedTo": "Asignado a",
+    "createdDate": "Fecha de Creación"
+  },
+  "users": {
+    "title": "Gestión de Usuarios",
+    "name": "Nombre",
+    "email": "Email",
+    "role": "Rol",
+    "active": "Activo",
+    "lastLogin": "Último Acceso"
+  },
+  "reports": {
+    "title": "Informes y Reportes",
+    "generate": "Generar Informe",
+    "export": "Exportar",
+    "dateRange": "Rango de Fechas",
+    "from": "Desde",
+    "to": "Hasta"
+  },
+  "administration": {
+    "title": "Administración",
+    "systemSettings": "Configuración del Sistema",
+    "userManagement": "Gestión de Usuarios",
+    "backup": "Respaldo",
+    "logs": "Registros"
+  },
+  "help": {
+    "title": "Ayuda y Soporte",
+    "documentation": "Documentación",
+    "faq": "Preguntas Frecuentes",
+    "contact": "Contacto",
+    "support": "Soporte Técnico"
+  }
+}
