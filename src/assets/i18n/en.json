@@ -139,6 +139,28 @@
       "rechazada": "Rejected",
       "archivada": "Archived"
     }
+  ,
+  "pdf": {
+    "title": "DEFENSE TRIBUNAL RECORD FOR FINAL DEGREE PROJECT",
+    "academicYear": "Academic Year",
+    "specialty": "Specialty",
+    "workTitle": "WORK TITLE:",
+    "student": "STUDENT:",
+    "committee": "TRIBUNAL COMPOSITION:",
+    "director": "Tribunal Director",
+    "vocal": "Tribunal Member",
+    "supplement": "Substitute",
+    "committeeData": "TRIBUNAL DATA:",
+    "committeePoint1": "The tribunal is composed of subject-matter expert professors",
+    "committeePoint2": "All tribunal members have previously reviewed the work",
+    "committeePoint3": "The tribunal commits to an objective and fair evaluation",
+    "directionComments": "DIRECTION COMMENTS:",
+    "recordInfo": "RECORD INFORMATION:",
+    "recordPoint1": "This record certifies the tribunal composition for the defense",
+    "recordPoint2": "The tribunal follows current academic regulations",
+    "recordPoint3": "The evaluation follows the university criteria",
+    "signatures": "SIGNATURES:"
+  }
   },
   "dashboard": {
     "title": "Dashboard",

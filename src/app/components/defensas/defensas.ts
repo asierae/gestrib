@@ -516,12 +516,21 @@ export class DefensasComponent implements OnInit, OnDestroy {
     
     // Cabecera ya dibujada en cada página
     yPosition += 0;
+
+    // Helper para escribir líneas envueltas con saltos de página seguros
+    const writeWrappedLines = (lines: string[], x: number, lineHeight: number = 16) => {
+      for (const line of lines) {
+        checkPageBreak(lineHeight);
+        pdf.text(line, x, yPosition);
+        yPosition += lineHeight;
+      }
+    };
     
     // Título del documento
     checkPageBreak(40);
     pdf.setFontSize(18);
     pdf.setFont('helvetica', 'bold');
-    const title = 'ACTA DE TRIBUNAL DE DEFENSA DE TRABAJO FIN DE GRADO';
+    const title = this.translationService.getTranslation('defensas.pdf.title') || 'ACTA DE TRIBUNAL DE DEFENSA DE TRABAJO FIN DE GRADO';
     const titleLines = pdf.splitTextToSize(title, pageWidth - 2 * margin);
     pdf.text(titleLines, pageWidth / 2, yPosition, { align: 'center' });
     yPosition += titleLines.length * 18 + 10;
@@ -530,31 +539,29 @@ export class DefensasComponent implements OnInit, OnDestroy {
     checkPageBreak(30);
     pdf.setFontSize(12);
     pdf.setFont('helvetica', 'normal');
-    pdf.text(`Curso Académico: ${formValue.curso}`, margin, yPosition);
+    pdf.text(`${this.translationService.getTranslation('defensas.pdf.academicYear') || 'Curso Académico'}: ${formValue.curso}`, margin, yPosition);
     yPosition += 24;
     
     // Información de la especialidad
     checkPageBreak(20);
     const especialidadText = this.getEspecialidadText(formValue.especialidad);
-    pdf.text(`Especialidad: ${especialidadText}`, margin, yPosition);
+    pdf.text(`${this.translationService.getTranslation('defensas.pdf.specialty') || 'Especialidad'}: ${especialidadText}`, margin, yPosition);
     yPosition += 20;
     
     // Título del trabajo
     checkPageBreak(60);
     pdf.setFont('helvetica', 'bold');
-    pdf.text('TÍTULO DEL TRABAJO:', margin, yPosition);
-    yPosition += 14;
+    pdf.text(`${this.translationService.getTranslation('defensas.pdf.workTitle') || 'TÍTULO DEL TRABAJO:'}`, margin, yPosition);
+    yPosition += 16;
     pdf.setFont('helvetica', 'normal');
     const tituloLines = pdf.splitTextToSize(formValue.titulo, pageWidth - 2 * margin);
-    const tituloHeight = tituloLines.length * 18;
-    checkPageBreak(tituloHeight + 16);
-    pdf.text(tituloLines, margin, yPosition);
-    yPosition += tituloHeight + 16;
+    writeWrappedLines(tituloLines, margin, 18);
+    yPosition += 4;
     
     // Información del estudiante
     checkPageBreak(25);
     pdf.setFont('helvetica', 'bold');
-    pdf.text('ESTUDIANTE:', margin, yPosition);
+    pdf.text(`${this.translationService.getTranslation('defensas.pdf.student') || 'ESTUDIANTE:'}`, margin, yPosition);
     yPosition += 14;
     pdf.setFont('helvetica', 'normal');
     pdf.text(formValue.estudiante, margin, yPosition);
@@ -563,53 +570,48 @@ export class DefensasComponent implements OnInit, OnDestroy {
     // Información del tribunal
     checkPageBreak(60);
     pdf.setFont('helvetica', 'bold');
-    pdf.text('COMPOSICIÓN DEL TRIBUNAL:', margin, yPosition);
+    pdf.text(`${this.translationService.getTranslation('defensas.pdf.committee') || 'COMPOSICIÓN DEL TRIBUNAL:'}`, margin, yPosition);
     yPosition += 16;
     
     checkPageBreak(30);
     pdf.setFont('helvetica', 'normal');
-    pdf.text(`Director del Tribunal: ${formValue.directorTribunal}`, margin, yPosition);
-    yPosition += 16;
+    writeWrappedLines(pdf.splitTextToSize(`${this.translationService.getTranslation('defensas.pdf.director') || 'Director del Tribunal'}: ${formValue.directorTribunal}`, pageWidth - 2 * margin), margin, 16);
     
     checkPageBreak(25);
-    pdf.text(`Vocal del Tribunal: ${formValue.vocalTribunal}`, margin, yPosition);
-    yPosition += 16;
+    writeWrappedLines(pdf.splitTextToSize(`${this.translationService.getTranslation('defensas.pdf.vocal') || 'Vocal del Tribunal'}: ${formValue.vocalTribunal}`, pageWidth - 2 * margin), margin, 16);
     
     checkPageBreak(25);
-    pdf.text(`Suplente: ${formValue.suplente}`, margin, yPosition);
-    yPosition += 26;
+    writeWrappedLines(pdf.splitTextToSize(`${this.translationService.getTranslation('defensas.pdf.supplement') || 'Suplente'}: ${formValue.suplente}`, pageWidth - 2 * margin), margin, 16);
+    yPosition += 10;
     
     // Información adicional del tribunal
     checkPageBreak(60);
     pdf.setFont('helvetica', 'bold');
-    pdf.text('DATOS DEL TRIBUNAL:', margin, yPosition);
+    pdf.text(`${this.translationService.getTranslation('defensas.pdf.committeeData') || 'DATOS DEL TRIBUNAL:'}`, margin, yPosition);
     yPosition += 16;
     
     checkPageBreak(35);
     pdf.setFont('helvetica', 'normal');
-    pdf.text('• El tribunal está compuesto por profesores especialistas en la materia', margin, yPosition);
-    yPosition += 16;
+    writeWrappedLines(pdf.splitTextToSize(`• ${this.translationService.getTranslation('defensas.pdf.committeePoint1') || 'El tribunal está compuesto por profesores especialistas en la materia'}`, pageWidth - 2 * margin), margin, 16);
     
     checkPageBreak(30);
-    pdf.text('• Todos los miembros del tribunal han revisado el trabajo previamente', margin, yPosition);
-    yPosition += 16;
+    writeWrappedLines(pdf.splitTextToSize(`• ${this.translationService.getTranslation('defensas.pdf.committeePoint2') || 'Todos los miembros del tribunal han revisado el trabajo previamente'}`, pageWidth - 2 * margin), margin, 16);
     
     checkPageBreak(30);
-    pdf.text('• El tribunal se compromete a evaluar de forma objetiva y justa', margin, yPosition);
-    yPosition += 22;
+    writeWrappedLines(pdf.splitTextToSize(`• ${this.translationService.getTranslation('defensas.pdf.committeePoint3') || 'El tribunal se compromete a evaluar de forma objetiva y justa'}`, pageWidth - 2 * margin), margin, 16);
+    yPosition += 6;
     
     // Especialidades del vocal (si hay)
     if (formValue.especialidadesVocal && formValue.especialidadesVocal.length > 0) {
       checkPageBreak(50);
       pdf.setFont('helvetica', 'bold');
-      pdf.text('Especialidades del Vocal:', margin, yPosition);
+      pdf.text(`${this.translationService.getTranslation('defensas.vocalSpecialties') || 'Especialidades del Vocal:'}`, margin, yPosition);
       yPosition += 16;
       
       pdf.setFont('helvetica', 'normal');
       formValue.especialidadesVocal.forEach((especialidad: string) => {
-        checkPageBreak(24);
-        pdf.text(`• ${especialidad}`, margin + 10, yPosition);
-        yPosition += 16;
+        const lines = pdf.splitTextToSize(`• ${especialidad}`, pageWidth - 2 * margin - 10);
+        lines.forEach((line: string) => { checkPageBreak(16); pdf.text(line, margin + 10, yPosition); yPosition += 16; });
       });
       yPosition += 12;
     }
@@ -618,14 +620,13 @@ export class DefensasComponent implements OnInit, OnDestroy {
     if (formValue.especialidadesSuplente && formValue.especialidadesSuplente.length > 0) {
       checkPageBreak(50);
       pdf.setFont('helvetica', 'bold');
-      pdf.text('Especialidades del Suplente:', margin, yPosition);
+      pdf.text(`${this.translationService.getTranslation('defensas.supplementSpecialties') || 'Especialidades del Suplente:'}`, margin, yPosition);
       yPosition += 16;
       
       pdf.setFont('helvetica', 'normal');
       formValue.especialidadesSuplente.forEach((especialidad: string) => {
-        checkPageBreak(24);
-        pdf.text(`• ${especialidad}`, margin + 10, yPosition);
-        yPosition += 16;
+        const lines = pdf.splitTextToSize(`• ${especialidad}`, pageWidth - 2 * margin - 10);
+        lines.forEach((line: string) => { checkPageBreak(16); pdf.text(line, margin + 10, yPosition); yPosition += 16; });
       });
       yPosition += 12;
     }
@@ -634,36 +635,32 @@ export class DefensasComponent implements OnInit, OnDestroy {
     if (formValue.comentariosDireccion) {
       checkPageBreak(60);
       pdf.setFont('helvetica', 'bold');
-      pdf.text('COMENTARIOS DE LA DIRECCIÓN:', margin, yPosition);
+      pdf.text(`${this.translationService.getTranslation('defensas.pdf.directionComments') || 'COMENTARIOS DE LA DIRECCIÓN:'}`, margin, yPosition);
       yPosition += 16;
       
       pdf.setFont('helvetica', 'normal');
       const comments = formValue.comentariosDireccion;
       const splitComments = pdf.splitTextToSize(comments, pageWidth - 2 * margin);
-      const commentsHeight = splitComments.length * 18;
-      checkPageBreak(commentsHeight + 18);
-      pdf.text(splitComments, margin, yPosition);
-      yPosition += commentsHeight + 18;
+      writeWrappedLines(splitComments, margin, 18);
+      yPosition += 8;
     }
     
     // Información adicional del acta
     checkPageBreak(60);
     pdf.setFont('helvetica', 'bold');
-    pdf.text('INFORMACIÓN DEL ACTA:', margin, yPosition);
+    pdf.text(`${this.translationService.getTranslation('defensas.pdf.recordInfo') || 'INFORMACIÓN DEL ACTA:'}`, margin, yPosition);
     yPosition += 18;
     
     checkPageBreak(35);
     pdf.setFont('helvetica', 'normal');
-    pdf.text('• Este acta certifica la composición del tribunal para la defensa del trabajo', margin, yPosition);
-    yPosition += 16;
+    writeWrappedLines(pdf.splitTextToSize(`• ${this.translationService.getTranslation('defensas.pdf.recordPoint1') || 'Este acta certifica la composición del tribunal para la defensa del trabajo'}`, pageWidth - 2 * margin), margin, 16);
     
     checkPageBreak(30);
-    pdf.text('• El tribunal se compromete a seguir las normativas académicas vigentes', margin, yPosition);
-    yPosition += 16;
+    writeWrappedLines(pdf.splitTextToSize(`• ${this.translationService.getTranslation('defensas.pdf.recordPoint2') || 'El tribunal se compromete a seguir las normativas académicas vigentes'}`, pageWidth - 2 * margin), margin, 16);
     
     checkPageBreak(30);
-    pdf.text('• La evaluación se realizará según los criterios establecidos por la universidad', margin, yPosition);
-    yPosition += 22;
+    writeWrappedLines(pdf.splitTextToSize(`• ${this.translationService.getTranslation('defensas.pdf.recordPoint3') || 'La evaluación se realizará según los criterios establecidos por la universidad'}`, pageWidth - 2 * margin), margin, 16);
+    yPosition += 8;
     
     // Firma - Asegurar que hay espacio suficiente
     checkPageBreak(140);
@@ -675,13 +672,13 @@ export class DefensasComponent implements OnInit, OnDestroy {
     
     checkPageBreak(40);
     pdf.setFont('helvetica', 'bold');
-    pdf.text('FIRMAS:', margin, yPosition);
+    pdf.text(`${this.translationService.getTranslation('defensas.pdf.signatures') || 'FIRMAS:'}`, margin, yPosition);
     yPosition += 20;
     
     checkPageBreak(40);
     pdf.setFont('helvetica', 'normal');
-    pdf.text('Director del Tribunal:', margin, yPosition);
-    pdf.text('Vocal del Tribunal:', pageWidth / 2, yPosition);
+    pdf.text(`${this.translationService.getTranslation('defensas.pdf.director') || 'Director del Tribunal'}:`, margin, yPosition);
+    pdf.text(`${this.translationService.getTranslation('defensas.pdf.vocal') || 'Vocal del Tribunal'}:`, pageWidth / 2, yPosition);
     yPosition += 24;
     
     checkPageBreak(30);

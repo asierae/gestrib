@@ -1,4 +1,60 @@
 <div class="administration-container">
-  <h1>{{ 'navigation.administration' | translate }}</h1>
-  <p>Configuración y administración del sistema</p>
+  <div class="header">
+    <h1>{{ 'navigation.administration' | translate }}</h1>
+    <div class="year-pill">Año activo: {{ currentYear }}-{{ nextYear }}</div>
+  </div>
+
+  <mat-tab-group>
+    <mat-tab label="Listados XLSX">
+      <div class="tab-content">
+        <mat-card class="upload-card">
+          <mat-card-header>
+            <mat-card-title>Alumnos</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="droparea" [class.over]="isDragOverAlumnos()" (dragover)="onDragOver('alumnos', $event)" (dragleave)="onDragLeave('alumnos', $event)" (drop)="onDrop('alumnos', $event)" (click)="openPicker('alumnos', alumnosInput)">
+              <mat-icon>upload_file</mat-icon>
+              Arrastra y suelta aquí el XLSX de alumnos
+              <div class="filename" *ngIf="alumnosFile">Seleccionado: {{ alumnosFile.name }}</div>
+            </div>
+            <input #alumnosInput hidden type="file" accept=".xlsx" (change)="onAlumnosFileChange($event)">
+            <div class="actions">
+              <button mat-raised-button color="primary" (click)="syncAlumnos()" [disabled]="isSyncingAlumnos()">
+                <mat-icon>sync</mat-icon>
+                Sincronizar lista
+              </button>
+            </div>
+            <div class="hint">Sobrescribirá los datos del curso {{ currentYear }}-{{ nextYear }}.</div>
+          </mat-card-content>
+        </mat-card>
+
+        <mat-card class="upload-card">
+          <mat-card-header>
+            <mat-card-title>Profesores</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="droparea" [class.over]="isDragOverProfesores()" (dragover)="onDragOver('profesores', $event)" (dragleave)="onDragLeave('profesores', $event)" (drop)="onDrop('profesores', $event)" (click)="openPicker('profesores', profesoresInput)">
+              <mat-icon>upload_file</mat-icon>
+              Arrastra y suelta aquí el XLSX de profesores
+              <div class="filename" *ngIf="profesoresFile">Seleccionado: {{ profesoresFile.name }}</div>
+            </div>
+            <input #profesoresInput hidden type="file" accept=".xlsx" (change)="onProfesoresFileChange($event)">
+            <div class="actions">
+              <button mat-raised-button color="primary" (click)="syncProfesores()" [disabled]="isSyncingProfesores()">
+                <mat-icon>sync</mat-icon>
+                Sincronizar lista
+              </button>
+            </div>
+            <div class="hint">Sobrescribirá los datos del curso {{ currentYear }}-{{ nextYear }}.</div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </mat-tab>
+
+    <mat-tab label="Configuración">
+      <div class="tab-content">
+        <p>Opciones adicionales de administración.</p>
+      </div>
+    </mat-tab>
+  </mat-tab-group>
 </div>

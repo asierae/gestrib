@@ -1,12 +1,42 @@
 .administration-container {
   padding: 2rem;
   
+  .header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
   h1 {
     color: var(--text-primary);
-    margin-bottom: 1rem;
+    margin: 0;
   }
-  
-  p {
-    color: var(--text-secondary);
+
+  .year-pill {
+    margin-left: auto;
+    background: #eef2f7;
+    border: 1px solid #e5e7eb;
+    color: #1f2937;
+    padding: 6px 12px;
+    border-radius: 999px;
+    font-weight: 600;
   }
+
+  .tab-content { display: grid; gap: 16px; }
+  .upload-card .actions { margin-top: 10px; }
+  .upload-card .hint { color: #6b7280; font-size: 12px; margin-top: 8px; }
+
+  .droparea {
+    margin-top: 12px;
+    border: 2px dashed #cbd5e1;
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+    color: #475569;
+    display: grid; gap: 6px; place-items: center;
+  }
+  .droparea mat-icon { color: #64748b; }
+  .droparea.over { background: #f8fafc; border-color: #3b82f6; }
+  .droparea .filename { font-size: 12px; color: #1f2937; }
 }

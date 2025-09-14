@@ -2,8 +2,19 @@
   <div class="login-center">
     <div class="login-card animate-in">
       <div class="login-card__header">
-        <div class="login-logo">⚖️</div>
-        <h1 class="login-title">Gestrib</h1>
+        <svg class="login-logo-svg" width="88" height="88" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-label="Logo universidad">
+          <defs>
+            <linearGradient id="g" x1="0" x2="1" y1="0" y2="1">
+              <stop offset="0%" stop-color="#3b82f6"/>
+              <stop offset="100%" stop-color="#1d4ed8"/>
+            </linearGradient>
+          </defs>
+          <rect x="4" y="16" width="56" height="36" rx="6" fill="url(#g)"/>
+          <polygon points="8,16 56,16 32,6" fill="#1e40af"/>
+          <rect x="14" y="26" width="36" height="4" fill="#fff"/>
+          <rect x="14" y="34" width="36" height="4" fill="#e0e7ff"/>
+        </svg>
+        <h1 class="login-title">Gestión Interna TFG</h1>
         <p class="login-subtitle">{{ 'login.welcome' | translate }}</p>
       </div>
 

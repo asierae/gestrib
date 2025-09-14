@@ -139,6 +139,28 @@
       "rechazada": "Rechazada",
       "archivada": "Archivada"
     }
+  ,
+  "pdf": {
+    "title": "ACTA DE TRIBUNAL DE DEFENSA DE TRABAJO FIN DE GRADO",
+    "academicYear": "Curso Académico",
+    "specialty": "Especialidad",
+    "workTitle": "TÍTULO DEL TRABAJO:",
+    "student": "ESTUDIANTE:",
+    "committee": "COMPOSICIÓN DEL TRIBUNAL:",
+    "director": "Director del Tribunal",
+    "vocal": "Vocal del Tribunal",
+    "supplement": "Suplente",
+    "committeeData": "DATOS DEL TRIBUNAL:",
+    "committeePoint1": "El tribunal está compuesto por profesores especialistas en la materia",
+    "committeePoint2": "Todos los miembros del tribunal han revisado el trabajo previamente",
+    "committeePoint3": "El tribunal se compromete a evaluar de forma objetiva y justa",
+    "directionComments": "COMENTARIOS DE LA DIRECCIÓN:",
+    "recordInfo": "INFORMACIÓN DEL ACTA:",
+    "recordPoint1": "Este acta certifica la composición del tribunal para la defensa del trabajo",
+    "recordPoint2": "El tribunal se compromete a seguir las normativas académicas vigentes",
+    "recordPoint3": "La evaluación se realizará según los criterios establecidos por la universidad",
+    "signatures": "FIRMAS:"
+  }
   },
   "dashboard": {
     "title": "Panel de Control",
