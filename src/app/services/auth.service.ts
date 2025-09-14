@@ -2,7 +2,7 @@ import { Injectable, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { User, LoginRequest, LoginResponse, AuthState, UserType, Language } from '../models/user.model';
-
+  
 @Injectable({
   providedIn: 'root'
 })
@@ -171,7 +171,6 @@ export class AuthService {
     if (currentState.user) {
       const updatedUser = { ...currentState.user, idIdioma: language };
       this.setAuthState({ ...currentState, user: updatedUser });
-      
       // Update stored user data
       localStorage.setItem('user_data', JSON.stringify(updatedUser));
     }

@@ -10,28 +10,34 @@ import { Subscription } from 'rxjs';
 export class TranslatePipe implements PipeTransform, OnDestroy {
   private translationService = inject(TranslationService);
   private cdr = inject(ChangeDetectorRef);
-  private subscription?: Subscription;
+  private translationsSubscription?: Subscription;
+  private languageSubscription?: Subscription;
+
+  constructor() {
+    this.translationsSubscription = this.translationService.getTranslations().subscribe(() => {
+      this.cdr.markForCheck();
+    });
+    this.languageSubscription = this.translationService.getLanguageChanges().subscribe(() => {
+      this.cdr.markForCheck();
+    });
+  }
 
   transform(key: string): string {
-    // Subscribe to translation changes if not already subscribed
-    if (!this.subscription) {
-      this.subscription = this.translationService.getTranslations().subscribe(() => {
-        this.cdr.markForCheck();
-      });
-      
-      // Also subscribe to language changes
-      this.translationService.getLanguageChanges().subscribe(() => {
-        this.cdr.markForCheck();
-      });
+    if (!key) {
+      return '';
     }
     
     const translation = this.translationService.getTranslation(key);
+    console.log(`TranslatePipe: ${key} -> ${translation}`);
     return translation;
   }
 
   ngOnDestroy(): void {
-    if (this.subscription) {
-      this.subscription.unsubscribe();
+    if (this.translationsSubscription) {
+      this.translationsSubscription.unsubscribe();
+    }
+    if (this.languageSubscription) {
+      this.languageSubscription.unsubscribe();
     }
   }
 }

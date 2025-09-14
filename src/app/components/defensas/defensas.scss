@@ -6,6 +6,9 @@
 
 .create-form {
   margin-bottom: 30px;
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
 }
 
 .curso-info {
@@ -13,6 +16,7 @@
   align-items: center;
   gap: 10px;
   margin-left: auto;
+  margin-top: -8px;
 }
 
 .form-header {
@@ -58,14 +62,34 @@
 
 .form-field {
   width: 100%;
+  background: #fff;
+  border-radius: 12px;
 }
 
 .form-field.full-width {
   grid-column: 1 / -1;
 }
 
+// Mat form field and inputs contrast improvements
+// Keep Material defaults; only light enhancements
+.mat-mdc-form-field {
+  --mdc-outlined-text-field-container-shape: 12px;
+}
+
+/* Subtle panel shadow without changing colors */
+.mat-mdc-select-panel { box-shadow: 0 12px 24px rgba(0,0,0,0.12) !important; }
+
+/* Keep option base styles */
+
+/* Softer hover */
+.mat-mdc-option:hover { background: #f8fafc !important; }
+
 .especialidades-section {
   margin: 20px 0;
+  background: #f9fafb;
+  border-radius: 12px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
+  border: 1px solid #e5e7eb;
 }
 
 .checkboxes-container {

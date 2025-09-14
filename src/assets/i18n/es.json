@@ -30,8 +30,8 @@
     "users": "Usuarios",
     "reports": "Informes",
     "administration": "Administración",
-    "help": "Ayuda",
-    "defensas": "Defensas"
+    "defensas": "Defensas",
+    "help": "Ayuda"
   },
   "breadcrumbs": {
     "home": "Inicio",
@@ -103,6 +103,7 @@
     "selectType": "Seleccionar tipo",
     "createButton": "Crear Defensa",
     "creating": "Creando...",
+    "exportPDF": "Exportar PDF",
     "loadButton": "Cargar Defensas",
     "loading": "Cargando...",
     "edit": "Editar",

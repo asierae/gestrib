@@ -2,7 +2,7 @@
   <h2>{{ 'defensas.title' | translate }}</h2>
   
   <!-- Formulario para crear defensa -->
-  <mat-card class="create-form">
+  <mat-card class="create-form mat-elevation-z8">
     <mat-card-header>
       <mat-card-title>{{ 'defensas.createTitle' | translate }}</mat-card-title>
       <div class="curso-info">
@@ -103,7 +103,7 @@
         </div>
       
         <!-- Especialidades del Vocal -->
-        <mat-card *ngIf="especialidadesVocal.length > 0" class="especialidades-section">
+        <mat-card *ngIf="especialidadesVocal.length > 0" class="especialidades-section mat-elevation-z4">
           <mat-card-header>
             <mat-card-title>{{ 'defensas.vocalSpecialties' | translate }}</mat-card-title>
           </mat-card-header>
@@ -141,7 +141,7 @@
         </div>
         
         <!-- Especialidades del Suplente -->
-        <mat-card *ngIf="especialidadesSuplente.length > 0" class="especialidades-section">
+        <mat-card *ngIf="especialidadesSuplente.length > 0" class="especialidades-section mat-elevation-z4">
           <mat-card-header>
             <mat-card-title>{{ 'defensas.supplementSpecialties' | translate }}</mat-card-title>
           </mat-card-header>
@@ -177,6 +177,16 @@
             <mat-spinner *ngIf="isLoading()" diameter="20" class="button-spinner"></mat-spinner>
             <span *ngIf="!isLoading()">{{ 'defensas.createButton' | translate }}</span>
             <span *ngIf="isLoading()">{{ 'defensas.creating' | translate }}</span>
+          </button>
+          
+          <button 
+            mat-raised-button 
+            color="accent" 
+            type="button"
+            (click)="exportToPDF()"
+            [disabled]="defensaForm.invalid || isLoading()">
+            <mat-icon>picture_as_pdf</mat-icon>
+            {{ 'defensas.exportPDF' | translate }}
           </button>
         </div>
       </form>

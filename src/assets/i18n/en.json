@@ -103,6 +103,7 @@
     "selectType": "Select type",
     "createButton": "Create Defense",
     "creating": "Creating...",
+    "exportPDF": "Export PDF",
     "loadButton": "Load Defenses",
     "loading": "Loading...",
     "edit": "Edit",

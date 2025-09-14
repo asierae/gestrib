@@ -1,6 +1,7 @@
 import { Component, signal, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterOutlet, RouterModule } from '@angular/router';
+import { MatIconModule } from '@angular/material/icon';
 import { TranslationService } from '../../services/translation.service';
 import { BreadcrumbService } from '../../services/breadcrumb.service';
 import { AuthService } from '../../services/auth.service';
@@ -12,7 +13,8 @@ import { Language } from '../../models/user.model';
 @Component({
   selector: 'app-layout',
   standalone: true,
-  imports: [CommonModule, RouterOutlet, RouterModule, TranslatePipe, UserMenuItemComponent],
+  imports: [CommonModule, RouterOutlet, RouterModule, MatIconModule, TranslatePipe, UserMenuItemComponent],
+  providers: [TranslationService],
   templateUrl: './layout.html',
   styleUrl: './layout.scss'
 })
@@ -30,7 +32,7 @@ export class LayoutComponent implements OnInit {
   languages: { code: Language; name: string; flag: string }[] = [
     { code: Language.ES, name: 'Español', flag: '🇪🇸' },
     { code: Language.EN, name: 'English', flag: '🇬🇧' },
-    { code: Language.EU, name: 'Euskera', flag: '🏴' }
+    { code: Language.EU, name: 'Euskera', flag: 'EU' }
   ];
 
   menuItems = signal([
@@ -39,6 +41,12 @@ export class LayoutComponent implements OnInit {
       label: 'navigation.dashboard', 
       route: '/dashboard',
       active: true
+    },
+    { 
+      icon: 'gavel', 
+      label: 'navigation.defensas', 
+      route: '/defensas',
+      active: false
     },
     { 
       icon: 'gavel', 
@@ -76,12 +84,7 @@ export class LayoutComponent implements OnInit {
       route: '/help',
       active: false
     },
-    { 
-      icon: 'gavel', 
-      label: 'navigation.defensas', 
-      route: '/defensas',
-      active: false
-    }
+
   ]);
 
 
