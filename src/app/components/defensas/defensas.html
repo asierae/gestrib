@@ -1,5 +1,5 @@
 <div class="defensas-container">
-  <h2>{{ 'defensas.title' | translate }}</h2>
+  <h2>Formulario de Defensa</h2>
   
   <!-- Formulario para crear defensa -->
   <mat-card class="create-form mat-elevation-z8">
@@ -12,7 +12,7 @@
       </div>
     </mat-card-header>
     
-    <mat-card-content>
+    <mat-card-content class="form-content">
       <form [formGroup]="defensaForm" (ngSubmit)="createDefensa()">
         <div class="form-row">
           <mat-form-field appearance="outline" class="form-field">
@@ -30,11 +30,11 @@
           </mat-form-field>
           
           <mat-form-field appearance="outline" class="form-field">
-            <mat-label>{{ 'defensas.title' | translate }}</mat-label>
+            <mat-label>{{ 'defensas.workTitle' | translate }}</mat-label>
             <input 
               matInput
               formControlName="titulo"
-              [placeholder]="'defensas.title' | translate">
+              [placeholder]="'defensas.workTitle' | translate">
             <mat-error *ngIf="defensaForm.get('titulo')?.hasError('required')">
               {{ 'validation.required' | translate }}
             </mat-error>
@@ -82,7 +82,9 @@
               {{ 'validation.required' | translate }}
             </mat-error>
           </mat-form-field>
-          
+        </div>
+        
+        <div class="form-row">
           <mat-form-field appearance="outline" class="form-field">
             <mat-label>{{ 'defensas.vocal' | translate }}</mat-label>
             <input 
@@ -175,7 +177,7 @@
             type="submit" 
             [disabled]="defensaForm.invalid || isLoading()">
             <mat-spinner *ngIf="isLoading()" diameter="20" class="button-spinner"></mat-spinner>
-            <span *ngIf="!isLoading()">{{ 'defensas.createButton' | translate }}</span>
+            <span *ngIf="!isLoading()">Generar Defensa</span>
             <span *ngIf="isLoading()">{{ 'defensas.creating' | translate }}</span>
           </button>
           
@@ -184,9 +186,11 @@
             color="accent" 
             type="button"
             (click)="exportToPDF()"
-            [disabled]="defensaForm.invalid || isLoading()">
-            <mat-icon>picture_as_pdf</mat-icon>
-            {{ 'defensas.exportPDF' | translate }}
+            [disabled]="defensaForm.invalid || isLoading() || isExporting()">
+            <mat-spinner *ngIf="isExporting()" diameter="18" class="button-spinner"></mat-spinner>
+            <mat-icon *ngIf="!isExporting()">picture_as_pdf</mat-icon>
+            <span *ngIf="!isExporting()">{{ 'defensas.exportPDF' | translate }}</span>
+            <span *ngIf="isExporting()">Exportando...</span>
           </button>
         </div>
       </form>

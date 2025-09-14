@@ -26,12 +26,14 @@
   "navigation": {
     "dashboard": "Dashboard",
     "tribunals": "Tribunals",
-    "cases": "Cases",
+    "availability": "Availability",
     "users": "Users",
     "reports": "Reports",
     "administration": "Administration",
     "help": "Help",
-    "defensas": "Defenses"
+    "defensas": "Defenses",
+    "formDefensa": "Defense Form",
+    "defensasList": "Defenses List"
   },
   "breadcrumbs": {
     "home": "Home",
@@ -89,6 +91,7 @@
     "vocalSpecialties": "Vocal Specialties",
     "supplementSpecialties": "Supplement Specialties",
     "directionComments": "Direction Comments",
+    "workTitle": "Work Title",
     "name": "Name",
     "description": "Description",
     "type": "Type",
@@ -173,13 +176,25 @@
     }
   },
   "tribunals": {
-    "title": "Court Management",
-    "name": "Name",
-    "address": "Address",
-    "phone": "Phone",
-    "email": "Email",
-    "type": "Type",
-    "active": "Active"
+    "title": "Defenses List",
+    "student": "Student",
+    "dni": "ID",
+    "titleCol": "Title",
+    "specialty": "Specialty",
+    "director": "Director",
+    "codirector": "Co-director",
+    "president": "President",
+    "vocal": "Member",
+    "replacement": "Replacement",
+    "field": "Field",
+    "language": "Language",
+    "date": "Date",
+    "time": "Time",
+    "place": "Place",
+    "from": "From",
+    "to": "To",
+    "exportExcel": "Export to Excel",
+    "status": "Status"
   },
   "cases": {
     "title": "Case Management",
@@ -188,7 +203,14 @@
     "status": "Status",
     "priority": "Priority",
     "assignedTo": "Assigned to",
-    "createdDate": "Creation Date"
+    "createdDate": "Creation Date",
+    "actions": "Actions",
+    "delete": "Delete",
+    "confirmDelete": "Confirm deletion",
+    "deleteDefenseMessage": "Are you sure you want to delete this defense?",
+    "deleteDefenseDetails": "This action cannot be undone. It will permanently delete:",
+    "cancel": "Cancel",
+    "confirm": "Confirm"
   },
   "users": {
     "title": "User Management",

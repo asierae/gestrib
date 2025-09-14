@@ -28,8 +28,8 @@ export const routes: Routes = [
         loadComponent: () => import('./components/tribunals/tribunals').then(m => m.TribunalsComponent)
       },
       {
-        path: 'cases',
-        loadComponent: () => import('./components/cases/cases').then(m => m.CasesComponent)
+        path: 'scheduler',
+        loadComponent: () => import('./components/scheduler/scheduler').then(m => m.SchedulerComponent)
       },
       {
         path: 'users',

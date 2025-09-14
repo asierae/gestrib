@@ -1,6 +1,6 @@
 export const environment = {
   production: true,
-  apiUrl: 'https://api.gestrib.com/api',
+  apiUrl: 'https://gestribapi-dncrgfhrebbzgwdk.canadacentral-01.azurewebsites.net',
   apiVersion: 'v1',
   timeout: 30000,
   retryAttempts: 3

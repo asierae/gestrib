@@ -1,3 +1,21 @@
+// Global chip color overrides
+::ng-deep {
+  .mat-mdc-chip.mat-accent {
+    background: linear-gradient(135deg, #4caf50 0%, #66bb6a 100%) !important;
+    color: white !important;
+  }
+  
+  .mat-mdc-chip.mat-warn {
+    background: linear-gradient(135deg, #ff9800 0%, #ffb74d 100%) !important;
+    color: white !important;
+  }
+  
+  .mat-mdc-chip.mat-primary {
+    background: linear-gradient(135deg, #f44336 0%, #ef5350 100%) !important;
+    color: white !important;
+  }
+}
+
 .tribunals-container {
   padding: 2rem;
   
@@ -5,8 +23,361 @@
     color: var(--text-primary);
     margin-bottom: 1rem;
   }
+
+  .filters { 
+    margin-bottom: 24px;
+    
+    .filters-row {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+      align-items: flex-end;
+      
+      .search {
+        min-width: 280px;
+        flex: 1;
+      }
+    }
+    
+    .export-row {
+      display: flex;
+      justify-content: flex-start;
+      
+      .excel-button {
+        height: 48px;
+        min-width: 200px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        box-shadow: 0 4px 12px rgba(33, 150, 243, 0.3);
+        border-radius: 8px;
+        
+        &:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 6px 16px rgba(33, 150, 243, 0.4);
+        }
+        
+        mat-icon {
+          margin-right: 8px;
+          font-size: 20px;
+        }
+      }
+    }
+  }
   
-  p {
-    color: var(--text-secondary);
+  .full-width { width: 100%; }
+  
+  .table-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 0;
+    
+    .export-section {
+      display: flex;
+      align-items: center;
+    }
+  }
+  
+  .excel-button {
+    background: linear-gradient(135deg, #1d6f42 0%, #2e7d32 100%);
+    color: white;
+    font-weight: 500;
+    padding: 8px 16px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(29, 111, 66, 0.3);
+    transition: all 0.3s ease;
+    
+    &:hover {
+      background: linear-gradient(135deg, #2e7d32 0%, #388e3c 100%);
+      box-shadow: 0 4px 12px rgba(29, 111, 66, 0.4);
+      transform: translateY(-1px);
+    }
+    
+    mat-icon {
+      margin-right: 8px;
+      font-size: 20px;
+    }
+  }
+  
+  .mat-table {
+    width: 100%;
+    background: white;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+    border: 1px solid #e2e8f0;
+    position: relative;
+    
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, #3b82f6, #8b5cf6, #06b6d4, #10b981);
+      z-index: 1;
+    }
+    
+    .mat-header-cell {
+      background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+      color: white;
+      font-weight: 800;
+      font-size: 0.85rem;
+      padding: 24px 20px;
+      border-bottom: none;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      position: relative;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+      
+      &::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: linear-gradient(90deg, #3b82f6, #8b5cf6, #06b6d4);
+        opacity: 0.8;
+      }
+      
+      &:first-child {
+        border-top-left-radius: 16px;
+      }
+      
+      &:last-child {
+        border-top-right-radius: 16px;
+      }
+    }
+    
+    .mat-cell {
+      padding: 20px;
+      border-bottom: 1px solid #f1f5f9;
+      font-size: 0.95rem;
+      color: #374151;
+      vertical-align: middle;
+      font-weight: 500;
+      line-height: 1.5;
+    }
+    
+    .mat-row {
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      border-bottom: 1px solid #f1f5f9;
+      position: relative;
+      
+      &:hover {
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+        z-index: 2;
+        
+        .mat-cell {
+          color: #1f2937;
+          font-weight: 600;
+        }
+      }
+      
+      &:nth-child(even) {
+        background: linear-gradient(135deg, #fafbfc 0%, #f8fafc 100%);
+      }
+      
+      &:last-child {
+        border-bottom: none;
+        border-bottom-left-radius: 16px;
+        border-bottom-right-radius: 16px;
+      }
+      
+      &:first-child {
+        border-top: none;
+      }
+    }
+    
+    // Estilos específicos para columnas
+    .mat-column-student {
+      font-weight: 700;
+      color: #1e40af;
+    }
+    
+    .mat-column-dni {
+      font-family: 'Courier New', monospace;
+      font-weight: 600;
+      color: #6b7280;
+    }
+    
+    .mat-column-title {
+      font-style: italic;
+      color: #374151;
+    }
+    
+    .mat-column-status {
+      text-align: center;
+    }
+    
+    .mat-column-actions {
+      text-align: center;
+    }
+    
+    // Status cell
+    .status-cell {
+      padding: 12px !important;
+      text-align: center;
+    }
+
+    // Status chip container
+    .status-chip-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    // Clickable status chip
+    .status-chip-clickable {
+      cursor: pointer;
+      font-size: 0.8rem;
+      font-weight: 700;
+      min-height: 32px;
+      border-radius: 16px;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.15);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      user-select: none;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      
+      &:hover {
+        transform: translateY(-2px) scale(1.05);
+        box-shadow: 0 6px 16px rgba(0,0,0,0.2);
+      }
+      
+      &:active {
+        transform: translateY(0) scale(1.02);
+      }
+    }
+
+    // Status select field
+    .status-select {
+      width: 100%;
+      min-width: 120px;
+      
+      .mat-mdc-form-field-subscript-wrapper {
+        display: none;
+      }
+      
+      .mat-mdc-form-field-infix {
+        min-height: 32px;
+        padding: 4px 0;
+      }
+      
+      .mat-mdc-select {
+        font-size: 0.875rem;
+      }
+    }
+
+    // Status chip styles with proper colors
+    mat-chip {
+      font-size: 0.8rem;
+      font-weight: 700;
+      min-height: 32px;
+      border-radius: 16px;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.15);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      
+      // Override Material Design colors
+      &.mat-accent {
+        background: linear-gradient(135deg, #10b981 0%, #34d399 100%) !important;
+        color: white !important;
+        border: 2px solid #059669;
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+      }
+      
+      &.mat-warn {
+        background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%) !important;
+        color: white !important;
+        border: 2px solid #d97706;
+        box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+      }
+      
+      &.mat-primary {
+        background: linear-gradient(135deg, #ef4444 0%, #f87171 100%) !important;
+        color: white !important;
+        border: 2px solid #dc2626;
+        box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+      }
+      
+      &:hover {
+        transform: translateY(-2px) scale(1.05);
+        box-shadow: 0 6px 16px rgba(0,0,0,0.2);
+      }
+    }
+
+    // Status chip in dropdown options
+    .status-chip-option {
+      margin: 2px 0;
+      font-size: 0.8rem;
+      min-height: 24px;
+    }
+
+    // Dropdown container
+    .status-dropdown-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    // Date cell
+    .date-cell {
+      text-align: center;
+      
+      .schedule-button {
+        color: #ff9800;
+        transition: all 0.2s ease;
+        
+        &:hover {
+          background: rgba(255, 152, 0, 0.1);
+          color: #f57c00;
+          transform: scale(1.1);
+        }
+        
+        mat-icon {
+          font-size: 20px;
+        }
+      }
+    }
+    
+    // Actions cell
+    .actions-cell {
+      text-align: center;
+      width: 100px;
+      
+      button {
+        color: #ef4444;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        border-radius: 8px;
+        width: 40px;
+        height: 40px;
+        box-shadow: 0 2px 4px rgba(239, 68, 68, 0.2);
+        
+        &:hover {
+          background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+          color: #dc2626;
+          transform: scale(1.15) translateY(-2px);
+          box-shadow: 0 6px 16px rgba(239, 68, 68, 0.3);
+        }
+        
+        &:active {
+          transform: scale(1.05) translateY(0);
+        }
+        
+        mat-icon {
+          font-size: 22px;
+          width: 22px;
+          height: 22px;
+        }
+      }
+    }
   }
 }

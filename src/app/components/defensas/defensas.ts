@@ -59,6 +59,7 @@ export class DefensasComponent implements OnInit, OnDestroy {
   private languageSubscription?: Subscription;
   
   isLoading = signal(false);
+  isExporting = signal(false);
   private logoDataUrlCache: string | null = null;
   
   // Formulario reactivo
@@ -74,8 +75,8 @@ export class DefensasComponent implements OnInit, OnDestroy {
   filteredEstudiantes: EstudianteDisplay[] = [];
   filteredProfesores: Profesor[] = [];
   especialidades = [
-    { value: TipoEspecialidad.INGENIERIA_COMPUTACION, label: 'Ing. Comp.' },
     { value: TipoEspecialidad.INGENIERIA_SOFTWARE, label: 'Ing. Software' },
+    { value: TipoEspecialidad.INGENIERIA_COMPUTACION, label: 'Ing. Comp.' },
     { value: TipoEspecialidad.COMPUTACION, label: 'Computación' }
   ];
   
@@ -416,6 +417,7 @@ export class DefensasComponent implements OnInit, OnDestroy {
   }
   
   async exportToPDF(): Promise<void> {
+    this.isExporting.set(true);
     if (this.defensaForm.invalid) {
       this.defensaForm.markAllAsTouched();
       this.snackBar.open(
@@ -423,6 +425,7 @@ export class DefensasComponent implements OnInit, OnDestroy {
         this.translationService.getTranslation('common.close'),
         { duration: 3000 }
       );
+      this.isExporting.set(false);
       return;
     }
     
@@ -486,11 +489,28 @@ export class DefensasComponent implements OnInit, OnDestroy {
       return false;
     };
 
-    // Encabezado inicial
-    drawHeader();
-    
-    // Continuar con el resto del PDF
-    this.continuePDFGeneration(pdf, formValue, yPosition, pageWidth, maxY, margin, checkPageBreak);
+    try {
+      // Encabezado inicial
+      drawHeader();
+      
+      // Continuar con el resto del PDF
+      this.continuePDFGeneration(pdf, formValue, yPosition, pageWidth, maxY, margin, checkPageBreak);
+      
+      // Guardar el PDF
+      const fileName = `defensa_${formValue.curso}_${formValue.estudiante.replace(/\s+/g, '_')}.pdf`;
+      pdf.save(fileName);
+      
+      this.snackBar.open(
+        'PDF exportado exitosamente',
+        'Cerrar',
+        { duration: 3000 }
+      );
+    } catch (e) {
+      console.error('Error exportando PDF', e);
+      this.snackBar.open('Error exportando PDF', 'Cerrar', { duration: 3000 });
+    } finally {
+      this.isExporting.set(false);
+    }
   }
   
   private generatePDFWithTextHeader(pdf: jsPDF, formValue: any, yPosition: number, pageWidth: number, maxY: number, margin: number, checkPageBreak: Function): void {
@@ -584,22 +604,6 @@ export class DefensasComponent implements OnInit, OnDestroy {
     writeWrappedLines(pdf.splitTextToSize(`${this.translationService.getTranslation('defensas.pdf.supplement') || 'Suplente'}: ${formValue.suplente}`, pageWidth - 2 * margin), margin, 16);
     yPosition += 10;
     
-    // Información adicional del tribunal
-    checkPageBreak(60);
-    pdf.setFont('helvetica', 'bold');
-    pdf.text(`${this.translationService.getTranslation('defensas.pdf.committeeData') || 'DATOS DEL TRIBUNAL:'}`, margin, yPosition);
-    yPosition += 16;
-    
-    checkPageBreak(35);
-    pdf.setFont('helvetica', 'normal');
-    writeWrappedLines(pdf.splitTextToSize(`• ${this.translationService.getTranslation('defensas.pdf.committeePoint1') || 'El tribunal está compuesto por profesores especialistas en la materia'}`, pageWidth - 2 * margin), margin, 16);
-    
-    checkPageBreak(30);
-    writeWrappedLines(pdf.splitTextToSize(`• ${this.translationService.getTranslation('defensas.pdf.committeePoint2') || 'Todos los miembros del tribunal han revisado el trabajo previamente'}`, pageWidth - 2 * margin), margin, 16);
-    
-    checkPageBreak(30);
-    writeWrappedLines(pdf.splitTextToSize(`• ${this.translationService.getTranslation('defensas.pdf.committeePoint3') || 'El tribunal se compromete a evaluar de forma objetiva y justa'}`, pageWidth - 2 * margin), margin, 16);
-    yPosition += 6;
     
     // Especialidades del vocal (si hay)
     if (formValue.especialidadesVocal && formValue.especialidadesVocal.length > 0) {
@@ -617,6 +621,7 @@ export class DefensasComponent implements OnInit, OnDestroy {
     }
     
     // Especialidades del suplente (si hay)
+    console.log('Especialidades del suplente:', formValue.especialidadesSuplente);
     if (formValue.especialidadesSuplente && formValue.especialidadesSuplente.length > 0) {
       checkPageBreak(50);
       pdf.setFont('helvetica', 'bold');
@@ -693,15 +698,7 @@ export class DefensasComponent implements OnInit, OnDestroy {
     
     // Fecha eliminada según petición
     
-    // Guardar el PDF
-    const fileName = `defensa_${formValue.curso}_${formValue.estudiante.replace(/\s+/g, '_')}.pdf`;
-    pdf.save(fileName);
-    
-    this.snackBar.open(
-      'PDF exportado exitosamente',
-      'Cerrar',
-      { duration: 3000 }
-    );
+    // Guardado y snackbar movidos al try/finally del método
   }
   
   private getEspecialidadText(especialidad: TipoEspecialidad): string {

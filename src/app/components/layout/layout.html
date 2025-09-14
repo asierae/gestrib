@@ -1,6 +1,9 @@
 <div class="layout-container">
+  <!-- Mobile Overlay -->
+  <div class="mobile-overlay" *ngIf="isMobileMenuOpen()" (click)="toggleMobileMenu()"></div>
+
   <!-- Sidebar -->
-  <aside class="sidebar" [class.sidebar-collapsed]="!isSidebarOpen()">
+  <aside class="sidebar" [class.sidebar-collapsed]="!isSidebarOpen()" [class.sidebar-open]="isMobileMenuOpen()">
     <div class="sidebar-header">
       <div class="logo">
         <span class="logo-icon">⚖️</span>
@@ -37,6 +40,9 @@
     <!-- Top Bar -->
     <header class="top-bar">
       <div class="top-bar-left">
+        <button class="mobile-menu-toggle" (click)="toggleMobileMenu()">
+          <span class="material-icons">menu</span>
+        </button>
         <nav class="breadcrumbs">
           <ol class="breadcrumb-list">
             <li *ngFor="let breadcrumb of breadcrumbs(); let last = last" class="breadcrumb-item">

@@ -25,11 +25,13 @@ export class LayoutComponent implements OnInit {
   private authMonitorService = inject(AuthMonitorService);
   
   isSidebarOpen = signal(true);
+  isMobileMenuOpen = signal(false);
   currentLanguage = signal<Language>(Language.ES);
   breadcrumbs = this.breadcrumbService.getBreadcrumbs();
   currentUser = signal(this.authService.getCurrentUser());
   
   languages: { code: Language; name: string; flag: string }[] = [
+    
     { code: Language.ES, name: 'Español', flag: '🇪🇸' },
     { code: Language.EN, name: 'English', flag: '🇬🇧' },
     { code: Language.EU, name: 'Euskera', flag: 'EU' }
@@ -43,21 +45,21 @@ export class LayoutComponent implements OnInit {
       active: true
     },
     { 
-      icon: 'gavel', 
-      label: 'navigation.defensas', 
+      icon: 'assignment', 
+      label: 'navigation.formDefensa', 
       route: '/defensas',
       active: false
     },
     { 
-      icon: 'gavel', 
-      label: 'navigation.tribunals', 
+      icon: 'table_view', 
+      label: 'navigation.defensasList', 
       route: '/tribunals',
       active: false
     },
     { 
-      icon: 'folder', 
-      label: 'navigation.cases', 
-      route: '/cases',
+      icon: 'event_available', 
+      label: 'navigation.availability', 
+      route: '/scheduler',
       active: false
     },
     { 
@@ -104,6 +106,10 @@ export class LayoutComponent implements OnInit {
 
   toggleSidebar(): void {
     this.isSidebarOpen.update(open => !open);
+  }
+
+  toggleMobileMenu(): void {
+    this.isMobileMenuOpen.update(open => !open);
   }
 
   changeLanguage(language: Language): void {

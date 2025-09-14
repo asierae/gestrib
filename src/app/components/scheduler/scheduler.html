@@ -1,0 +1,96 @@
+<div class="scheduler-container">
+  <h1>{{ 'navigation.availability' | translate }}</h1>
+  
+  <mat-card class="doodle-card">
+    <mat-card-header>
+      <mat-card-title *ngIf="!defenseData">Calendario de Disponibilidad</mat-card-title>
+      <mat-card-title *ngIf="defenseData">{{ defenseData.title }}</mat-card-title>
+      <mat-card-subtitle *ngIf="!defenseData">Haz clic en los días que estés disponible</mat-card-subtitle>
+      <mat-card-subtitle *ngIf="defenseData">Defensa de: {{ defenseData.student }} - {{ defenseData.specialty }}</mat-card-subtitle>
+    </mat-card-header>
+    
+    <mat-card-content>
+      <div class="calendar-container">
+        <!-- Calendar Section -->
+        <div class="calendar-section">
+          <!-- Month Navigation -->
+          <div class="calendar-header">
+            <button mat-icon-button (click)="previousMonth()" class="nav-button">
+              <mat-icon>chevron_left</mat-icon>
+            </button>
+            
+            <h2 class="month-title">
+              {{ monthNames[currentMonth.getMonth()] }} {{ currentMonth.getFullYear() }}
+            </h2>
+            
+            <button mat-icon-button (click)="nextMonth()" class="nav-button">
+              <mat-icon>chevron_right</mat-icon>
+            </button>
+          </div>
+          
+          <!-- Calendar Grid -->
+          <div class="calendar-grid">
+            <!-- Week day headers -->
+            <div class="weekday-header" *ngFor="let day of weekDays">
+              {{ day }}
+            </div>
+            
+            <!-- Calendar days -->
+            <div 
+              *ngFor="let date of generateCalendar()" 
+              class="calendar-day"
+              [class.current-month]="isCurrentMonth(date)"
+              [class.selected]="isSelected(date)"
+              [class.other-month]="!isCurrentMonth(date)"
+              (click)="toggleDay(date)">
+              {{ date.getDate() }}
+            </div>
+          </div>
+        </div>
+        
+        <!-- Selected Days List -->
+        <div class="selected-days-section">
+          <h3 class="selected-days-title">
+            <mat-icon>event_available</mat-icon>
+            Días Seleccionados
+          </h3>
+          
+          <div class="selected-days-list" *ngIf="getSelectedDaysCount() > 0; else noSelection">
+            <div 
+              *ngFor="let dayKey of getSelectedDaysArray()" 
+              class="selected-day-item">
+              <mat-icon>event</mat-icon>
+              <span class="day-text">{{ formatSelectedDay(dayKey) }}</span>
+              <button 
+                mat-icon-button 
+                (click)="removeSelectedDay(dayKey)"
+                class="remove-button">
+                <mat-icon>close</mat-icon>
+              </button>
+            </div>
+          </div>
+          
+          <ng-template #noSelection>
+            <div class="no-selection">
+              <mat-icon>event_busy</mat-icon>
+              <p>No hay días seleccionados</p>
+              <small>Haz clic en el calendario para seleccionar días</small>
+            </div>
+          </ng-template>
+        </div>
+      </div>
+    </mat-card-content>
+    
+    <mat-card-actions>
+      <button 
+        mat-raised-button 
+        color="primary" 
+        (click)="sendAvailability()"
+        [disabled]="getSelectedDaysCount() === 0"
+        class="send-button">
+        <mat-icon>send</mat-icon>
+        Enviar Disponibilidad
+      </button>
+    </mat-card-actions>
+  </mat-card>
+</div>

@@ -26,11 +26,13 @@
   "navigation": {
     "dashboard": "Panel de Control",
     "tribunals": "Tribunales",
-    "cases": "Casos",
+    "availability": "Disponibilidad",
     "users": "Usuarios",
     "reports": "Informes",
     "administration": "Administración",
     "defensas": "Defensas",
+    "formDefensa": "Formulario Defensa",
+    "defensasList": "Lista Defensas",
     "help": "Ayuda"
   },
   "breadcrumbs": {
@@ -89,6 +91,7 @@
     "vocalSpecialties": "Especialidades del Vocal",
     "supplementSpecialties": "Especialidades del Suplente",
     "directionComments": "Comentarios de la Dirección",
+    "workTitle": "Título del Trabajo",
     "name": "Nombre",
     "description": "Descripción",
     "type": "Tipo",
@@ -173,13 +176,25 @@
     }
   },
   "tribunals": {
-    "title": "Gestión de Tribunales",
-    "name": "Nombre",
-    "address": "Dirección",
-    "phone": "Teléfono",
-    "email": "Email",
-    "type": "Tipo",
-    "active": "Activo"
+    "title": "Lista de Defensas",
+    "student": "Estudiante",
+    "dni": "DNI",
+    "titleCol": "Título",
+    "specialty": "Especialidad",
+    "director": "Director/a",
+    "codirector": "Codirector/a",
+    "president": "Presidente",
+    "vocal": "Vocal",
+    "replacement": "Reemplazo",
+    "field": "Campo",
+    "language": "Idioma",
+    "date": "Fecha",
+    "time": "Hora",
+    "place": "Lugar",
+    "from": "Desde",
+    "to": "Hasta",
+    "exportExcel": "Exportar a Excel",
+    "status": "Estado"
   },
   "cases": {
     "title": "Gestión de Casos",
@@ -188,7 +203,14 @@
     "status": "Estado",
     "priority": "Prioridad",
     "assignedTo": "Asignado a",
-    "createdDate": "Fecha de Creación"
+    "createdDate": "Fecha de Creación",
+    "actions": "Acciones",
+    "delete": "Eliminar",
+    "confirmDelete": "Confirmar eliminación",
+    "deleteDefenseMessage": "¿Estás seguro de que quieres eliminar esta defensa?",
+    "deleteDefenseDetails": "Esta acción no se puede deshacer. Se eliminará permanentemente:",
+    "cancel": "Cancelar",
+    "confirm": "Confirmar"
   },
   "users": {
     "title": "Gestión de Usuarios",

@@ -1,4 +1,168 @@
 <div class="tribunals-container">
-  <h1>{{ 'navigation.tribunals' | translate }}</h1>
-  <p>Gestión de tribunales del sistema</p>
+  <h1>{{ 'navigation.defensasList' | translate }}</h1>
+
+  <div class="filters">
+    <div class="filters-row">
+      <mat-form-field appearance="outline" class="search">
+        <mat-label>{{ 'common.search' | translate }}</mat-label>
+        <mat-icon matSuffix>search</mat-icon>
+        <input matInput [(ngModel)]="filterText" (input)="applyFilters()" placeholder="{{ 'common.search' | translate }}">
+      </mat-form-field>
+      
+      <mat-form-field appearance="outline">
+        <mat-label>{{ 'tribunals.from' | translate }}</mat-label>
+        <input matInput [matDatepicker]="fromPicker" [(ngModel)]="fromDate" (dateChange)="applyFilters()">
+        <mat-datepicker-toggle matSuffix [for]="fromPicker"></mat-datepicker-toggle>
+        <mat-datepicker #fromPicker></mat-datepicker>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>{{ 'tribunals.to' | translate }}</mat-label>
+        <input matInput [matDatepicker]="toPicker" [(ngModel)]="toDate" (dateChange)="applyFilters()">
+        <mat-datepicker-toggle matSuffix [for]="toPicker"></mat-datepicker-toggle>
+        <mat-datepicker #toPicker></mat-datepicker>
+      </mat-form-field>
+    </div>
+    
+    <div class="export-row">
+      <button mat-raised-button color="primary" class="excel-button" (click)="exportToExcel()">
+        <mat-icon>download</mat-icon>
+        {{ 'tribunals.exportExcel' | translate }}
+      </button>
+    </div>
+  </div>
+
+
+  <table mat-table [dataSource]="filteredData.slice(pageIndex*pageSize, (pageIndex+1)*pageSize)" matSort (matSortChange)="onSortChange($event)" class="mat-elevation-z2 full-width">
+    <ng-container matColumnDef="student">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header="student">{{ 'tribunals.student' | translate }}</th>
+      <td mat-cell *matCellDef="let row">{{ row.student }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="dni">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header="dni">{{ 'tribunals.dni' | translate }}</th>
+      <td mat-cell *matCellDef="let row">{{ row.dni }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="title">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header="title">{{ 'tribunals.titleCol' | translate }}</th>
+      <td mat-cell *matCellDef="let row">{{ row.title }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="specialty">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header="specialty">{{ 'tribunals.specialty' | translate }}</th>
+      <td mat-cell *matCellDef="let row">{{ row.specialty }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="director">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header="director">{{ 'tribunals.director' | translate }}</th>
+      <td mat-cell *matCellDef="let row">{{ row.director }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="codirector">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header="codirector">{{ 'tribunals.codirector' | translate }}</th>
+      <td mat-cell *matCellDef="let row">{{ row.codirector }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="president">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header="president">{{ 'tribunals.president' | translate }}</th>
+      <td mat-cell *matCellDef="let row">{{ row.president }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="vocal">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header="vocal">{{ 'tribunals.vocal' | translate }}</th>
+      <td mat-cell *matCellDef="let row">{{ row.vocal }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="replacement">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header="replacement">{{ 'tribunals.replacement' | translate }}</th>
+      <td mat-cell *matCellDef="let row">{{ row.replacement }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="field">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header="field">{{ 'tribunals.field' | translate }}</th>
+      <td mat-cell *matCellDef="let row">{{ row.field }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="language">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header="language">{{ 'tribunals.language' | translate }}</th>
+      <td mat-cell *matCellDef="let row">{{ row.language }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="date">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header="date">{{ 'tribunals.date' | translate }}</th>
+      <td mat-cell *matCellDef="let row" class="date-cell">
+        <span *ngIf="hasDate(row)">{{ row.date }}</span>
+        <button 
+          *ngIf="!hasDate(row)" 
+          mat-icon-button 
+          (click)="goToSchedule(row)"
+          class="schedule-button"
+          matTooltip="Planificar defensa">
+          <mat-icon>schedule</mat-icon>
+        </button>
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="time">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header="time">{{ 'tribunals.time' | translate }}</th>
+      <td mat-cell *matCellDef="let row">{{ row.time }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="place">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header="place">{{ 'tribunals.place' | translate }}</th>
+      <td mat-cell *matCellDef="let row">{{ row.place }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="status">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header="status">{{ 'tribunals.status' | translate }}</th>
+      <td mat-cell *matCellDef="let row" class="status-cell">
+        <!-- Show chip by default -->
+        <div *ngIf="!isEditingStatus(row)" class="status-chip-container">
+          <mat-chip 
+            [color]="getStatusColor(row.status)" 
+            selected 
+            class="status-chip-clickable"
+            (click)="toggleStatusEdit(row)">
+            {{ row.status }}
+          </mat-chip>
+        </div>
+        
+        <!-- Show dropdown when editing -->
+        <div *ngIf="isEditingStatus(row)" class="status-dropdown-container" [attr.data-row-key]="getRowKey(row)">
+          <mat-form-field appearance="outline" class="status-select">
+            <mat-select 
+              [value]="row.status" 
+              (selectionChange)="onStatusChange(row, $event.value)"
+              class="status-dropdown">
+              <mat-option *ngFor="let status of statusOptions" [value]="status">
+                <mat-chip [color]="getStatusColor(status)" selected class="status-chip-option">
+                  {{ status }}
+                </mat-chip>
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="actions">
+      <th mat-header-cell *matHeaderCellDef>{{ 'cases.actions' | translate }}</th>
+      <td mat-cell *matCellDef="let row" class="actions-cell">
+        <button mat-icon-button 
+                color="warn" 
+                (click)="deleteDefense(row)"
+                matTooltip="{{ 'cases.delete' | translate }}">
+          <mat-icon>delete_forever</mat-icon>
+        </button>
+      </td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+  </table>
+
+  <mat-paginator [length]="filteredData.length" [pageSize]="pageSize" [pageIndex]="pageIndex" (page)="onPageChange($event)"
+                 [pageSizeOptions]="[5,10,20]">
+  </mat-paginator>
 </div>
