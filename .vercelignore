@@ -6,10 +6,6 @@ npm-debug.log*
 dist/
 .angular/
 
-# Environment files (except production)
-src/environments/environment.ts
-src/environments/environment.vercel.ts
-
 # IDE files
 .vscode/
 .idea/
@@ -28,3 +24,6 @@ coverage/
 # Temporary files
 *.tmp
 *.temp
+
+# Environment files (keep only production)
+src/environments/environment.ts

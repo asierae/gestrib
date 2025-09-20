@@ -1,17 +1,5 @@
 {
   "buildCommand": "npm run build:vercel",
   "outputDirectory": "dist/gestrib",
-  "framework": "angular",
-  "env": {
-    "NODE_ENV": "production"
-  },
-  "builds": [
-    {
-      "src": "package.json",
-      "use": "@vercel/static-build",
-      "config": {
-        "distDir": "dist/gestrib"
-      }
-    }
-  ]
+  "framework": "angular"
 }
