@@ -26,4 +26,4 @@ coverage/
 *.temp
 
 # Environment files (keep only production)
-src/environments/environment.ts
+# Note: environment.ts is needed for build process

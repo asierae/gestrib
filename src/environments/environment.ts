@@ -1,6 +1,6 @@
 export const environment = {
-  production: false,
-  apiUrl: 'https://localhost:7108', // URL de la API .NET en desarrollo
+  production: true,
+  apiUrl: 'https://gestribapi-dncrgfhrebbzgwdk.canadacentral-01.azurewebsites.net', // URL de la API .NET en producción
   apiVersion: 'v1',
   timeout: 30000,
   retryAttempts: 3
