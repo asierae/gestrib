@@ -41,7 +41,7 @@ export class DefensasService {
 
     return this.http.get<DefensaResponse>(this.baseUrl, { params })
       .pipe(
-        timeout(environment.timeout),
+        timeout<DefensaResponse>(environment.timeout),
         retry(environment.retryAttempts),
         catchError(this.handleError)
       );
@@ -53,7 +53,7 @@ export class DefensasService {
   getDefensaById(id: number): Observable<DefensaResponse> {
     return this.http.get<DefensaResponse>(`${this.baseUrl}/${id}`)
       .pipe(
-        timeout(environment.timeout),
+        timeout<DefensaResponse>(environment.timeout),
         retry(environment.retryAttempts),
         catchError(this.handleError)
       );
@@ -65,7 +65,7 @@ export class DefensasService {
   createDefensa(defensa: CreateDefensaRequest): Observable<DefensaResponse> {
     return this.http.post<DefensaResponse>(this.baseUrl, defensa)
       .pipe(
-        timeout(environment.timeout),
+        timeout<DefensaResponse>(environment.timeout),
         catchError(this.handleError)
       );
   }
@@ -76,7 +76,7 @@ export class DefensasService {
   updateDefensa(id: number, defensa: UpdateDefensaRequest): Observable<DefensaResponse> {
     return this.http.put<DefensaResponse>(`${this.baseUrl}/${id}`, defensa)
       .pipe(
-        timeout(environment.timeout),
+        timeout<DefensaResponse>(environment.timeout),
         catchError(this.handleError)
       );
   }
@@ -87,7 +87,7 @@ export class DefensasService {
   patchDefensa(id: number, updates: Partial<UpdateDefensaRequest>): Observable<DefensaResponse> {
     return this.http.patch<DefensaResponse>(`${this.baseUrl}/${id}`, updates)
       .pipe(
-        timeout(environment.timeout),
+        timeout<DefensaResponse>(environment.timeout),
         catchError(this.handleError)
       );
   }
@@ -98,7 +98,7 @@ export class DefensasService {
   deleteDefensa(id: number): Observable<DefensaResponse> {
     return this.http.delete<DefensaResponse>(`${this.baseUrl}/${id}`)
       .pipe(
-        timeout(environment.timeout),
+        timeout<DefensaResponse>(environment.timeout),
         catchError(this.handleError)
       );
   }
@@ -109,7 +109,7 @@ export class DefensasService {
   hardDeleteDefensa(id: number): Observable<DefensaResponse> {
     return this.http.delete<DefensaResponse>(`${this.baseUrl}/${id}/permanent`)
       .pipe(
-        timeout(environment.timeout),
+        timeout<DefensaResponse>(environment.timeout),
         catchError(this.handleError)
       );
   }
@@ -120,7 +120,7 @@ export class DefensasService {
   restoreDefensa(id: number): Observable<DefensaResponse> {
     return this.http.post<DefensaResponse>(`${this.baseUrl}/${id}/restore`, {})
       .pipe(
-        timeout(environment.timeout),
+        timeout<DefensaResponse>(environment.timeout),
         catchError(this.handleError)
       );
   }
@@ -155,7 +155,7 @@ export class DefensasService {
   getDefensasStats(): Observable<any> {
     return this.http.get<any>(`${this.baseUrl}/stats`)
       .pipe(
-        timeout(environment.timeout),
+        timeout<any>(environment.timeout),
         retry(environment.retryAttempts),
         catchError(this.handleError)
       );
@@ -180,7 +180,7 @@ export class DefensasService {
       params, 
       responseType: 'blob' 
     }).pipe(
-      timeout(environment.timeout),
+      timeout<Blob>(environment.timeout),
       catchError(this.handleError)
     );
   }
