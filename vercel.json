@@ -2,14 +2,10 @@
   "buildCommand": "npm run build:vercel",
   "outputDirectory": "dist/gestrib/browser",
   "framework": "angular",
-  "routes": [
+  "rewrites": [
     {
-      "src": "/assets/(.*)",
-      "dest": "/assets/$1"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/index.html"
+      "source": "/((?!.*\\.).*)$",
+      "destination": "/index.html"
     }
   ]
 }
