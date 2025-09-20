@@ -56,7 +56,14 @@
     "forgotPassword": "Pasahitza ahaztu duzu?",
     "loginButton": "Saioa hasi",
     "welcome": "Ongi etorri",
-    "demoCredentials": "Froga kredentzialak"
+    "demoCredentials": "Froga kredentzialak",
+    "profesorado": "Irakasleak",
+    "administracion": "Administrazioa",
+    "profesoradoDesc": "Irakasleentzako sarbidea",
+    "administracionDesc": "Administratzaileentzako sarbidea",
+    "profesoradoEmail": "Irakaslearen helbide elektronikoa",
+    "administracionEmail": "Administratzailearen helbide elektronikoa",
+    "administracionPassword": "Administratzailearen pasahitza"
   },
   "validation": {
     "email": {

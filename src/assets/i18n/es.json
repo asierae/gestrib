@@ -58,7 +58,14 @@
     "forgotPassword": "¿Olvidaste tu contraseña?",
     "loginButton": "Iniciar Sesión",
     "welcome": "Bienvenido",
-    "demoCredentials": "Credenciales de demostración"
+    "demoCredentials": "Credenciales de demostración",
+    "profesorado": "Profesorado",
+    "administracion": "Administración",
+    "profesoradoDesc": "Acceso para profesores",
+    "administracionDesc": "Acceso para administradores",
+    "profesoradoEmail": "Email del profesor",
+    "administracionEmail": "Email del administrador",
+    "administracionPassword": "Contraseña del administrador"
   },
   "validation": {
     "email": {
