@@ -28,7 +28,7 @@ export class LayoutComponent implements OnInit {
   isMobileMenuOpen = signal(false);
   currentLanguage = signal<Language>(Language.ES);
   breadcrumbs = this.breadcrumbService.getBreadcrumbs();
-  currentUser = signal(this.authService.getCurrentUser());
+  currentUser = this.authMonitorService.currentUser;
   
   languages: { code: Language; name: string; flag: string }[] = [
     
@@ -94,8 +94,8 @@ export class LayoutComponent implements OnInit {
     this.currentLanguage.set(this.translationService.getCurrentLanguage());
     
     // Subscribe to auth state changes
-    this.authService.getAuthState().subscribe(authState => {
-      this.currentUser.set(authState.user);
+    this.authMonitorService.user$.subscribe(user => {
+      // currentUser is already a computed signal, no need to set it manually
     });
   }
 
@@ -117,14 +117,16 @@ export class LayoutComponent implements OnInit {
     this.translationService.setLanguage(language);
     // Update user language if logged in
     if (this.currentUser()) {
-      this.authService.updateUserLanguage(language);
+      // Convert Language enum to number for API
+      const languageId = language === Language.ES ? 1 : language === Language.EN ? 2 : 3;
+      this.authService.changeLanguage(languageId).subscribe();
     }
     // Update breadcrumbs with new translations
     this.breadcrumbService.updateTranslations();
   }
 
   logout(): void {
-    this.authService.logout();
+    this.authMonitorService.logout();
   }
 
   setActiveMenuItem(activeItem: any): void {

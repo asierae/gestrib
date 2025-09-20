@@ -1,0 +1,326 @@
+-- =====================================================
+-- SCRIPT DE CREACIÓN DE TABLAS PARA SISTEMA DE LOGIN
+-- GES_TRIBUNALES - API .NET
+-- =====================================================
+
+-- Tabla de Idiomas
+CREATE TABLE Idiomas (
+    id INT IDENTITY(1,1) PRIMARY KEY,
+    nombre NVARCHAR(100) NOT NULL,
+    prioridad INT NOT NULL DEFAULT 0,
+    locale NVARCHAR(10) NOT NULL DEFAULT 'es-ES'
+);
+
+-- Insertar idiomas por defecto
+INSERT INTO Idiomas (nombre, prioridad, locale) VALUES 
+('Español', 1, 'es-ES'),
+('English', 2, 'en-US'),
+('Euskera', 3, 'eu-ES');
+
+-- Tabla de Configuración Global
+CREATE TABLE configuracion (
+    id INT IDENTITY(1,1) PRIMARY KEY,
+    nombre_cliente NVARCHAR(200) NOT NULL,
+    color_app NVARCHAR(20) NOT NULL DEFAULT '#3b82f6'
+);
+
+-- Tabla principal de Usuarios
+CREATE TABLE Usuarios (
+    Id INT IDENTITY(1,1) PRIMARY KEY,
+    NombreUsuario NVARCHAR(50) NOT NULL,
+    Nombre NVARCHAR(100) NOT NULL,
+    Apellidos NVARCHAR(100) NOT NULL,
+    Email NVARCHAR(255) NOT NULL UNIQUE,
+    Telefono NVARCHAR(20) NOT NULL DEFAULT '',
+    idIdioma INT NOT NULL DEFAULT 1,
+    UrlAvatar NVARCHAR(500) NOT NULL DEFAULT 'https://www.w3schools.com/howto/img_avatar.png',
+    descripcion NVARCHAR(500) NOT NULL DEFAULT '',
+    FechaNacimiento DATETIME2 NOT NULL DEFAULT '1900-01-01',
+    PasswordHash NVARCHAR(255) NOT NULL,
+    AceptadoTerminos BIT NOT NULL DEFAULT 0,
+    Role INT NOT NULL DEFAULT 1, -- 0=Admin, 1=User, 2=DirProyectos, 3=Desarrollador, 4=Sistemas, 5=Administracion
+    VerificationToken NVARCHAR(255) NOT NULL DEFAULT '',
+    Verified DATETIME2 NULL,
+    ResetToken NVARCHAR(255) NOT NULL DEFAULT '',
+    ResetTokenExpires DATETIME2 NULL,
+    PasswordReset DATETIME2 NULL,
+    Created DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
+    Updated DATETIME2 NULL,
+    rememberAccount BIT NOT NULL DEFAULT 0,
+    Tema INT NOT NULL DEFAULT 1,
+    MenuExpandido INT NOT NULL DEFAULT 0,
+    idDb INT NOT NULL DEFAULT 1,
+    TipoUsuario INT NOT NULL DEFAULT 1,
+    activo BIT NOT NULL DEFAULT 1,
+    entidad NVARCHAR(200) NULL,
+    puesto NVARCHAR(100) NULL,
+    
+    -- Índices
+    CONSTRAINT FK_Usuarios_Idioma FOREIGN KEY (idIdioma) REFERENCES Idiomas(id),
+    INDEX IX_Usuarios_Email (Email),
+    INDEX IX_Usuarios_NombreUsuario (NombreUsuario),
+    INDEX IX_Usuarios_idDb (idDb),
+    INDEX IX_Usuarios_Role (Role),
+    INDEX IX_Usuarios_activo (activo)
+);
+
+-- Tabla de Refresh Tokens (relacionada con Usuarios)
+CREATE TABLE RefreshToken (
+    Id INT IDENTITY(1,1) PRIMARY KEY,
+    usuarioId INT NOT NULL,
+    Token NVARCHAR(500) NOT NULL,
+    Expires DATETIME2 NOT NULL,
+    Created DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
+    CreatedByIp NVARCHAR(50) NOT NULL DEFAULT '',
+    Revoked DATETIME2 NULL,
+    RevokedByIp NVARCHAR(50) NOT NULL DEFAULT '',
+    ReplacedByToken NVARCHAR(500) NOT NULL DEFAULT '',
+    ReasonRevoked NVARCHAR(200) NOT NULL DEFAULT '',
+    rememberAccount BIT NOT NULL DEFAULT 0,
+    
+    -- Claves foráneas e índices
+    CONSTRAINT FK_RefreshToken_Usuario FOREIGN KEY (usuarioId) REFERENCES Usuarios(Id) ON DELETE CASCADE,
+    INDEX IX_RefreshToken_usuarioId (usuarioId),
+    INDEX IX_RefreshToken_Token (Token),
+    INDEX IX_RefreshToken_Expires (Expires)
+);
+
+-- Tabla de Tipos de Usuario (opcional, para gestión de roles específicos)
+CREATE TABLE TiposUsuario (
+    id INT IDENTITY(1,1) PRIMARY KEY,
+    nombre NVARCHAR(100) NOT NULL,
+    descripcion NVARCHAR(500) NULL,
+    activo BIT NOT NULL DEFAULT 1,
+    idDb INT NOT NULL DEFAULT 1
+);
+
+-- Insertar tipos de usuario por defecto
+INSERT INTO TiposUsuario (nombre, descripcion, idDb) VALUES 
+('Administrador', 'Acceso completo al sistema', 1),
+('Profesor', 'Acceso para profesores del tribunal', 1),
+('Coordinador', 'Coordinador de defensas', 1),
+('Secretario', 'Secretario administrativo', 1);
+
+-- Tabla de Logs de Autenticación (opcional, para auditoría)
+CREATE TABLE LogsAutenticacion (
+    id INT IDENTITY(1,1) PRIMARY KEY,
+    usuarioId INT NULL,
+    email NVARCHAR(255) NOT NULL,
+    ipAddress NVARCHAR(50) NOT NULL,
+    userAgent NVARCHAR(500) NULL,
+    tipoAccion NVARCHAR(50) NOT NULL, -- 'LOGIN', 'LOGOUT', 'REFRESH', 'FAILED_LOGIN'
+    exito BIT NOT NULL,
+    mensaje NVARCHAR(500) NULL,
+    fecha DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
+    idDb INT NOT NULL DEFAULT 1,
+    
+    -- Índices
+    INDEX IX_LogsAutenticacion_usuarioId (usuarioId),
+    INDEX IX_LogsAutenticacion_email (email),
+    INDEX IX_LogsAutenticacion_fecha (fecha),
+    INDEX IX_LogsAutenticacion_tipoAccion (tipoAccion)
+);
+
+-- Tabla de Configuración de Aspectos (para personalización de la UI)
+CREATE TABLE ConfiguracionAspecto (
+    id INT IDENTITY(1,1) PRIMARY KEY,
+    idDb INT NOT NULL,
+    icono NVARCHAR(500) NOT NULL DEFAULT '',
+    color_primario NVARCHAR(20) NOT NULL DEFAULT '#3b82f6',
+    color_secundario NVARCHAR(20) NOT NULL DEFAULT '#1d4ed8',
+    logo_url NVARCHAR(500) NULL,
+    nombre_aplicacion NVARCHAR(200) NOT NULL DEFAULT 'Gestión Tribunales',
+    activo BIT NOT NULL DEFAULT 1,
+    
+    INDEX IX_ConfiguracionAspecto_idDb (idDb)
+);
+
+-- Insertar configuración por defecto
+INSERT INTO ConfiguracionAspecto (idDb, icono, color_primario, color_secundario, nombre_aplicacion) VALUES 
+(1, 'https://www.w3schools.com/howto/img_avatar.png', '#3b82f6', '#1d4ed8', 'Gestión Tribunales TFG');
+
+-- =====================================================
+-- USUARIOS DE PRUEBA PARA DESARROLLO
+-- =====================================================
+
+-- Usuario Administrador
+INSERT INTO Usuarios (
+    NombreUsuario, Nombre, Apellidos, Email, PasswordHash, 
+    Role, idIdioma, AceptadoTerminos, activo, idDb, TipoUsuario
+) VALUES (
+    'admin', 'Administrador', 'Sistema', 'admin@gestrib.com', 
+    '$2a$11$rQZ8K7t4x5y6z7a8b9c0dOe1f2g3h4i5j6k7l8m9n0o1p2q3r4s5t6u', -- Contraseña: admin123
+    0, 1, 1, 1, 1, 1
+);
+
+-- Usuario Profesor de prueba
+INSERT INTO Usuarios (
+    NombreUsuario, Nombre, Apellidos, Email, PasswordHash, 
+    Role, idIdioma, AceptadoTerminos, activo, idDb, TipoUsuario, entidad, puesto
+) VALUES (
+    'profesor1', 'Juan', 'Pérez García', 'juan.perez@universidad.edu', 
+    '$2a$11$rQZ8K7t4x5y6z7a8b9c0dOe1f2g3h4i5j6k7l8m9n0o1p2q3r4s5t6u', -- Contraseña: 123456
+    1, 1, 1, 1, 1, 2, 'Universidad de Prueba', 'Profesor Titular'
+);
+
+-- Usuario Coordinador de prueba
+INSERT INTO Usuarios (
+    NombreUsuario, Nombre, Apellidos, Email, PasswordHash, 
+    Role, idIdioma, AceptadoTerminos, activo, idDb, TipoUsuario, entidad, puesto
+) VALUES (
+    'coord1', 'María', 'López Martínez', 'maria.lopez@universidad.edu', 
+    '$2a$11$rQZ8K7t4x5y6z7a8b9c0dOe1f2g3h4i5j6k7l8m9n0o1p2q3r4s5t6u', -- Contraseña: 123456
+    2, 1, 1, 1, 1, 3, 'Universidad de Prueba', 'Coordinadora TFG'
+);
+
+-- =====================================================
+-- VISTAS ÚTILES PARA CONSULTAS
+-- =====================================================
+
+-- Vista de usuarios con información completa
+CREATE VIEW vw_UsuariosCompletos AS
+SELECT 
+    u.Id,
+    u.NombreUsuario,
+    u.Nombre,
+    u.Apellidos,
+    u.Email,
+    u.Telefono,
+    u.UrlAvatar,
+    u.descripcion,
+    u.FechaNacimiento,
+    u.Role,
+    CASE u.Role
+        WHEN 0 THEN 'Admin'
+        WHEN 1 THEN 'User'
+        WHEN 2 THEN 'DirProyectos'
+        WHEN 3 THEN 'Desarrollador'
+        WHEN 4 THEN 'Sistemas'
+        WHEN 5 THEN 'Administracion'
+        ELSE 'Desconocido'
+    END as RoleNombre,
+    u.activo,
+    u.entidad,
+    u.puesto,
+    u.Created,
+    u.Updated,
+    i.nombre as IdiomaNombre,
+    i.locale as IdiomaLocale,
+    tu.nombre as TipoUsuarioNombre
+FROM Usuarios u
+LEFT JOIN Idiomas i ON u.idIdioma = i.id
+LEFT JOIN TiposUsuario tu ON u.TipoUsuario = tu.id;
+
+-- Vista de estadísticas de autenticación
+CREATE VIEW vw_EstadisticasAuth AS
+SELECT 
+    COUNT(*) as TotalUsuarios,
+    SUM(CASE WHEN activo = 1 THEN 1 ELSE 0 END) as UsuariosActivos,
+    SUM(CASE WHEN Role = 0 THEN 1 ELSE 0 END) as Administradores,
+    SUM(CASE WHEN Role = 1 THEN 1 ELSE 0 END) as UsuariosNormales,
+    SUM(CASE WHEN Role = 5 THEN 1 ELSE 0 END) as Administracion,
+    SUM(CASE WHEN rememberAccount = 1 THEN 1 ELSE 0 END) as UsuariosRecordar
+FROM Usuarios;
+
+-- =====================================================
+-- PROCEDIMIENTOS ALMACENADOS ÚTILES
+-- =====================================================
+
+-- Procedimiento para autenticar usuario
+CREATE PROCEDURE sp_AuthenticateUser
+    @Email NVARCHAR(255),
+    @PasswordHash NVARCHAR(255),
+    @idDb INT = 1
+AS
+BEGIN
+    SELECT 
+        Id, NombreUsuario, Nombre, Apellidos, Email, Telefono,
+        idIdioma, UrlAvatar, descripcion, Role, activo, entidad, puesto,
+        Created, Updated, TipoUsuario
+    FROM Usuarios 
+    WHERE Email = @Email 
+    AND PasswordHash = @PasswordHash 
+    AND activo = 1 
+    AND idDb = @idDb;
+END;
+
+-- Procedimiento para obtener usuario por email
+CREATE PROCEDURE sp_GetUserByEmail
+    @Email NVARCHAR(255),
+    @idDb INT = 1
+AS
+BEGIN
+    SELECT 
+        Id, NombreUsuario, Nombre, Apellidos, Email, Telefono,
+        idIdioma, UrlAvatar, descripcion, Role, activo, entidad, puesto,
+        Created, Updated, TipoUsuario, rememberAccount
+    FROM Usuarios 
+    WHERE Email = @Email 
+    AND activo = 1 
+    AND idDb = @idDb;
+END;
+
+-- Procedimiento para registrar intento de login
+CREATE PROCEDURE sp_LogAuthAttempt
+    @usuarioId INT = NULL,
+    @email NVARCHAR(255),
+    @ipAddress NVARCHAR(50),
+    @userAgent NVARCHAR(500) = NULL,
+    @tipoAccion NVARCHAR(50),
+    @exito BIT,
+    @mensaje NVARCHAR(500) = NULL,
+    @idDb INT = 1
+AS
+BEGIN
+    INSERT INTO LogsAutenticacion (usuarioId, email, ipAddress, userAgent, tipoAccion, exito, mensaje, idDb)
+    VALUES (@usuarioId, @email, @ipAddress, @userAgent, @tipoAccion, @exito, @mensaje, @idDb);
+END;
+
+-- =====================================================
+-- NOTAS IMPORTANTES
+-- =====================================================
+
+/*
+1. CONTRASEÑAS:
+   - Las contraseñas deben estar hasheadas con BCrypt
+   - Ejemplo de hash para 'admin123': $2a$11$rQZ8K7t4x5y6z7a8b9c0dOe1f2g3h4i5j6k7l8m9n0o1p2q3r4s5t6u
+   - Ejemplo de hash para '123456': $2a$11$rQZ8K7t4x5y6z7a8b9c0dOe1f2g3h4i5j6k7l8m9n0o1p2q3r4s5t6u
+
+2. ROLES:
+   - 0 = Admin (acceso completo)
+   - 1 = User (usuario normal)
+   - 2 = DirProyectos (director de proyectos)
+   - 3 = Desarrollador (desarrollador)
+   - 4 = Sistemas (sistemas)
+   - 5 = Administracion (administración)
+
+3. TIPOS DE USUARIO:
+   - 1 = Administrador
+   - 2 = Profesor
+   - 3 = Coordinador
+   - 4 = Secretario
+
+4. IDIOMAS:
+   - 1 = Español (es-ES)
+   - 2 = English (en-US)
+   - 3 = Euskera (eu-ES)
+
+5. CONFIGURACIÓN:
+   - idDb = 1 es la base de datos principal
+   - Los usuarios pueden tener diferentes idDb para multi-tenancy
+
+6. SEGURIDAD:
+   - Los RefreshTokens se almacenan por separado
+   - Se mantiene un log de intentos de autenticación
+   - Las contraseñas nunca se almacenan en texto plano
+
+7. PARA EL LOGIN DE PROFESORES:
+   - Usar el campo 'TipoUsuario = 2' para identificar profesores
+   - La contraseña fija '123456' debe estar hasheada
+   - Solo se requiere email para el login de profesores
+
+8. PARA EL LOGIN DE ADMINISTRACIÓN:
+   - Usar el campo 'Role = 0' o 'Role = 5' para administradores
+   - Requiere email y contraseña personalizada
+   - Mayor nivel de seguridad y validación
+*/

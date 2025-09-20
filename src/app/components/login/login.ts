@@ -5,7 +5,7 @@ import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { TranslationService } from '../../services/translation.service';
 import { TranslatePipe } from '../../pipes/translate.pipe';
-import { LoginRequest } from '../../models/user.model';
+// Removed LoginRequest import as it's now defined in auth.service.ts
 
 @Component({
   selector: 'app-login',
@@ -57,28 +57,20 @@ export class LoginComponent {
       this.isLoading.set(true);
       this.errorMessage.set('');
 
-      const loginRequest: LoginRequest = {
-        email: this.profesoradoForm.value.email,
-        password: '123456', // Fixed password for professors
-        rememberMe: false
-      };
-
-      this.authService.login(loginRequest).subscribe({
+      this.authService.loginProfesorado(this.profesoradoForm.value.email).subscribe({
         next: (response) => {
           this.isLoading.set(false);
-          if (response.success) {
-            // Update user language if needed
-            if (response.user?.idIdioma) {
-              this.translationService.setLanguage(response.user.idIdioma);
-            }
-            this.router.navigate(['/dashboard']);
-          } else {
-            this.errorMessage.set(response.message || 'Error en el login');
+          // Update user language if needed
+          if (response.idIdioma) {
+            // Convert number to Language enum
+            const language = response.idIdioma === 1 ? 'es' : response.idIdioma === 2 ? 'en' : 'eu';
+            this.translationService.setLanguage(language as any);
           }
+          this.router.navigate(['/dashboard']);
         },
         error: (error) => {
           this.isLoading.set(false);
-          this.errorMessage.set('Error de conexión');
+          this.errorMessage.set(error.message || 'Error en el login');
           console.error('Login error:', error);
         }
       });
@@ -92,28 +84,24 @@ export class LoginComponent {
       this.isLoading.set(true);
       this.errorMessage.set('');
 
-      const loginRequest: LoginRequest = {
-        email: this.administracionForm.value.email,
-        password: this.administracionForm.value.password,
-        rememberMe: this.administracionForm.value.rememberMe
-      };
-
-      this.authService.login(loginRequest).subscribe({
+      this.authService.loginAdministracion(
+        this.administracionForm.value.email,
+        this.administracionForm.value.password,
+        this.administracionForm.value.rememberMe
+      ).subscribe({
         next: (response) => {
           this.isLoading.set(false);
-          if (response.success) {
-            // Update user language if needed
-            if (response.user?.idIdioma) {
-              this.translationService.setLanguage(response.user.idIdioma);
-            }
-            this.router.navigate(['/dashboard']);
-          } else {
-            this.errorMessage.set(response.message || 'Error en el login');
+          // Update user language if needed
+          if (response.idIdioma) {
+            // Convert number to Language enum
+            const language = response.idIdioma === 1 ? 'es' : response.idIdioma === 2 ? 'en' : 'eu';
+            this.translationService.setLanguage(language as any);
           }
+          this.router.navigate(['/dashboard']);
         },
         error: (error) => {
           this.isLoading.set(false);
-          this.errorMessage.set('Error de conexión');
+          this.errorMessage.set(error.message || 'Error en el login');
           console.error('Login error:', error);
         }
       });

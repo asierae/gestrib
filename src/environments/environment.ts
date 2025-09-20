@@ -1,6 +1,6 @@
 export const environment = {
   production: false,
-  apiUrl: 'http://localhost:3000/api',
+  apiUrl: 'https://localhost:7108', // URL de la API .NET en desarrollo
   apiVersion: 'v1',
   timeout: 30000,
   retryAttempts: 3
