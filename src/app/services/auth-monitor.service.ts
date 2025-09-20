@@ -212,7 +212,8 @@ export class AuthMonitorService {
    * Verifica si el usuario es administrador
    */
   isAdmin(): boolean {
-    return this.hasRole('Admin');
+    const user = this._currentUser();
+    return user?.tipoUsuario === 1; // TipoUsuario 1 = Admin
   }
 
   /**
@@ -220,7 +221,7 @@ export class AuthMonitorService {
    */
   isProfesor(): boolean {
     const user = this._currentUser();
-    return user?.tipoUsuario === 2;
+    return user?.tipoUsuario === 2; // TipoUsuario 2 = Profesor
   }
 
   /**
@@ -228,7 +229,7 @@ export class AuthMonitorService {
    */
   isAdministracion(): boolean {
     const user = this._currentUser();
-    return user?.role === 'Admin' || user?.role === 'Administracion';
+    return user?.tipoUsuario === 1; // TipoUsuario 1 = Administración/Admin
   }
 
   /**

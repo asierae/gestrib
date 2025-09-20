@@ -339,7 +339,8 @@ export class AuthService {
    * Verifica si el usuario es administrador
    */
   isAdmin(): boolean {
-    return this.hasRole('Admin');
+    const user = this._currentUser();
+    return user?.tipoUsuario === 1; // TipoUsuario 1 = Admin
   }
 
   /**
@@ -355,7 +356,7 @@ export class AuthService {
    */
   isAdministracion(): boolean {
     const user = this._currentUser();
-    return user?.role === 'Admin' || user?.role === 'Administracion';
+    return user?.tipoUsuario === 1; // TipoUsuario 1 = Administración/Admin
   }
 
   /**

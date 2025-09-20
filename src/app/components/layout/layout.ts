@@ -42,49 +42,57 @@ export class LayoutComponent implements OnInit {
       icon: 'dashboard', 
       label: 'navigation.dashboard', 
       route: '/dashboard',
-      active: true
+      active: true,
+      roles: [1, 2] // Admin y Profesor
     },
     { 
       icon: 'assignment', 
       label: 'navigation.formDefensa', 
       route: '/defensas',
-      active: false
+      active: false,
+      roles: [1, 2] // Admin y Profesor
     },
     { 
       icon: 'table_view', 
       label: 'navigation.defensasList', 
       route: '/tribunals',
-      active: false
+      active: false,
+      roles: [1, 2] // Admin y Profesor
     },
     { 
       icon: 'event_available', 
       label: 'navigation.availability', 
       route: '/scheduler',
-      active: false
+      active: false,
+      roles: [1] // Solo Admin
     },
     { 
       icon: 'people', 
       label: 'navigation.users', 
       route: '/users',
-      active: false
+      active: false,
+      roles: [1] // Solo Admin
     },
     { 
       icon: 'assessment', 
       label: 'navigation.reports', 
       route: '/reports',
-      active: false
+      active: false,
+      roles: [1] // Solo Admin
     },
     { 
       icon: 'admin_panel_settings', 
       label: 'navigation.administration', 
       route: '/administration',
-      active: false
+      active: false,
+      roles: [1] // Solo Admin
     },
     { 
       icon: 'help', 
       label: 'navigation.help', 
       route: '/help',
-      active: false
+      active: false,
+      roles: [1, 2] // Admin y Profesor
     },
 
   ]);
