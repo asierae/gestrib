@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Diagnosis</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ccc; border-radius: 5px; }
+        .success { background-color: #d4edda; border-color: #c3e6cb; }
+        .error { background-color: #f8d7da; border-color: #f5c6cb; }
+        .info { background-color: #d1ecf1; border-color: #bee5eb; }
+        button { margin: 5px; padding: 10px 15px; }
+        pre { background: #f8f9fa; padding: 10px; border-radius: 3px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <h1>🔍 API Diagnosis Tool</h1>
+    
+    <div class="test-section info">
+        <h3>1. Test API Health</h3>
+        <button onclick="testApiHealth()">Test API Health</button>
+        <div id="health-result"></div>
+    </div>
+    
+    <div class="test-section info">
+        <h3>2. Test Authentication with Different idDb Values</h3>
+        <button onclick="testIdDb0()">Test idDb: 0</button>
+        <button onclick="testIdDb1()">Test idDb: 1</button>
+        <button onclick="testIdDb2()">Test idDb: 2</button>
+        <div id="auth-result"></div>
+    </div>
+    
+    <div class="test-section info">
+        <h3>3. Test CORS</h3>
+        <button onclick="testCors()">Test CORS</button>
+        <div id="cors-result"></div>
+    </div>
+    
+    <div class="test-section info">
+        <h3>4. Test Different Endpoints</h3>
+        <button onclick="testEndpoints()">Test All Endpoints</button>
+        <div id="endpoints-result"></div>
+    </div>
+
+    <script>
+        const API_BASE = 'https://gestribapi-dncrgfhrebbzgwdk.canadacentral-01.azurewebsites.net';
+        
+        async function testApiHealth() {
+            const resultDiv = document.getElementById('health-result');
+            resultDiv.innerHTML = '<p>Testing API health...</p>';
+            
+            try {
+                const response = await fetch(`${API_BASE}/swagger`, {
+                    method: 'GET',
+                    mode: 'cors'
+                });
+                
+                if (response.ok) {
+                    resultDiv.innerHTML = '<div class="success"><p>✅ API is accessible</p></div>';
+                } else {
+                    resultDiv.innerHTML = `<div class="error"><p>❌ API returned status: ${response.status}</p></div>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="error"><p>❌ Error: ${error.message}</p></div>`;
+            }
+        }
+        
+        async function testAuthentication(idDb, description) {
+            const resultDiv = document.getElementById('auth-result');
+            resultDiv.innerHTML += `<p>Testing ${description}...</p>`;
+            
+            try {
+                const response = await fetch(`${API_BASE}/Usuarios/authenticate`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        idDb: idDb,
+                        Email: 'admin@gestrib.com',
+                        Password: '123456',
+                        language: 'es',
+                        rememberAccount: false
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    resultDiv.innerHTML += `<div class="success"><p>✅ ${description}: SUCCESS</p><pre>${JSON.stringify(data, null, 2)}</pre></div>`;
+                } else {
+                    resultDiv.innerHTML += `<div class="error"><p>❌ ${description}: FAILED</p><pre>Status: ${response.status}\nResponse: ${JSON.stringify(data, null, 2)}</pre></div>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML += `<div class="error"><p>❌ ${description}: ERROR</p><pre>${error.message}</pre></div>`;
+            }
+        }
+        
+        function testIdDb0() {
+            testAuthentication(0, 'idDb: 0');
+        }
+        
+        function testIdDb1() {
+            testAuthentication(1, 'idDb: 1');
+        }
+        
+        function testIdDb2() {
+            testAuthentication(2, 'idDb: 2');
+        }
+        
+        async function testCors() {
+            const resultDiv = document.getElementById('cors-result');
+            resultDiv.innerHTML = '<p>Testing CORS...</p>';
+            
+            try {
+                const response = await fetch(`${API_BASE}/Usuarios/authenticate`, {
+                    method: 'OPTIONS',
+                    headers: {
+                        'Access-Control-Request-Method': 'POST',
+                        'Access-Control-Request-Headers': 'Content-Type'
+                    }
+                });
+                
+                if (response.ok) {
+                    resultDiv.innerHTML = '<div class="success"><p>✅ CORS preflight successful</p></div>';
+                } else {
+                    resultDiv.innerHTML = `<div class="error"><p>❌ CORS preflight failed: ${response.status}</p></div>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="error"><p>❌ CORS error: ${error.message}</p></div>`;
+            }
+        }
+        
+        async function testEndpoints() {
+            const resultDiv = document.getElementById('endpoints-result');
+            resultDiv.innerHTML = '<p>Testing endpoints...</p>';
+            
+            const endpoints = [
+                '/swagger',
+                '/swagger/v1/swagger.json',
+                '/Usuarios/authenticate'
+            ];
+            
+            for (const endpoint of endpoints) {
+                try {
+                    const response = await fetch(`${API_BASE}${endpoint}`, {
+                        method: 'GET',
+                        mode: 'cors'
+                    });
+                    
+                    if (response.ok) {
+                        resultDiv.innerHTML += `<div class="success"><p>✅ ${endpoint}: OK (${response.status})</p></div>`;
+                    } else {
+                        resultDiv.innerHTML += `<div class="error"><p>❌ ${endpoint}: ${response.status}</p></div>`;
+                    }
+                } catch (error) {
+                    resultDiv.innerHTML += `<div class="error"><p>❌ ${endpoint}: ${error.message}</p></div>`;
+                }
+            }
+        }
+    </script>
+</body>
+</html>

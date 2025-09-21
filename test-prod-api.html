@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Production API</title>
+    <script>
+        const API_URL = 'https://gestribapi-dncrgfhrebbzgwdk.canadacentral-01.azurewebsites.net/Usuarios/authenticate';
+        
+        async function testLogin(email, password, idDb) {
+            try {
+                console.log(`Testing login for ${email} with idDb: ${idDb}`);
+                
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        idDb: idDb,
+                        Email: email,
+                        Password: password,
+                        language: 'es',
+                        rememberAccount: false
+                    })
+                });
+                
+                const data = await response.json();
+                console.log('Response status:', response.status);
+                console.log('Response data:', data);
+                
+                if (response.ok) {
+                    alert(`✅ Login successful for ${email}!\nToken: ${data.jwtToken ? data.jwtToken.substring(0, 30) + '...' : 'No token'}`);
+                } else {
+                    alert(`❌ Login failed for ${email}:\nStatus: ${response.status}\nError: ${data.message || JSON.stringify(data)}`);
+                }
+            } catch (error) {
+                console.error('Error during fetch:', error);
+                alert(`❌ Error during fetch for ${email}:\n${error.message}`);
+            }
+        }
+        
+        // Test different idDb values
+        function testAllIdDbValues() {
+            const email = 'admin@gestrib.com';
+            const password = '123456';
+            
+            // Test idDb: 0, 1, 2
+            [0, 1, 2].forEach(idDb => {
+                setTimeout(() => {
+                    console.log(`\n=== Testing idDb: ${idDb} ===`);
+                    testLogin(email, password, idDb);
+                }, idDb * 2000); // Wait 2 seconds between tests
+            });
+        }
+    </script>
+</head>
+<body>
+    <h1>Test Production API Authentication</h1>
+    <button onclick="testLogin('admin@gestrib.com', '123456', 0)">Test Admin (idDb: 0)</button>
+    <button onclick="testLogin('admin@gestrib.com', '123456', 1)">Test Admin (idDb: 1)</button>
+    <button onclick="testLogin('admin@gestrib.com', '123456', 2)">Test Admin (idDb: 2)</button>
+    <button onclick="testAllIdDbValues()">Test All idDb Values</button>
+    
+    <h2>Test Professor</h2>
+    <button onclick="testLogin('juan.perez@universidad.edu', '123456', 0)">Test Profesor (idDb: 0)</button>
+    <button onclick="testLogin('juan.perez@universidad.edu', '123456', 1)">Test Profesor (idDb: 1)</button>
+    <button onclick="testLogin('juan.perez@universidad.edu', '123456', 2)">Test Profesor (idDb: 2)</button>
+    
+    <h2>Console Output</h2>
+    <p>Open browser console (F12) to see detailed logs.</p>
+</body>
+</html>
