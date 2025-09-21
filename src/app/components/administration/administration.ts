@@ -10,6 +10,8 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTableModule } from '@angular/material/table';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { ScrollingModule } from '@angular/cdk/scrolling';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
 import { TranslatePipe } from '../../pipes/translate.pipe';
 import { AlumnosService, AlumnoRequest } from '../../services/alumnos.service';
 import * as XLSX from 'xlsx';
@@ -17,7 +19,7 @@ import * as XLSX from 'xlsx';
 @Component({
   selector: 'app-administration',
   standalone: true,
-  imports: [CommonModule, FormsModule, MatTabsModule, MatCardModule, MatButtonModule, MatIconModule, MatSnackBarModule, MatProgressSpinnerModule, MatTableModule, MatPaginatorModule, ScrollingModule, TranslatePipe],
+  imports: [CommonModule, FormsModule, MatTabsModule, MatCardModule, MatButtonModule, MatIconModule, MatSnackBarModule, MatProgressSpinnerModule, MatTableModule, MatPaginatorModule, ScrollingModule, MatFormFieldModule, MatInputModule, TranslatePipe],
   templateUrl: './administration.html',
   styleUrl: './administration.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -31,9 +33,13 @@ export class AdministrationComponent implements OnInit {
 
   // Alumnos table data
   alumnos: any[] = [];
+  filteredAlumnos: any[] = [];
   displayedColumns: string[] = ['dni', 'nombre', 'apellidos', 'titulacion', 'asignatura', 'creditos', 'media', 'tipoGrado'];
   isLoadingAlumnos = signal(false);
   alumnosError?: string;
+  
+  // Search
+  searchTerm = '';
   
   // Pagination
   pageSize = 10;
@@ -63,8 +69,10 @@ export class AdministrationComponent implements OnInit {
         if (Array.isArray(data)) {
           this.alumnos = data;
           this.totalAlumnos = data.length;
+          this.filteredAlumnos = [...data];
         } else {
           this.alumnos = [];
+          this.filteredAlumnos = [];
           this.totalAlumnos = 0;
         }
         this.isLoadingAlumnos.set(false);
@@ -89,11 +97,48 @@ export class AdministrationComponent implements OnInit {
   get paginatedAlumnos(): any[] {
     const startIndex = this.pageIndex * this.pageSize;
     const endIndex = startIndex + this.pageSize;
-    return this.alumnos.slice(startIndex, endIndex);
+    return this.filteredAlumnos.slice(startIndex, endIndex);
   }
 
   trackByAlumnoId(index: number, alumno: any): any {
     return alumno.id || index;
+  }
+
+  onSearchChange(): void {
+    this.filterAlumnos();
+    this.pageIndex = 0; // Reset to first page when searching
+  }
+
+  clearSearch(): void {
+    this.searchTerm = '';
+    this.filterAlumnos();
+    this.pageIndex = 0;
+  }
+
+  private filterAlumnos(): void {
+    if (!this.searchTerm.trim()) {
+      this.filteredAlumnos = [...this.alumnos];
+    } else {
+      const searchLower = this.searchTerm.toLowerCase().trim();
+      this.filteredAlumnos = this.alumnos.filter(alumno => 
+        this.matchesSearch(alumno, searchLower)
+      );
+    }
+  }
+
+  private matchesSearch(alumno: any, searchTerm: string): boolean {
+    const searchableFields = [
+      alumno.dni,
+      alumno.nombre,
+      alumno.apellidos,
+      alumno.titulacion,
+      alumno.asignatura,
+      alumno.tipoGradoNombre
+    ];
+
+    return searchableFields.some(field => 
+      field && field.toString().toLowerCase().includes(searchTerm)
+    );
   }
 
 

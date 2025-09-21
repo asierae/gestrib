@@ -88,6 +88,19 @@
     }
   }
 
+  .search-container {
+    margin-bottom: 20px;
+    
+    .search-field {
+      width: 100%;
+      max-width: 500px;
+      
+      .mat-mdc-form-field-subscript-wrapper {
+        display: none;
+      }
+    }
+  }
+
   .table-container {
     overflow-x: auto;
     border-radius: 8px;

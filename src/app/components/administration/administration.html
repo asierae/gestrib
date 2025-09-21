@@ -60,9 +60,28 @@
         <mat-card class="alumnos-card">
           <mat-card-header>
             <mat-card-title>Lista de Alumnos</mat-card-title>
-            <mat-card-subtitle>Total: {{ totalAlumnos }} alumnos</mat-card-subtitle>
+            <mat-card-subtitle>Total: {{ filteredAlumnos.length }} de {{ totalAlumnos }} alumnos</mat-card-subtitle>
           </mat-card-header>
           <mat-card-content>
+            <!-- Search Bar -->
+            <div class="search-container">
+              <mat-form-field appearance="outline" class="search-field">
+                <mat-label>Buscar alumnos...</mat-label>
+                <input matInput 
+                       [(ngModel)]="searchTerm" 
+                       (input)="onSearchChange()"
+                       placeholder="DNI, nombre, apellidos, titulación...">
+                <mat-icon matSuffix>search</mat-icon>
+                <button mat-icon-button 
+                        matSuffix 
+                        *ngIf="searchTerm" 
+                        (click)="clearSearch()" 
+                        aria-label="Limpiar búsqueda">
+                  <mat-icon>close</mat-icon>
+                </button>
+              </mat-form-field>
+            </div>
+
             <div class="table-container" *ngIf="!isLoadingAlumnos()">
               <table mat-table [dataSource]="paginatedAlumnos" class="alumnos-table">
                 <!-- DNI Column -->
@@ -119,7 +138,7 @@
               
               <!-- Paginator -->
               <mat-paginator 
-                [length]="totalAlumnos"
+                [length]="filteredAlumnos.length"
                 [pageSize]="pageSize"
                 [pageIndex]="pageIndex"
                 [pageSizeOptions]="[5, 10, 25, 50]"
@@ -148,6 +167,16 @@
             <div class="empty-container" *ngIf="!isLoadingAlumnos() && !alumnosError && totalAlumnos === 0">
               <mat-icon>school</mat-icon>
               <p>No hay alumnos registrados</p>
+            </div>
+
+            <!-- No Results State -->
+            <div class="empty-container" *ngIf="!isLoadingAlumnos() && !alumnosError && totalAlumnos > 0 && filteredAlumnos.length === 0">
+              <mat-icon>search_off</mat-icon>
+              <p>No se encontraron alumnos que coincidan con "{{ searchTerm }}"</p>
+              <button mat-raised-button color="primary" (click)="clearSearch()">
+                <mat-icon>clear</mat-icon>
+                Limpiar búsqueda
+              </button>
             </div>
           </mat-card-content>
         </mat-card>
