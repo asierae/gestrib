@@ -12,4 +12,9 @@ export interface EstudianteDisplay {
   apellido1: string;
   apellido2: string;
   email?: string;
+  dni?: string;
+  titulacion?: string;
+  asignatura?: string;
+  creditosSup?: number;
+  mediaExpediente?: number;
 }

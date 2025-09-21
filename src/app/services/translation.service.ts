@@ -65,23 +65,18 @@ export class TranslationService {
     }
     
     const result = typeof value === 'string' ? value : key;
-    console.log(`Translation result for ${key}: ${result}`);
     return result;
   }
 
   setLanguage(language: Language): void {
-    console.log(`Setting language to: ${language}`);
     this.currentLanguage.set(language);
     this.languageChangeSubject.next(language);
     this.loadTranslations(language);
   }
 
   private loadTranslations(language: Language): void {
-    console.log(`Loading translations for language: ${language}`);
     this.http.get(`/assets/i18n/${language}.json`).subscribe({
       next: (translations) => {
-        console.log(`Successfully loaded translations for ${language}:`, translations);
-        console.log(`defensas.title in loaded translations:`, (translations as any)?.defensas?.title);
         this.translations.set(translations);
         this.translationsSubject.next(translations);
       },

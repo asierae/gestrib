@@ -16,6 +16,20 @@
       <form [formGroup]="defensaForm" (ngSubmit)="createDefensa()">
         <div class="form-row">
           <mat-form-field appearance="outline" class="form-field">
+            <mat-label>Grado</mat-label>
+            <mat-select 
+              formControlName="grado"
+              (selectionChange)="onGradoChange()">
+              <mat-option *ngFor="let grado of grados" [value]="grado.value">
+                {{ grado.label }}
+              </mat-option>
+            </mat-select>
+            <mat-error *ngIf="defensaForm.get('grado')?.hasError('required')">
+              {{ 'validation.required' | translate }}
+            </mat-error>
+          </mat-form-field>
+          
+          <mat-form-field appearance="outline" class="form-field" *ngIf="mostrarEspecialidades">
             <mat-label>{{ 'defensas.specialty' | translate }}</mat-label>
             <mat-select 
               formControlName="especialidad"
@@ -28,7 +42,9 @@
               {{ 'validation.required' | translate }}
             </mat-error>
           </mat-form-field>
-          
+        </div>
+        
+        <div class="form-row">
           <mat-form-field appearance="outline" class="form-field">
             <mat-label>{{ 'defensas.workTitle' | translate }}</mat-label>
             <input 
@@ -46,15 +62,15 @@
       
         <div class="form-row">
           <mat-form-field appearance="outline" class="form-field">
-            <mat-label>{{ 'defensas.student' | translate }}</mat-label>
+            <mat-label>Alumno</mat-label>
             <input 
               matInput
               formControlName="estudiante"
               [matAutocomplete]="estudianteAuto"
-              [placeholder]="'defensas.selectStudent' | translate"
+              placeholder="Alumno"
               (click)="onEstudianteFieldClick()">
-            <mat-autocomplete #estudianteAuto="matAutocomplete" (optionSelected)="onEstudianteChange()">
-              <mat-option *ngFor="let estudiante of filteredEstudiantes" [value]="estudiante.nombreCompleto">
+            <mat-autocomplete #estudianteAuto="matAutocomplete" [displayWith]="displayEstudianteFn" (optionSelected)="onEstudianteChange()">
+              <mat-option *ngFor="let estudiante of filteredEstudiantes; trackBy: trackByEstudiante" [value]="estudiante">
                 {{ estudiante.nombreCompleto }}
               </mat-option>
             </mat-autocomplete>
@@ -62,6 +78,7 @@
               {{ 'validation.required' | translate }}
             </mat-error>
           </mat-form-field>
+          
         </div>
       
         <div class="form-row">
@@ -74,7 +91,7 @@
               [placeholder]="'defensas.selectDirector' | translate"
               (click)="onDirectorFieldClick()">
             <mat-autocomplete #directorAuto="matAutocomplete" (optionSelected)="onDirectorChange()">
-              <mat-option *ngFor="let profesor of filteredProfesores" [value]="profesor.nombre + ' ' + profesor.apellidos">
+              <mat-option *ngFor="let profesor of filteredDirectores" [value]="profesor.nombre + ' ' + profesor.apellidos">
                 {{ profesor.nombre }} {{ profesor.apellidos }}
               </mat-option>
             </mat-autocomplete>
@@ -86,15 +103,32 @@
         
         <div class="form-row">
           <mat-form-field appearance="outline" class="form-field">
-            <mat-label>{{ 'defensas.vocal' | translate }}</mat-label>
+            <mat-label>Co-director del tribunal</mat-label>
+            <input 
+              matInput
+              formControlName="codirectorTribunal"
+              [matAutocomplete]="codirectorAuto"
+              placeholder="Co-director del tribunal"
+              (click)="onCodirectorFieldClick()">
+            <mat-autocomplete #codirectorAuto="matAutocomplete" (optionSelected)="onCodirectorChange()">
+              <mat-option *ngFor="let profesor of filteredCodirectores" [value]="profesor.nombre + ' ' + profesor.apellidos">
+                {{ profesor.nombre }} {{ profesor.apellidos }}
+              </mat-option>
+            </mat-autocomplete>
+          </mat-form-field>
+        </div>
+        
+        <div class="form-row">
+          <mat-form-field appearance="outline" class="form-field">
+            <mat-label>Vocal de tribunal propuesto</mat-label>
             <input 
               matInput
               formControlName="vocalTribunal"
               [matAutocomplete]="vocalAuto"
-              [placeholder]="'defensas.selectVocal' | translate"
+              placeholder="Vocal de tribunal propuesto"
               (click)="onVocalFieldClick()">
             <mat-autocomplete #vocalAuto="matAutocomplete" (optionSelected)="onVocalChange()">
-              <mat-option *ngFor="let profesor of filteredProfesores" [value]="profesor.nombre + ' ' + profesor.apellidos">
+              <mat-option *ngFor="let profesor of filteredVocales" [value]="profesor.nombre + ' ' + profesor.apellidos">
                 {{ profesor.nombre }} {{ profesor.apellidos }}
               </mat-option>
             </mat-autocomplete>
@@ -104,10 +138,10 @@
           </mat-form-field>
         </div>
       
-        <!-- Especialidades del Vocal -->
+        <!-- Áreas de conocimiento del Vocal -->
         <mat-card *ngIf="especialidadesVocal.length > 0" class="especialidades-section mat-elevation-z4">
           <mat-card-header>
-            <mat-card-title>{{ 'defensas.vocalSpecialties' | translate }}</mat-card-title>
+            <mat-card-title>Áreas de conocimiento del vocal</mat-card-title>
           </mat-card-header>
           <mat-card-content>
             <div class="checkboxes-container">
@@ -124,15 +158,15 @@
       
         <div class="form-row">
           <mat-form-field appearance="outline" class="form-field">
-            <mat-label>{{ 'defensas.supplement' | translate }}</mat-label>
+            <mat-label>Suplente propuesto</mat-label>
             <input 
               matInput
               formControlName="suplente"
               [matAutocomplete]="suplenteAuto"
-              [placeholder]="'defensas.selectSupplement' | translate"
+              placeholder="Suplente propuesto"
               (click)="onSuplenteFieldClick()">
             <mat-autocomplete #suplenteAuto="matAutocomplete" (optionSelected)="onSuplenteChange()">
-              <mat-option *ngFor="let profesor of filteredProfesores" [value]="profesor.nombre + ' ' + profesor.apellidos">
+              <mat-option *ngFor="let profesor of filteredSuplentes" [value]="profesor.nombre + ' ' + profesor.apellidos">
                 {{ profesor.nombre }} {{ profesor.apellidos }}
               </mat-option>
             </mat-autocomplete>
@@ -142,10 +176,10 @@
           </mat-form-field>
         </div>
         
-        <!-- Especialidades del Suplente -->
+        <!-- Áreas de conocimiento del Suplente -->
         <mat-card *ngIf="especialidadesSuplente.length > 0" class="especialidades-section mat-elevation-z4">
           <mat-card-header>
-            <mat-card-title>{{ 'defensas.supplementSpecialties' | translate }}</mat-card-title>
+            <mat-card-title>Áreas de conocimiento del suplente</mat-card-title>
           </mat-card-header>
           <mat-card-content>
             <div class="checkboxes-container">

@@ -17,6 +17,7 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 import { TranslationService } from '../../services/translation.service';
+import { AlumnosService } from '../../services/alumnos.service';
 import { TranslatePipe } from '../../pipes/translate.pipe';
 import * as XLSX from 'xlsx';
 import { DeleteConfirmationDialogComponent } from './delete-confirmation-dialog.component';
@@ -33,6 +34,7 @@ export class TribunalsComponent implements OnInit {
   private snackBar = inject(MatSnackBar);
   private router = inject(Router);
   private dialog = inject(MatDialog);
+  private alumnosService = inject(AlumnosService);
   displayedColumns = ['student','dni','title','specialty','director','codirector','president','vocal','replacement','field','language','date','time','place','status','actions'];
   data: any[] = [];
   filteredData: any[] = [];
@@ -47,8 +49,83 @@ export class TribunalsComponent implements OnInit {
   editingStatus: { [key: string]: boolean } = {};
 
   ngOnInit(): void {
-    this.data = this.generateFakeData(57);
-    this.applyFilters();
+    this.loadDefensas();
+  }
+
+  loadDefensas(): void {
+    console.log('TribunalsComponent: Cargando defensas desde la API...');
+    this.alumnosService.getAllAlumnos().subscribe({
+      next: (alumnos: any[]) => {
+        console.log('TribunalsComponent: Alumnos recibidos:', alumnos);
+        this.data = this.convertAlumnosToDefensas(alumnos);
+        this.applyFilters();
+        this.snackBar.open(`Cargadas ${this.data.length} defensas`, 'Cerrar', { duration: 2000 });
+      },
+      error: (error) => {
+        console.error('TribunalsComponent: Error cargando defensas:', error);
+        this.snackBar.open('Error al cargar las defensas', 'Cerrar', { duration: 3000 });
+        // Fallback a datos mock si hay error
+        this.data = this.generateFakeData(10);
+        this.applyFilters();
+      }
+    });
+  }
+
+  convertAlumnosToDefensas(alumnos: any[]): any[] {
+    return alumnos.map((alumno, index) => {
+      // Validar y limpiar datos
+      const nombre = alumno.Nombre || 'Sin nombre';
+      const apellidos = alumno.Apellidos || 'Sin apellidos';
+      const dni = alumno.DNI || 'Sin DNI';
+      const titulacion = alumno.Titulacion || 'Sin titulación';
+      const asignatura = alumno.Asignatura || 'Trabajo Fin de Grado';
+      const creditosSup = alumno.CreditosSup || 0;
+      const mediaExpediente = alumno.MediaExpediente || 0;
+      
+      const day = (index % 28) + 1;
+      const month = ((index % 12) + 1).toString().padStart(2, '0');
+      const dateStr = `2025-${month}-${day.toString().padStart(2,'0')}`;
+      
+      return {
+        student: `${nombre} ${apellidos}`.trim(),
+        dni: dni,
+        title: `Trabajo Fin de Grado - ${asignatura}`,
+        specialty: this.getSpecialtyFromTitulacion(titulacion),
+        director: `Dr. Director ${index + 1}`,
+        codirector: index % 2 === 0 ? `Dra. Codirectora ${index + 1}` : '-',
+        president: `Presidente ${index + 1}`,
+        vocal: `Vocal ${index + 1}`,
+        replacement: `Suplente ${index + 1}`,
+        field: this.getFieldFromTitulacion(titulacion),
+        language: ['ES','EN','EU'][index % 3],
+        date: index % 7 === 0 ? '' : dateStr, // Some records without date
+        time: index % 7 === 0 ? '' : `${(9 + (index % 8)).toString().padStart(2,'0')}:00`,
+        place: index % 7 === 0 ? 'Por asignar' : `Aula ${100 + index}`,
+        status: ['Aprobada', 'Pendiente', 'Rechazada'][index % 3],
+        // Datos adicionales del alumno
+        creditosSup: creditosSup,
+        mediaExpediente: mediaExpediente,
+        titulacion: titulacion
+      };
+    });
+  }
+
+  getSpecialtyFromTitulacion(titulacion: string): string {
+    if (titulacion.toLowerCase().includes('inteligencia artificial')) {
+      return 'Ing. Software';
+    } else if (titulacion.toLowerCase().includes('informática')) {
+      return 'Ing. Comp.';
+    }
+    return 'Computación';
+  }
+
+  getFieldFromTitulacion(titulacion: string): string {
+    if (titulacion.toLowerCase().includes('inteligencia artificial')) {
+      return 'IA';
+    } else if (titulacion.toLowerCase().includes('informática')) {
+      return 'Sistemas';
+    }
+    return 'Redes';
   }
 
   generateFakeData(count: number): any[] {

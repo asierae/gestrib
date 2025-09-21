@@ -39,6 +39,11 @@ export enum TipoEspecialidad {
   COMPUTACION = 'computacion'
 }
 
+export enum TipoGrado {
+  INGENIERIA_INFORMATICA = 'ingenieria_informatica',
+  INTELIGENCIA_ARTIFICIAL = 'inteligencia_artificial'
+}
+
 export enum TipoDefensa {
   PENAL = 'penal',
   CIVIL = 'civil',
@@ -60,10 +65,12 @@ export enum EstadoDefensa {
 
 export interface CreateDefensaRequest {
   curso: string;
-  especialidad: TipoEspecialidad;
+  grado: TipoGrado;
+  especialidad?: TipoEspecialidad; // Opcional porque solo se usa para GII
   titulo: string;
   estudiante: EstudianteDisplay;
   directorTribunal: Profesor;
+  codirectorTribunal?: Profesor; // Opcional
   vocalTribunal: Profesor;
   suplente: Profesor;
   comentariosDireccion: string;

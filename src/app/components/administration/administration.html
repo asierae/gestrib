@@ -17,11 +17,14 @@
               Arrastra y suelta aquí el XLSX de alumnos
               <div class="filename" *ngIf="alumnosFile">Seleccionado: {{ alumnosFile.name }}</div>
             </div>
-            <input #alumnosInput hidden type="file" accept=".xlsx" (change)="onAlumnosFileChange($event)">
+            <input #alumnosInput id="alumnos-file-input" hidden type="file" accept=".xlsx" (change)="onAlumnosFileChange($event)">
             <div class="actions">
               <button mat-raised-button color="primary" (click)="syncAlumnos()" [disabled]="isSyncingAlumnos()">
-                <mat-icon>sync</mat-icon>
-                Sincronizar lista
+                <div class="button-content">
+                  <mat-spinner *ngIf="isSyncingAlumnos()" diameter="20" class="button-spinner"></mat-spinner>
+                  <mat-icon *ngIf="!isSyncingAlumnos()">sync</mat-icon>
+                  <span>{{ isSyncingAlumnos() ? 'Sincronizando...' : 'Sincronizar lista' }}</span>
+                </div>
               </button>
             </div>
             <div class="hint">Sobrescribirá los datos del curso {{ currentYear }}-{{ nextYear }}.</div>
@@ -41,11 +44,111 @@
             <input #profesoresInput hidden type="file" accept=".xlsx" (change)="onProfesoresFileChange($event)">
             <div class="actions">
               <button mat-raised-button color="primary" (click)="syncProfesores()" [disabled]="isSyncingProfesores()">
-                <mat-icon>sync</mat-icon>
-                Sincronizar lista
+                <mat-spinner *ngIf="isSyncingProfesores()" diameter="20" class="button-spinner"></mat-spinner>
+                <mat-icon *ngIf="!isSyncingProfesores()">sync</mat-icon>
+                {{ isSyncingProfesores() ? 'Sincronizando...' : 'Sincronizar lista' }}
               </button>
             </div>
             <div class="hint">Sobrescribirá los datos del curso {{ currentYear }}-{{ nextYear }}.</div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </mat-tab>
+
+    <mat-tab label="Alumnos">
+      <div class="tab-content">
+        <mat-card class="alumnos-card">
+          <mat-card-header>
+            <mat-card-title>Lista de Alumnos</mat-card-title>
+            <mat-card-subtitle>Total: {{ totalAlumnos }} alumnos</mat-card-subtitle>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="table-container" *ngIf="!isLoadingAlumnos()">
+              <table mat-table [dataSource]="paginatedAlumnos" class="alumnos-table">
+                <!-- DNI Column -->
+                <ng-container matColumnDef="dni">
+                  <th mat-header-cell *matHeaderCellDef>DNI</th>
+                  <td mat-cell *matCellDef="let alumno">{{ alumno.dni }}</td>
+                </ng-container>
+
+                <!-- Nombre Column -->
+                <ng-container matColumnDef="nombre">
+                  <th mat-header-cell *matHeaderCellDef>Nombre</th>
+                  <td mat-cell *matCellDef="let alumno">{{ alumno.nombre }}</td>
+                </ng-container>
+
+                <!-- Apellidos Column -->
+                <ng-container matColumnDef="apellidos">
+                  <th mat-header-cell *matHeaderCellDef>Apellidos</th>
+                  <td mat-cell *matCellDef="let alumno">{{ alumno.apellidos }}</td>
+                </ng-container>
+
+                <!-- Titulación Column -->
+                <ng-container matColumnDef="titulacion">
+                  <th mat-header-cell *matHeaderCellDef>Titulación</th>
+                  <td mat-cell *matCellDef="let alumno">{{ alumno.titulacion }}</td>
+                </ng-container>
+
+                <!-- Asignatura Column -->
+                <ng-container matColumnDef="asignatura">
+                  <th mat-header-cell *matHeaderCellDef>Asignatura</th>
+                  <td mat-cell *matCellDef="let alumno">{{ alumno.asignatura }}</td>
+                </ng-container>
+
+                <!-- Créditos Column -->
+                <ng-container matColumnDef="creditos">
+                  <th mat-header-cell *matHeaderCellDef>Créditos</th>
+                  <td mat-cell *matCellDef="let alumno">{{ alumno.creditosSup }}</td>
+                </ng-container>
+
+                <!-- Media Column -->
+                <ng-container matColumnDef="media">
+                  <th mat-header-cell *matHeaderCellDef>Media</th>
+                  <td mat-cell *matCellDef="let alumno">{{ alumno.mediaExpediente | number:'1.2-2' }}</td>
+                </ng-container>
+
+                <!-- Tipo Grado Column -->
+                <ng-container matColumnDef="tipoGrado">
+                  <th mat-header-cell *matHeaderCellDef>Tipo Grado</th>
+                  <td mat-cell *matCellDef="let alumno">{{ alumno.tipoGradoNombre }}</td>
+                </ng-container>
+
+                <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                <tr mat-row *matRowDef="let row; columns: displayedColumns; trackBy: trackByAlumnoId"></tr>
+              </table>
+              
+              <!-- Paginator -->
+              <mat-paginator 
+                [length]="totalAlumnos"
+                [pageSize]="pageSize"
+                [pageIndex]="pageIndex"
+                [pageSizeOptions]="[5, 10, 25, 50]"
+                (page)="onPageChange($event)"
+                showFirstLastButtons>
+              </mat-paginator>
+            </div>
+
+            <!-- Loading State -->
+            <div class="loading-container" *ngIf="isLoadingAlumnos()">
+              <mat-spinner diameter="40"></mat-spinner>
+              <p>Cargando alumnos...</p>
+            </div>
+
+            <!-- Error State -->
+            <div class="error-container" *ngIf="alumnosError">
+              <mat-icon color="warn">error</mat-icon>
+              <p>{{ alumnosError }}</p>
+              <button mat-raised-button color="primary" (click)="loadAlumnos()">
+                <mat-icon>refresh</mat-icon>
+                Reintentar
+              </button>
+            </div>
+
+            <!-- Empty State -->
+            <div class="empty-container" *ngIf="!isLoadingAlumnos() && !alumnosError && totalAlumnos === 0">
+              <mat-icon>school</mat-icon>
+              <p>No hay alumnos registrados</p>
+            </div>
           </mat-card-content>
         </mat-card>
       </div>

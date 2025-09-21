@@ -39,4 +39,151 @@
   .droparea mat-icon { color: #64748b; }
   .droparea.over { background: #f8fafc; border-color: #3b82f6; }
   .droparea .filename { font-size: 12px; color: #1f2937; }
+
+         // Estilos para el contenido del botón
+         .button-content {
+           display: flex;
+           align-items: center;
+           justify-content: center;
+           gap: 8px;
+           min-height: 24px;
+         }
+
+         // Estilos para el spinner en el botón
+         .button-spinner {
+           margin: 0;
+         }
+
+         // Estilos para el botón cuando está sincronizando
+         .actions button {
+           min-height: 40px;
+           padding: 8px 16px;
+           
+           &:disabled {
+             opacity: 0.7;
+             cursor: not-allowed;
+           }
+         }
+
+  // Estilos para los snackbars
+  ::ng-deep .success-snackbar {
+    background-color: #10b981 !important;
+    color: white !important;
+  }
+
+  ::ng-deep .error-snackbar {
+    background-color: #ef4444 !important;
+    color: white !important;
+  }
+
+  // Estilos para la tabla de alumnos
+  .alumnos-card {
+    .mat-card-header {
+      margin-bottom: 16px;
+    }
+
+    .mat-card-subtitle {
+      color: #6b7280;
+      font-size: 14px;
+    }
+  }
+
+  .table-container {
+    overflow-x: auto;
+    border-radius: 8px;
+    border: 1px solid #e5e7eb;
+
+    mat-paginator {
+      border-top: 1px solid #e5e7eb;
+      background-color: #f8fafc;
+    }
+  }
+
+  .alumnos-table {
+    width: 100%;
+    min-width: 800px;
+
+    .mat-mdc-header-cell {
+      background-color: #f8fafc;
+      color: #374151;
+      font-weight: 600;
+      border-bottom: 2px solid #e5e7eb;
+    }
+
+    .mat-mdc-cell {
+      color: #374151;
+      border-bottom: 1px solid #f3f4f6;
+    }
+
+    .mat-mdc-row:hover {
+      background-color: #f9fafb;
+    }
+
+    .mat-mdc-row:nth-child(even) {
+      background-color: #fafbfc;
+    }
+  }
+
+  .loading-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem;
+    gap: 16px;
+
+    p {
+      color: #6b7280;
+      margin: 0;
+    }
+  }
+
+  .error-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem;
+    gap: 16px;
+    text-align: center;
+
+    mat-icon {
+      font-size: 48px;
+      width: 48px;
+      height: 48px;
+    }
+
+    p {
+      color: #ef4444;
+      margin: 0;
+      font-weight: 500;
+    }
+
+    button {
+      margin-top: 8px;
+    }
+  }
+
+  .empty-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem;
+    gap: 16px;
+    text-align: center;
+
+    mat-icon {
+      font-size: 48px;
+      width: 48px;
+      height: 48px;
+      color: #9ca3af;
+    }
+
+    p {
+      color: #6b7280;
+      margin: 0;
+      font-size: 16px;
+    }
+  }
 }

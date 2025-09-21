@@ -28,7 +28,6 @@ export class TranslatePipe implements PipeTransform, OnDestroy {
     }
     
     const translation = this.translationService.getTranslation(key);
-    console.log(`TranslatePipe: ${key} -> ${translation}`);
     return translation;
   }
 
