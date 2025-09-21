@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Azure Debug Tool</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ccc; border-radius: 5px; }
+        .success { background-color: #d4edda; border-color: #c3e6cb; }
+        .error { background-color: #f8d7da; border-color: #f5c6cb; }
+        .info { background-color: #d1ecf1; border-color: #bee5eb; }
+        .warning { background-color: #fff3cd; border-color: #ffeaa7; }
+        button { margin: 5px; padding: 10px 15px; }
+        pre { background: #f8f9fa; padding: 10px; border-radius: 3px; overflow-x: auto; }
+        .highlight { background-color: #e7f3ff; border: 1px solid #b3d9ff; padding: 15px; margin: 10px 0; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Azure Debug Tool</h1>
+    
+    <div class="highlight">
+        <h3>🎯 Problema Identificado</h3>
+        <p><strong>Error:</strong> "Número de usuario incorrecto" en Azure</p>
+        <p><strong>Causa probable:</strong> La base de datos de Azure no tiene los usuarios o la configuración es incorrecta</p>
+        <p><strong>Solución:</strong> Configurar la base de datos de Azure correctamente</p>
+    </div>
+    
+    <div class="test-section warning">
+        <h3>⚠️ Pasos para resolver en Azure</h3>
+        <ol>
+            <li><strong>Verificar que la API de Azure esté conectada a una base de datos</strong></li>
+            <li><strong>Ejecutar el script SQL en la base de datos de Azure</strong></li>
+            <li><strong>Verificar la cadena de conexión en Azure App Service</strong></li>
+            <li><strong>Verificar que la base de datos tenga las tablas necesarias</strong></li>
+        </ol>
+    </div>
+    
+    <div class="test-section info">
+        <h3>1. Test API Health</h3>
+        <button onclick="testHealth()">Test Health</button>
+        <div id="health-result"></div>
+    </div>
+    
+    <div class="test-section info">
+        <h3>2. Test Database Connection (via API)</h3>
+        <button onclick="testDatabase()">Test Database</button>
+        <div id="db-result"></div>
+    </div>
+    
+    <div class="test-section info">
+        <h3>3. Test Authentication with Debug Info</h3>
+        <button onclick="testAuthDebug()">Test Auth with Debug</button>
+        <div id="auth-debug-result"></div>
+    </div>
+    
+    <div class="test-section info">
+        <h3>4. Test Different Scenarios</h3>
+        <button onclick="testScenarios()">Test All Scenarios</button>
+        <div id="scenarios-result"></div>
+    </div>
+
+    <script>
+        const API_BASE = 'https://gestribapi-dncrgfhrebbzgwdk.canadacentral-01.azurewebsites.net';
+        
+        async function testHealth() {
+            const resultDiv = document.getElementById('health-result');
+            resultDiv.innerHTML = '<p>Testing API health...</p>';
+            
+            try {
+                const response = await fetch(`${API_BASE}/Log/test`);
+                const data = await response.text();
+                
+                if (response.ok) {
+                    resultDiv.innerHTML = `<div class="success"><p>✅ API Health: OK</p><pre>${data}</pre></div>`;
+                } else {
+                    resultDiv.innerHTML = `<div class="error"><p>❌ API Health: FAILED (${response.status})</p></div>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="error"><p>❌ API Health: ERROR</p><pre>${error.message}</pre></div>`;
+            }
+        }
+        
+        async function testDatabase() {
+            const resultDiv = document.getElementById('db-result');
+            resultDiv.innerHTML = '<p>Testing database connection...</p>';
+            
+            // Intentar diferentes endpoints que podrían indicar conexión a BD
+            const endpoints = [
+                '/swagger/v1/swagger.json',
+                '/Usuarios/authenticate'
+            ];
+            
+            for (const endpoint of endpoints) {
+                try {
+                    const response = await fetch(`${API_BASE}${endpoint}`, {
+                        method: endpoint === '/Usuarios/authenticate' ? 'POST' : 'GET',
+                        headers: endpoint === '/Usuarios/authenticate' ? {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json'
+                        } : {},
+                        body: endpoint === '/Usuarios/authenticate' ? JSON.stringify({
+                            idDb: 0,
+                            Email: 'test@test.com',
+                            Password: 'test',
+                            language: 'es',
+                            rememberAccount: false
+                        }) : undefined
+                    });
+                    
+                    if (response.ok) {
+                        resultDiv.innerHTML += `<div class="success"><p>✅ ${endpoint}: OK (${response.status})</p></div>`;
+                    } else {
+                        const errorData = await response.text();
+                        resultDiv.innerHTML += `<div class="error"><p>❌ ${endpoint}: ${response.status}</p><pre>${errorData}</pre></div>`;
+                    }
+                } catch (error) {
+                    resultDiv.innerHTML += `<div class="error"><p>❌ ${endpoint}: ${error.message}</p></div>`;
+                }
+            }
+        }
+        
+        async function testAuthDebug() {
+            const resultDiv = document.getElementById('auth-debug-result');
+            resultDiv.innerHTML = '<p>Testing authentication with debug info...</p>';
+            
+            const testCases = [
+                { idDb: 0, email: 'admin@gestrib.com', password: '123456', desc: 'Admin idDb: 0' },
+                { idDb: 1, email: 'admin@gestrib.com', password: '123456', desc: 'Admin idDb: 1' },
+                { idDb: 0, email: 'ADMIN@GESTRIB.COM', password: '123456', desc: 'Admin uppercase' },
+                { idDb: 0, email: 'admin@gestrib.com', password: '123456', language: 'en', desc: 'Admin English' }
+            ];
+            
+            for (const testCase of testCases) {
+                try {
+                    const response = await fetch(`${API_BASE}/Usuarios/authenticate`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            idDb: testCase.idDb,
+                            Email: testCase.email,
+                            Password: testCase.password,
+                            language: testCase.language || 'es',
+                            rememberAccount: false
+                        })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (response.ok) {
+                        resultDiv.innerHTML += `<div class="success"><p>✅ ${testCase.desc}: SUCCESS</p><pre>${JSON.stringify(data, null, 2)}</pre></div>`;
+                    } else {
+                        resultDiv.innerHTML += `<div class="error"><p>❌ ${testCase.desc}: FAILED (${response.status})</p><pre>${JSON.stringify(data, null, 2)}</pre></div>`;
+                    }
+                } catch (error) {
+                    resultDiv.innerHTML += `<div class="error"><p>❌ ${testCase.desc}: ERROR</p><pre>${error.message}</pre></div>`;
+                }
+            }
+        }
+        
+        async function testScenarios() {
+            const resultDiv = document.getElementById('scenarios-result');
+            resultDiv.innerHTML = '<p>Testing different scenarios...</p>';
+            
+            // Test 1: Verificar si la API responde a requests malformados
+            try {
+                const response = await fetch(`${API_BASE}/Usuarios/authenticate`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        // Request malformado intencionalmente
+                        idDb: "0", // String en lugar de number
+                        Email: 'admin@gestrib.com',
+                        Password: '123456'
+                    })
+                });
+                
+                const data = await response.json();
+                resultDiv.innerHTML += `<div class="info"><p>🔍 Test malformed request: ${response.status}</p><pre>${JSON.stringify(data, null, 2)}</pre></div>`;
+            } catch (error) {
+                resultDiv.innerHTML += `<div class="error"><p>❌ Malformed request test: ${error.message}</p></div>`;
+            }
+            
+            // Test 2: Verificar headers de respuesta
+            try {
+                const response = await fetch(`${API_BASE}/Usuarios/authenticate`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        idDb: 0,
+                        Email: 'admin@gestrib.com',
+                        Password: '123456',
+                        language: 'es',
+                        rememberAccount: false
+                    })
+                });
+                
+                const headers = {};
+                response.headers.forEach((value, key) => {
+                    headers[key] = value;
+                });
+                
+                resultDiv.innerHTML += `<div class="info"><p>🔍 Response headers:</p><pre>${JSON.stringify(headers, null, 2)}</pre></div>`;
+            } catch (error) {
+                resultDiv.innerHTML += `<div class="error"><p>❌ Headers test: ${error.message}</p></div>`;
+            }
+        }
+    </script>
+</body>
+</html>

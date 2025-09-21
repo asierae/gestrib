@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Production Authentication</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ccc; border-radius: 5px; }
+        .success { background-color: #d4edda; border-color: #c3e6cb; }
+        .error { background-color: #f8d7da; border-color: #f5c6cb; }
+        .info { background-color: #d1ecf1; border-color: #bee5eb; }
+        button { margin: 5px; padding: 10px 15px; }
+        pre { background: #f8f9fa; padding: 10px; border-radius: 3px; overflow-x: auto; }
+        .highlight { background-color: #fff3cd; border: 1px solid #ffeaa7; padding: 10px; margin: 10px 0; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Test Production Authentication</h1>
+    
+    <div class="highlight">
+        <h3>⚠️ Problema Identificado</h3>
+        <p>La API de producción devuelve "Número de usuario incorrecto" para <code>idDb: 0</code>.</p>
+        <p><strong>Solución:</strong> Ejecutar el script SQL <code>fix-prod-users.sql</code> en la base de datos de Azure.</p>
+    </div>
+    
+    <div class="test-section info">
+        <h3>1. Test API Health</h3>
+        <button onclick="testHealth()">Test Health</button>
+        <div id="health-result"></div>
+    </div>
+    
+    <div class="test-section info">
+        <h3>2. Test Authentication - Different idDb Values</h3>
+        <button onclick="testIdDb(0)">Test idDb: 0</button>
+        <button onclick="testIdDb(1)">Test idDb: 1</button>
+        <button onclick="testIdDb(2)">Test idDb: 2</button>
+        <button onclick="testAllIdDb()">Test All</button>
+        <div id="auth-result"></div>
+    </div>
+    
+    <div class="test-section info">
+        <h3>3. Test After SQL Fix</h3>
+        <p>Después de ejecutar el script SQL, prueba aquí:</p>
+        <button onclick="testAfterFix()">Test After Fix</button>
+        <div id="fix-result"></div>
+    </div>
+
+    <script>
+        const API_BASE = 'https://gestribapi-dncrgfhrebbzgwdk.canadacentral-01.azurewebsites.net';
+        
+        async function testHealth() {
+            const resultDiv = document.getElementById('health-result');
+            resultDiv.innerHTML = '<p>Testing API health...</p>';
+            
+            try {
+                const response = await fetch(`${API_BASE}/Log/test`);
+                const data = await response.text();
+                
+                if (response.ok) {
+                    resultDiv.innerHTML = `<div class="success"><p>✅ API Health: OK</p><pre>${data}</pre></div>`;
+                } else {
+                    resultDiv.innerHTML = `<div class="error"><p>❌ API Health: FAILED (${response.status})</p></div>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="error"><p>❌ API Health: ERROR</p><pre>${error.message}</pre></div>`;
+            }
+        }
+        
+        async function testIdDb(idDb) {
+            const resultDiv = document.getElementById('auth-result');
+            resultDiv.innerHTML += `<p>Testing idDb: ${idDb}...</p>`;
+            
+            try {
+                const response = await fetch(`${API_BASE}/Usuarios/authenticate`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        idDb: idDb,
+                        Email: 'admin@gestrib.com',
+                        Password: '123456',
+                        language: 'es',
+                        rememberAccount: false
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    resultDiv.innerHTML += `<div class="success"><p>✅ idDb ${idDb}: SUCCESS</p><pre>${JSON.stringify(data, null, 2)}</pre></div>`;
+                } else {
+                    resultDiv.innerHTML += `<div class="error"><p>❌ idDb ${idDb}: FAILED (${response.status})</p><pre>${JSON.stringify(data, null, 2)}</pre></div>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML += `<div class="error"><p>❌ idDb ${idDb}: ERROR</p><pre>${error.message}</pre></div>`;
+            }
+        }
+        
+        function testAllIdDb() {
+            document.getElementById('auth-result').innerHTML = '';
+            testIdDb(0);
+            setTimeout(() => testIdDb(1), 1000);
+            setTimeout(() => testIdDb(2), 2000);
+        }
+        
+        async function testAfterFix() {
+            const resultDiv = document.getElementById('fix-result');
+            resultDiv.innerHTML = '<p>Testing after SQL fix...</p>';
+            
+            try {
+                const response = await fetch(`${API_BASE}/Usuarios/authenticate`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        idDb: 0,
+                        Email: 'admin@gestrib.com',
+                        Password: '123456',
+                        language: 'es',
+                        rememberAccount: false
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    resultDiv.innerHTML = `<div class="success"><p>✅ FIXED! Authentication successful</p><pre>${JSON.stringify(data, null, 2)}</pre></div>`;
+                } else {
+                    resultDiv.innerHTML = `<div class="error"><p>❌ Still failing: ${response.status}</p><pre>${JSON.stringify(data, null, 2)}</pre></div>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="error"><p>❌ Error: ${error.message}</p></div>`;
+            }
+        }
+    </script>
+</body>
+</html>
