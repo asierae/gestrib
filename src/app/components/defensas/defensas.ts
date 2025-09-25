@@ -172,42 +172,41 @@ export class DefensasComponent implements OnInit, OnDestroy {
       this.filteredEstudiantes = filtered;
     });
     
-    // Configurar autocomplete para profesores
+    // Configurar autocomplete para director
     this.defensaForm.get('directorTribunal')?.valueChanges.pipe(
       startWith(''),
       map(value => this.filterProfesores(value))
     ).subscribe(filtered => {
-      this.filteredProfesores = filtered;
+      this.filteredDirectores = filtered;
     });
     
+    // Configurar autocomplete para codirector
+    this.defensaForm.get('codirectorTribunal')?.valueChanges.pipe(
+      startWith(''),
+      map(value => this.filterProfesores(value))
+    ).subscribe(filtered => {
+      this.filteredCodirectores = filtered;
+    });
+    
+    // Configurar autocomplete para vocal
     this.defensaForm.get('vocalTribunal')?.valueChanges.pipe(
       startWith(''),
       map(value => this.filterProfesores(value))
     ).subscribe(filtered => {
-      this.filteredProfesores = filtered;
+      this.filteredVocales = filtered;
     });
     
+    // Configurar autocomplete para suplente
     this.defensaForm.get('suplente')?.valueChanges.pipe(
       startWith(''),
       map(value => this.filterProfesores(value))
     ).subscribe(filtered => {
-      this.filteredProfesores = filtered;
-    });
-
-    // Forzar que cada apertura de autocomplete muestre todo (sin filtro previo)
-    ['estudiante','directorTribunal','vocalTribunal','suplente'].forEach(ctrlName => {
-      const ctrl = this.defensaForm.get(ctrlName);
-      ctrl?.valueChanges.pipe(startWith('')).subscribe(val => {
-        if (val === '' || val === null) {
-          if (ctrlName === 'estudiante') this.filteredEstudiantes = this.estudiantes;
-          else this.filteredProfesores = this.profesores;
-        }
-      });
+      this.filteredSuplentes = filtered;
     });
   }
   
-  private filterEstudiantes(value: string): EstudianteDisplay[] {
-    if (!value) {
+  private filterEstudiantes(value: any): EstudianteDisplay[] {
+    if (!value || typeof value !== 'string') {
       return this.estudiantes;
     }
     const filterValue = value.toLowerCase();
@@ -217,8 +216,8 @@ export class DefensasComponent implements OnInit, OnDestroy {
     });
   }
   
-  private filterProfesores(value: string): Profesor[] {
-    if (!value) {
+  private filterProfesores(value: any): Profesor[] {
+    if (!value || typeof value !== 'string') {
       return this.profesores;
     }
     const filterValue = value.toLowerCase();
@@ -245,15 +244,14 @@ export class DefensasComponent implements OnInit, OnDestroy {
     
     // Configurar especialidades iniciales para GII
     this.mostrarEspecialidades = true;
-    this.especialidadesVocal = ESPECIALIDAD_OPTIONS[TipoEspecialidad.INGENIERIA_COMPUTACION] || [];
-    this.especialidadesSuplente = ESPECIALIDAD_OPTIONS[TipoEspecialidad.INGENIERIA_COMPUTACION] || [];
+    this.updateAreasConocimiento();
   }
   
   loadEstudiantes(): void {
     this.excelService.loadEstudiantes().subscribe({
       next: (estudiantes) => {
         this.estudiantes = estudiantes;
-        this.filteredEstudiantes = [...estudiantes]; // Crear nueva referencia
+        this.filteredEstudiantes = [...estudiantes];
         this.cdr.detectChanges();
       },
       error: (error) => {
@@ -309,7 +307,7 @@ export class DefensasComponent implements OnInit, OnDestroy {
         mediaExpediente: 7.8
       } as EstudianteDisplay
     ];
-    this.filteredEstudiantes = [...this.estudiantes]; // Crear nueva referencia
+    this.filteredEstudiantes = [...this.estudiantes];
     this.cdr.detectChanges();
   }
   
@@ -317,7 +315,10 @@ export class DefensasComponent implements OnInit, OnDestroy {
     this.profesoresService.getProfesores().subscribe({
       next: (profesores) => {
         this.profesores = profesores;
-        this.filteredProfesores = profesores;
+        this.filteredDirectores = [...profesores];
+        this.filteredCodirectores = [...profesores];
+        this.filteredVocales = [...profesores];
+        this.filteredSuplentes = [...profesores];
       },
       error: (error) => {
         console.error('Error loading profesores:', error);
@@ -338,21 +339,16 @@ export class DefensasComponent implements OnInit, OnDestroy {
     this.mostrarEspecialidades = grado === TipoGrado.INGENIERIA_INFORMATICA;
     
     if (grado === TipoGrado.INTELIGENCIA_ARTIFICIAL) {
-      // Para IA: usar áreas de conocimiento fijas y quitar validador required
-      this.especialidadesVocal = this.areasConocimientoIA;
-      this.especialidadesSuplente = this.areasConocimientoIA;
-      this.selectedVocalEspecialidades = [];
-      this.selectedSuplenteEspecialidades = [];
-      
-      // Quitar validador required para especialidad
+      // Para IA: quitar validador required para especialidad
       especialidadControl?.clearValidators();
       especialidadControl?.updateValueAndValidity();
       
       this.defensaForm.patchValue({
-        especialidad: null,
-        especialidadesVocal: [],
-        especialidadesSuplente: []
+        especialidad: null
       });
+      
+      // Actualizar áreas de conocimiento para IA
+      this.updateAreasConocimiento();
     } else if (grado === TipoGrado.INGENIERIA_INFORMATICA) {
       // Para Informática: agregar validador required y establecer especialidad por defecto
       especialidadControl?.setValidators([Validators.required]);
@@ -361,45 +357,40 @@ export class DefensasComponent implements OnInit, OnDestroy {
       this.defensaForm.patchValue({
         especialidad: TipoEspecialidad.INGENIERIA_COMPUTACION
       });
-      this.onEspecialidadChange();
+      
+      // Actualizar áreas de conocimiento para GII
+      this.updateAreasConocimiento();
     }
   }
 
   onEspecialidadChange(): void {
-    const especialidad = this.defensaForm.get('especialidad')?.value as TipoEspecialidad;
-    this.especialidadesVocal = ESPECIALIDAD_OPTIONS[especialidad] || [];
-    this.especialidadesSuplente = ESPECIALIDAD_OPTIONS[especialidad] || [];
-    this.selectedVocalEspecialidades = [];
-    this.selectedSuplenteEspecialidades = [];
-    this.defensaForm.patchValue({
-      especialidadesVocal: [],
-      especialidadesSuplente: []
-    });
+    // Actualizar las áreas de conocimiento según la especialidad elegida
+    this.updateAreasConocimiento();
   }
   
   onEstudianteFieldClick(): void {
-    // Limpiar el filtro para mostrar todos los estudiantes
-    this.filteredEstudiantes = [...this.estudiantes]; // Crear nueva referencia
+    // Inicializar la lista filtrada con todos los estudiantes
+    this.filteredEstudiantes = [...this.estudiantes];
     this.cdr.detectChanges();
   }
   
   onDirectorFieldClick(): void {
-    // Limpiar el filtro para mostrar todos los profesores
+    // Inicializar la lista filtrada con todos los profesores
     this.filteredDirectores = [...this.profesores];
   }
   
   onCodirectorFieldClick(): void {
-    // Limpiar el filtro para mostrar todos los profesores
+    // Inicializar la lista filtrada con todos los profesores
     this.filteredCodirectores = [...this.profesores];
   }
   
   onVocalFieldClick(): void {
-    // Limpiar el filtro para mostrar todos los profesores
+    // Inicializar la lista filtrada con todos los profesores
     this.filteredVocales = [...this.profesores];
   }
   
   onSuplenteFieldClick(): void {
-    // Limpiar el filtro para mostrar todos los profesores
+    // Inicializar la lista filtrada con todos los profesores
     this.filteredSuplentes = [...this.profesores];
   }
   
@@ -426,27 +417,36 @@ export class DefensasComponent implements OnInit, OnDestroy {
   }
   
   onVocalChange(): void {
-    const vocalNombre = this.defensaForm.get('vocalTribunal')?.value;
-    const vocal = this.profesores.find(p => `${p.nombre} ${p.apellidos}` === vocalNombre);
-    if (vocal) {
-      this.especialidadesVocal = ESPECIALIDAD_OPTIONS[vocal.tipoEspecialidad] || [];
-      this.selectedVocalEspecialidades = [];
-      this.defensaForm.patchValue({
-        especialidadesVocal: []
-      });
-    }
+    // Las áreas de conocimiento del vocal se determinan por el grado y especialidad, no por el profesor
+    this.updateAreasConocimiento();
   }
   
   onSuplenteChange(): void {
-    const suplenteNombre = this.defensaForm.get('suplente')?.value;
-    const suplente = this.profesores.find(p => `${p.nombre} ${p.apellidos}` === suplenteNombre);
-    if (suplente) {
-      this.especialidadesSuplente = ESPECIALIDAD_OPTIONS[suplente.tipoEspecialidad] || [];
-      this.selectedSuplenteEspecialidades = [];
-      this.defensaForm.patchValue({
-        especialidadesSuplente: []
-      });
+    // Las áreas de conocimiento del suplente se determinan por el grado y especialidad, no por el profesor
+    this.updateAreasConocimiento();
+  }
+  
+  private updateAreasConocimiento(): void {
+    const grado = this.defensaForm.get('grado')?.value as TipoGrado;
+    const especialidad = this.defensaForm.get('especialidad')?.value as TipoEspecialidad;
+    
+    if (grado === TipoGrado.INTELIGENCIA_ARTIFICIAL) {
+      // Para IA: siempre las mismas áreas de conocimiento
+      this.especialidadesVocal = this.areasConocimientoIA;
+      this.especialidadesSuplente = this.areasConocimientoIA;
+    } else if (grado === TipoGrado.INGENIERIA_INFORMATICA && especialidad) {
+      // Para GII: áreas según la especialidad elegida
+      this.especialidadesVocal = ESPECIALIDAD_OPTIONS[especialidad] || [];
+      this.especialidadesSuplente = ESPECIALIDAD_OPTIONS[especialidad] || [];
     }
+    
+    // Limpiar selecciones previas
+    this.selectedVocalEspecialidades = [];
+    this.selectedSuplenteEspecialidades = [];
+    this.defensaForm.patchValue({
+      especialidadesVocal: [],
+      especialidadesSuplente: []
+    });
   }
   
   onVocalEspecialidadChange(event: any): void {
@@ -587,17 +587,16 @@ export class DefensasComponent implements OnInit, OnDestroy {
     this.selectedVocalEspecialidades = [];
     this.selectedSuplenteEspecialidades = [];
     
-    // Limpiar listas filtradas
-    this.filteredEstudiantes = [];
-    this.filteredDirectores = [];
-    this.filteredCodirectores = [];
-    this.filteredVocales = [];
-    this.filteredSuplentes = [];
+    // Inicializar listas filtradas con todos los datos
+    this.filteredEstudiantes = [...this.estudiantes];
+    this.filteredDirectores = [...this.profesores];
+    this.filteredCodirectores = [...this.profesores];
+    this.filteredVocales = [...this.profesores];
+    this.filteredSuplentes = [...this.profesores];
     
     // Restaurar configuración inicial para GII
     this.mostrarEspecialidades = true;
-    this.especialidadesVocal = ESPECIALIDAD_OPTIONS[TipoEspecialidad.INGENIERIA_COMPUTACION] || [];
-    this.especialidadesSuplente = ESPECIALIDAD_OPTIONS[TipoEspecialidad.INGENIERIA_COMPUTACION] || [];
+    this.updateAreasConocimiento();
   }
   
   async exportToPDF(): Promise<void> {

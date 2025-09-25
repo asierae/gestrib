@@ -237,22 +237,24 @@
   .breadcrumb-link {
     display: inline-flex;
     align-items: center;
-    padding: 0.375rem 0.75rem;
+    padding: 0.5rem 1rem;
     background-color: var(--chip-bg);
     color: var(--chip-text);
     text-decoration: none;
     font-size: 0.8rem;
     font-weight: 500;
-    border-radius: 20px;
+    border-radius: 8px;
     transition: var(--transition);
     border: 1px solid transparent;
     white-space: nowrap;
+    min-height: 32px;
 
     &:hover {
       background-color: var(--chip-hover);
       color: var(--chip-text);
       transform: translateY(-1px);
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+      border-color: rgba(25, 118, 210, 0.2);
     }
 
     &:active {
@@ -263,14 +265,16 @@
   .breadcrumb-current {
     display: inline-flex;
     align-items: center;
-    padding: 0.375rem 0.75rem;
+    padding: 0.5rem 1rem;
     background-color: var(--chip-active);
     color: var(--chip-text-hover);
     font-size: 0.8rem;
     font-weight: 600;
-    border-radius: 20px;
+    border-radius: 8px;
     white-space: nowrap;
-    box-shadow: 0 2px 4px rgba(25, 118, 210, 0.3);
+    box-shadow: 0 2px 8px rgba(25, 118, 210, 0.3);
+    min-height: 32px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
   }
 
   .breadcrumb-separator {

@@ -1,4 +1,4 @@
-import { Component, signal, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, signal, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatTabsModule } from '@angular/material/tabs';
@@ -24,27 +24,13 @@ import * as XLSX from 'xlsx';
   styleUrl: './administration.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class AdministrationComponent implements OnInit {
+export class AdministrationComponent {
   currentYear = new Date().getFullYear();
   nextYear = this.currentYear + 1;
 
   alumnosFile?: File;
   profesoresFile?: File;
 
-  // Alumnos table data
-  alumnos: any[] = [];
-  filteredAlumnos: any[] = [];
-  displayedColumns: string[] = ['dni', 'nombre', 'apellidos', 'titulacion', 'asignatura', 'creditos', 'media', 'tipoGrado'];
-  isLoadingAlumnos = signal(false);
-  alumnosError?: string;
-  
-  // Search
-  searchTerm = '';
-  
-  // Pagination
-  pageSize = 10;
-  pageIndex = 0;
-  totalAlumnos = 0;
 
   isSyncingAlumnos = signal(false);
   isSyncingProfesores = signal(false);
@@ -56,90 +42,6 @@ export class AdministrationComponent implements OnInit {
     private alumnosService: AlumnosService
   ) {}
 
-  ngOnInit(): void {
-    this.loadAlumnos();
-  }
-
-  loadAlumnos(): void {
-    this.isLoadingAlumnos.set(true);
-    this.alumnosError = undefined;
-
-    this.alumnosService.getAllAlumnos().subscribe({
-      next: (data) => {
-        if (Array.isArray(data)) {
-          this.alumnos = data;
-          this.totalAlumnos = data.length;
-          this.filteredAlumnos = [...data];
-        } else {
-          this.alumnos = [];
-          this.filteredAlumnos = [];
-          this.totalAlumnos = 0;
-        }
-        this.isLoadingAlumnos.set(false);
-      },
-      error: (error) => {
-        console.error('Error cargando alumnos:', error);
-        this.alumnosError = 'Error al cargar los alumnos. Inténtelo de nuevo.';
-        this.isLoadingAlumnos.set(false);
-        this.snackBar.open('❌ Error al cargar los alumnos', 'Cerrar', { 
-          duration: 4000,
-          panelClass: ['error-snackbar']
-        });
-      }
-    });
-  }
-
-  onPageChange(event: PageEvent): void {
-    this.pageIndex = event.pageIndex;
-    this.pageSize = event.pageSize;
-  }
-
-  get paginatedAlumnos(): any[] {
-    const startIndex = this.pageIndex * this.pageSize;
-    const endIndex = startIndex + this.pageSize;
-    return this.filteredAlumnos.slice(startIndex, endIndex);
-  }
-
-  trackByAlumnoId(index: number, alumno: any): any {
-    return alumno.id || index;
-  }
-
-  onSearchChange(): void {
-    this.filterAlumnos();
-    this.pageIndex = 0; // Reset to first page when searching
-  }
-
-  clearSearch(): void {
-    this.searchTerm = '';
-    this.filterAlumnos();
-    this.pageIndex = 0;
-  }
-
-  private filterAlumnos(): void {
-    if (!this.searchTerm.trim()) {
-      this.filteredAlumnos = [...this.alumnos];
-    } else {
-      const searchLower = this.searchTerm.toLowerCase().trim();
-      this.filteredAlumnos = this.alumnos.filter(alumno => 
-        this.matchesSearch(alumno, searchLower)
-      );
-    }
-  }
-
-  private matchesSearch(alumno: any, searchTerm: string): boolean {
-    const searchableFields = [
-      alumno.dni,
-      alumno.nombre,
-      alumno.apellidos,
-      alumno.titulacion,
-      alumno.asignatura,
-      alumno.tipoGradoNombre
-    ];
-
-    return searchableFields.some(field => 
-      field && field.toString().toLowerCase().includes(searchTerm)
-    );
-  }
 
 
   onAlumnosFileChange(event: Event): void {
@@ -260,9 +162,6 @@ export class AdministrationComponent implements OnInit {
         // Resetear el input file
         const fileInput = document.getElementById('alumnos-file-input') as HTMLInputElement;
         if (fileInput) fileInput.value = '';
-        
-        // Recargar la lista de alumnos
-        this.loadAlumnos();
       } else {
         this.snackBar.open('❌ Error en la sincronización: No se recibió respuesta del servidor', 'Cerrar', { 
           duration: 4000,

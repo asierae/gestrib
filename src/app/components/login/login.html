@@ -18,115 +18,61 @@
         <p class="login-subtitle">{{ 'login.welcome' | translate }}</p>
       </div>
 
-      <!-- Tabs -->
-      <div class="login-tabs">
-        <button 
-          class="tab-button" 
-          [class.active]="activeTab() === 'profesorado'"
-          (click)="setActiveTab('profesorado')">
-          <span class="material-icons">school</span>
-          {{ 'login.profesorado' | translate }}
-        </button>
-        <button 
-          class="tab-button" 
-          [class.active]="activeTab() === 'administracion'"
-          (click)="setActiveTab('administracion')">
-          <span class="material-icons">admin_panel_settings</span>
-          {{ 'login.administracion' | translate }}
-        </button>
-      </div>
-
       <!-- Error Message -->
       <div class="error-message" *ngIf="errorMessage()">
         <span class="material-icons">error</span>
         {{ errorMessage() }}
       </div>
 
-      <!-- Tab Content -->
-      <div class="tab-content">
-        <!-- Profesorado Tab -->
-        <div *ngIf="activeTab() === 'profesorado'" class="tab-panel">
-          <p class="tab-description">{{ 'login.profesoradoDesc' | translate }}</p>
-          
-          <form [formGroup]="profesoradoForm" (ngSubmit)="onProfesoradoSubmit()">
-            <div class="form-control">
-              <label class="form-label" for="profesorado-email">
-                <span class="material-icons">email</span>
-                {{ 'login.profesoradoEmail' | translate }}
-              </label>
-              <input 
-                id="profesorado-email" 
-                type="email" 
-                formControlName="email" 
-                placeholder="{{ 'login.profesoradoEmail' | translate }}" />
-              <div class="form-error" *ngIf="getProfesoradoFieldError('email')">
-                <span class="material-icons">error</span>
-                {{ getProfesoradoFieldError('email') | translate }}
-              </div>
-            </div>
-
-            <button class="login-btn" type="submit" [disabled]="isLoading()">
-              <span class="material-icons" *ngIf="!isLoading()">login</span>
-              <span *ngIf="isLoading()">{{ 'common.loading' | translate }}</span>
-              <span *ngIf="!isLoading()">{{ 'login.loginButton' | translate }}</span>
-            </button>
-          </form>
+      <!-- Login Form -->
+      <form [formGroup]="loginForm" (ngSubmit)="onLoginSubmit()">
+        <div class="form-control">
+          <label class="form-label" for="email">
+            <span class="material-icons">email</span>
+            {{ 'login.email' | translate }}
+          </label>
+          <input 
+            id="email" 
+            type="email" 
+            formControlName="email" 
+            placeholder="{{ 'login.email' | translate }}" />
+          <div class="form-error" *ngIf="getFieldError('email')">
+            <span class="material-icons">error</span>
+            {{ getFieldError('email') | translate }}
+          </div>
         </div>
 
-        <!-- Administración Tab -->
-        <div *ngIf="activeTab() === 'administracion'" class="tab-panel">
-          <p class="tab-description">{{ 'login.administracionDesc' | translate }}</p>
-          
-          <form [formGroup]="administracionForm" (ngSubmit)="onAdministracionSubmit()">
-            <div class="form-control">
-              <label class="form-label" for="admin-email">
-                <span class="material-icons">email</span>
-                {{ 'login.administracionEmail' | translate }}
-              </label>
-              <input 
-                id="admin-email" 
-                type="email" 
-                formControlName="email" 
-                placeholder="{{ 'login.administracionEmail' | translate }}" />
-              <div class="form-error" *ngIf="getAdministracionFieldError('email')">
-                <span class="material-icons">error</span>
-                {{ getAdministracionFieldError('email') | translate }}
-              </div>
-            </div>
-
-            <div class="form-control">
-              <label class="form-label" for="admin-password">
-                <span class="material-icons">lock</span>
-                {{ 'login.administracionPassword' | translate }}
-              </label>
-              <input 
-                id="admin-password" 
-                type="password" 
-                formControlName="password" 
-                placeholder="{{ 'login.administracionPassword' | translate }}" />
-              <div class="form-error" *ngIf="getAdministracionFieldError('password')">
-                <span class="material-icons">error</span>
-                {{ getAdministracionFieldError('password') | translate }}
-              </div>
-            </div>
-
-            <label class="remember">
-              <input type="checkbox" formControlName="rememberMe" />
-              <span>{{ 'login.rememberMe' | translate }}</span>
-            </label>
-
-            <button class="login-btn" type="submit" [disabled]="isLoading()">
-              <span class="material-icons" *ngIf="!isLoading()">login</span>
-              <span *ngIf="isLoading()">{{ 'common.loading' | translate }}</span>
-              <span *ngIf="!isLoading()">{{ 'login.loginButton' | translate }}</span>
-            </button>
-
-            <div class="login-help">
-              <a href="#">{{ 'login.forgotPassword' | translate }}</a>
-            </div>
-          </form>
+        <div class="form-control">
+          <label class="form-label" for="password">
+            <span class="material-icons">lock</span>
+            {{ 'login.password' | translate }}
+          </label>
+          <input 
+            id="password" 
+            type="password" 
+            formControlName="password" 
+            placeholder="{{ 'login.password' | translate }}" />
+          <div class="form-error" *ngIf="getFieldError('password')">
+            <span class="material-icons">error</span>
+            {{ getFieldError('password') | translate }}
+          </div>
         </div>
-      </div>
+
+        <label class="remember">
+          <input type="checkbox" formControlName="rememberMe" />
+          <span>{{ 'login.rememberMe' | translate }}</span>
+        </label>
+
+        <button class="login-btn" type="submit" [disabled]="isLoading()">
+          <span class="material-icons" *ngIf="!isLoading()">login</span>
+          <span *ngIf="isLoading()">{{ 'common.loading' | translate }}</span>
+          <span *ngIf="!isLoading()">{{ 'login.loginButton' | translate }}</span>
+        </button>
+
+        <div class="login-help">
+          <a href="#">{{ 'login.forgotPassword' | translate }}</a>
+        </div>
+      </form>
 
     </div>
   </div>

@@ -20,24 +20,15 @@ export class LoginComponent {
   private router = inject(Router);
   private fb = inject(FormBuilder);
 
-  // Tab management
-  activeTab = signal('profesorado');
-  
-  // Forms
-  profesoradoForm: FormGroup;
-  administracionForm: FormGroup;
+  // Form
+  loginForm: FormGroup;
   
   isLoading = signal(false);
   errorMessage = signal('');
 
   constructor() {
-    // Profesorado form (only email)
-    this.profesoradoForm = this.fb.group({
-      email: ['', [Validators.required, Validators.email]]
-    });
-
-    // Administración form (email and password)
-    this.administracionForm = this.fb.group({
+    // Login form (email and password)
+    this.loginForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(6)]],
       rememberMe: [false]
@@ -47,47 +38,15 @@ export class LoginComponent {
     this.translationService.setLanguage(this.translationService.getCurrentLanguage());
   }
 
-  setActiveTab(tab: string): void {
-    this.activeTab.set(tab);
-    this.errorMessage.set('');
-  }
-
-  onProfesoradoSubmit(): void {
-    if (this.profesoradoForm.valid) {
-      this.isLoading.set(true);
-      this.errorMessage.set('');
-
-      this.authService.loginProfesorado(this.profesoradoForm.value.email).subscribe({
-        next: (response) => {
-          this.isLoading.set(false);
-          // Update user language if needed
-          if (response.idIdioma) {
-            // Convert number to Language enum
-            const language = response.idIdioma === 1 ? 'es' : response.idIdioma === 2 ? 'en' : 'eu';
-            this.translationService.setLanguage(language as any);
-          }
-          this.router.navigate(['/dashboard']);
-        },
-        error: (error) => {
-          this.isLoading.set(false);
-          this.errorMessage.set(error.message || 'Error en el login');
-          console.error('Login error:', error);
-        }
-      });
-    } else {
-      this.markFormGroupTouched(this.profesoradoForm);
-    }
-  }
-
-  onAdministracionSubmit(): void {
-    if (this.administracionForm.valid) {
+  onLoginSubmit(): void {
+    if (this.loginForm.valid) {
       this.isLoading.set(true);
       this.errorMessage.set('');
 
       this.authService.loginAdministracion(
-        this.administracionForm.value.email,
-        this.administracionForm.value.password,
-        this.administracionForm.value.rememberMe
+        this.loginForm.value.email,
+        this.loginForm.value.password,
+        this.loginForm.value.rememberMe
       ).subscribe({
         next: (response) => {
           this.isLoading.set(false);
@@ -106,7 +65,7 @@ export class LoginComponent {
         }
       });
     } else {
-      this.markFormGroupTouched(this.administracionForm);
+      this.markFormGroupTouched(this.loginForm);
     }
   }
 
@@ -117,21 +76,8 @@ export class LoginComponent {
     });
   }
 
-  getProfesoradoFieldError(fieldName: string): string {
-    const field = this.profesoradoForm.get(fieldName);
-    if (field?.errors && field.touched) {
-      if (field.errors['required']) {
-        return `validation.${fieldName}.required`;
-      }
-      if (field.errors['email']) {
-        return `validation.${fieldName}.email`;
-      }
-    }
-    return '';
-  }
-
-  getAdministracionFieldError(fieldName: string): string {
-    const field = this.administracionForm.get(fieldName);
+  getFieldError(fieldName: string): string {
+    const field = this.loginForm.get(fieldName);
     if (field?.errors && field.touched) {
       if (field.errors['required']) {
         return `validation.${fieldName}.required`;
