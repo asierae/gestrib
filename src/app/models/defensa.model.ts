@@ -3,6 +3,7 @@ export interface Defensa {
   curso: string;
   especialidad: TipoEspecialidad;
   titulo: string;
+  idioma: string;
   estudiante: EstudianteDisplay;
   directorTribunal: Profesor;
   vocalTribunal: Profesor;
@@ -16,11 +17,17 @@ export interface Defensa {
 }
 
 export interface EstudianteDisplay {
+  id?: number;
   nombreCompleto: string;
   nombre: string;
   apellido1: string;
   apellido2: string;
   email?: string;
+  dni?: string;
+  titulacion?: string;
+  asignatura?: string;
+  creditosSup?: number;
+  mediaExpediente?: number;
 }
 
 export interface Profesor {
@@ -68,6 +75,7 @@ export interface CreateDefensaRequest {
   grado: TipoGrado;
   especialidad?: TipoEspecialidad; // Opcional porque solo se usa para GII
   titulo: string;
+  idioma: string;
   estudiante: EstudianteDisplay;
   directorTribunal: Profesor;
   codirectorTribunal?: Profesor; // Opcional

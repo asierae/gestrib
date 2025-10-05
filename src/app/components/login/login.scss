@@ -64,6 +64,25 @@
   }
 }
 
+/* Success Message */
+.success-message {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+  color: #16a34a;
+  padding: 12px 16px;
+  border-radius: 8px;
+  border-left: 4px solid #16a34a;
+  margin-bottom: 20px;
+  font-size: 14px;
+  font-weight: 500;
+  
+  .material-icons {
+    font-size: 20px;
+  }
+}
+
 form { display: grid; gap: 16px; }
 .form-control { display: grid; gap: 8px; }
 .form-label { display: flex; align-items: center; gap: 8px; color: #374151; font-weight: 600; font-size: 13px; }
@@ -88,8 +107,24 @@ input[type="email"]:focus, input[type="password"]:focus {
 .login-btn:disabled { opacity: .7; cursor: not-allowed; }
 
 .login-help { text-align: center; margin-top: 8px; }
-.login-help a { color: #2563eb; text-decoration: none; font-weight: 600; }
+.login-help a { 
+  color: #2563eb; 
+  text-decoration: none; 
+  font-weight: 600; 
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease-in-out;
+}
 .login-help a:hover { text-decoration: underline; }
+.login-help a.loading { 
+  opacity: 0.7; 
+  cursor: not-allowed; 
+  pointer-events: none;
+}
+.login-help a .material-icons {
+  font-size: 18px;
+}
 
 
 button, input, label { transition: all .2s ease-in-out; }

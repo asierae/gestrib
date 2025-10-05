@@ -1,261 +1,195 @@
-import { Component, signal, computed, inject } from '@angular/core';
+import { Component, signal, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
-import { AuthService } from '../../services/auth.service';
-import { AuthMonitorService } from '../../services/auth-monitor.service';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { AuthService, User } from '../../services/auth.service';
 import { TranslationService } from '../../services/translation.service';
 import { TranslatePipe } from '../../pipes/translate.pipe';
 
 @Component({
   selector: 'app-user-profile',
   standalone: true,
-  imports: [CommonModule, TranslatePipe],
-  template: `
-    <div class="user-profile" *ngIf="currentUser()">
-      <div class="profile-header">
-        <img [src]="getAvatar()" [alt]="getFullName()" class="avatar">
-        <div class="user-info">
-          <h3>{{ getFullName() }}</h3>
-          <p class="email">{{ currentUser()?.email }}</p>
-          <p class="role">{{ getRoleName() }}</p>
-        </div>
-      </div>
-      
-      <div class="profile-details">
-        <div class="detail-item">
-          <span class="label">{{ 'profile.phone' | translate }}:</span>
-          <span class="value">{{ currentUser()?.telefono || 'N/A' }}</span>
-        </div>
-        
-        <div class="detail-item" *ngIf="currentUser()?.entidad">
-          <span class="label">{{ 'profile.entity' | translate }}:</span>
-          <span class="value">{{ currentUser()?.entidad }}</span>
-        </div>
-        
-        <div class="detail-item" *ngIf="currentUser()?.puesto">
-          <span class="label">{{ 'profile.position' | translate }}:</span>
-          <span class="value">{{ currentUser()?.puesto }}</span>
-        </div>
-        
-        <div class="detail-item">
-          <span class="label">{{ 'profile.language' | translate }}:</span>
-          <span class="value">{{ getLanguageName() }}</span>
-        </div>
-        
-        <div class="detail-item">
-          <span class="label">{{ 'profile.memberSince' | translate }}:</span>
-          <span class="value">{{ getFormattedDate(currentUser()?.created) }}</span>
-        </div>
-      </div>
-      
-      <div class="profile-actions">
-        <button class="btn btn-primary" (click)="editProfile()">
-          {{ 'profile.editProfile' | translate }}
-        </button>
-        
-        <button class="btn btn-secondary" (click)="changePassword()">
-          {{ 'profile.changePassword' | translate }}
-        </button>
-        
-        <button class="btn btn-danger" (click)="logout()">
-          {{ 'profile.logout' | translate }}
-        </button>
-      </div>
-    </div>
-    
-    <div class="loading" *ngIf="isLoading()">
-      {{ 'common.loading' | translate }}...
-    </div>
-  `,
-  styles: [`
-    .user-profile {
-      max-width: 600px;
-      margin: 0 auto;
-      padding: 20px;
-      background: white;
-      border-radius: 12px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    }
-    
-    .profile-header {
-      display: flex;
-      align-items: center;
-      gap: 20px;
-      margin-bottom: 30px;
-      padding-bottom: 20px;
-      border-bottom: 1px solid #e5e7eb;
-    }
-    
-    .avatar {
-      width: 80px;
-      height: 80px;
-      border-radius: 50%;
-      object-fit: cover;
-      border: 3px solid #3b82f6;
-    }
-    
-    .user-info h3 {
-      margin: 0 0 8px 0;
-      color: #1f2937;
-      font-size: 1.5rem;
-    }
-    
-    .email {
-      margin: 0 0 4px 0;
-      color: #6b7280;
-      font-size: 0.9rem;
-    }
-    
-    .role {
-      margin: 0;
-      color: #3b82f6;
-      font-weight: 600;
-      font-size: 0.9rem;
-    }
-    
-    .profile-details {
-      margin-bottom: 30px;
-    }
-    
-    .detail-item {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 12px 0;
-      border-bottom: 1px solid #f3f4f6;
-    }
-    
-    .detail-item:last-child {
-      border-bottom: none;
-    }
-    
-    .label {
-      font-weight: 600;
-      color: #374151;
-    }
-    
-    .value {
-      color: #6b7280;
-    }
-    
-    .profile-actions {
-      display: flex;
-      gap: 12px;
-      flex-wrap: wrap;
-    }
-    
-    .btn {
-      padding: 10px 20px;
-      border: none;
-      border-radius: 8px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-    
-    .btn-primary {
-      background: #3b82f6;
-      color: white;
-    }
-    
-    .btn-primary:hover {
-      background: #2563eb;
-    }
-    
-    .btn-secondary {
-      background: #6b7280;
-      color: white;
-    }
-    
-    .btn-secondary:hover {
-      background: #4b5563;
-    }
-    
-    .btn-danger {
-      background: #ef4444;
-      color: white;
-    }
-    
-    .btn-danger:hover {
-      background: #dc2626;
-    }
-    
-    .loading {
-      text-align: center;
-      padding: 40px;
-      color: #6b7280;
-    }
-  `]
+  imports: [CommonModule, ReactiveFormsModule, TranslatePipe],
+  templateUrl: './user-profile.html',
+  styleUrl: './user-profile.scss'
 })
-export class UserProfileComponent {
+export class UserProfileComponent implements OnInit {
   private authService = inject(AuthService);
-  private authMonitorService = inject(AuthMonitorService);
   private translationService = inject(TranslationService);
-  private router = inject(Router);
+  private fb = inject(FormBuilder);
 
-  // Signals del servicio de autenticación
-  currentUser = this.authMonitorService.currentUser;
-  isLoading = this.authMonitorService.isLoading;
+  // Signals
+  currentUser = signal<User | null>(null);
+  isLoading = signal(false);
+  isSaving = signal(false);
+  successMessage = signal('');
+  errorMessage = signal('');
 
-  getFullName(): string {
-    return this.authMonitorService.getFullName();
+  // Forms
+  profileForm: FormGroup;
+  passwordForm: FormGroup;
+
+  constructor() {
+    // Profile form
+    this.profileForm = this.fb.group({
+      nombre: ['', [Validators.required, Validators.minLength(2)]],
+      apellidos: ['', [Validators.required, Validators.minLength(2)]],
+      email: ['', [Validators.required, Validators.email]],
+      telefono: [''],
+      puesto: [''],
+      empresa: [''],
+      descripcion: ['']
+    });
+
+    // Password form
+    this.passwordForm = this.fb.group({
+      currentPassword: ['', [Validators.required]],
+      newPassword: ['', [Validators.required, Validators.minLength(6)]],
+      confirmPassword: ['', [Validators.required]]
+    }, { validators: this.passwordMatchValidator });
   }
 
-  getAvatar(): string {
-    return this.authMonitorService.getAvatar();
+  ngOnInit(): void {
+    this.loadUserProfile();
   }
 
-  getRoleName(): string {
-    const user = this.currentUser();
-    if (!user) return '';
+  /**
+   * Carga los datos del usuario actual
+   */
+  loadUserProfile(): void {
+    this.isLoading.set(true);
+    this.errorMessage.set('');
     
-    const roleMap: { [key: string]: string } = {
-      'Admin': 'Administrador',
-      'User': 'Usuario',
-      'DirProyectos': 'Director de Proyectos',
-      'Desarrollador': 'Desarrollador',
-      'Sistemas': 'Sistemas',
-      'Administracion': 'Administración'
-    };
+    const user = this.authService.currentUser();
+    if (user) {
+      this.currentUser.set(user);
+      this.profileForm.patchValue({
+        nombre: user.nombre || '',
+        apellidos: user.apellidos || '',
+        email: user.email || '',
+        telefono: user.telefono || '',
+        puesto: user.puesto || '',
+        empresa: user.entidad || '',
+        descripcion: user.descripcion || ''
+      });
+    }
     
-    return roleMap[user.role] || user.role;
+    this.isLoading.set(false);
   }
 
-  getLanguageName(): string {
-    const user = this.currentUser();
-    if (!user) return '';
+  /**
+   * Validador personalizado para verificar que las contraseñas coincidan
+   */
+  passwordMatchValidator(form: FormGroup) {
+    const newPassword = form.get('newPassword');
+    const confirmPassword = form.get('confirmPassword');
     
-    const languageMap: { [key: number]: string } = {
-      1: 'Español',
-      2: 'English',
-      3: 'Euskera'
-    };
+    if (newPassword && confirmPassword && newPassword.value !== confirmPassword.value) {
+      confirmPassword.setErrors({ passwordMismatch: true });
+      return { passwordMismatch: true };
+    }
     
-    return languageMap[user.idIdioma] || 'Español';
+    return null;
   }
 
-  getFormattedDate(dateString?: string): string {
-    if (!dateString) return 'N/A';
-    
-    const date = new Date(dateString);
-    return date.toLocaleDateString('es-ES', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
+  /**
+   * Guarda los cambios del perfil
+   */
+  onSaveProfile(): void {
+    if (this.profileForm.valid) {
+      this.isSaving.set(true);
+      this.errorMessage.set('');
+      this.successMessage.set('');
+
+      const profileData = this.profileForm.value;
+      
+      this.authService.updateProfile(profileData).subscribe({
+        next: (response) => {
+          this.isSaving.set(false);
+          this.successMessage.set('Perfil actualizado correctamente');
+          this.loadUserProfile(); // Recargar datos
+        },
+        error: (error) => {
+          this.isSaving.set(false);
+          this.errorMessage.set(error.message || 'Error al actualizar el perfil');
+        }
+      });
+    } else {
+      this.markFormGroupTouched(this.profileForm);
+    }
+  }
+
+  /**
+   * Cambia la contraseña del usuario
+   */
+  onChangePassword(): void {
+    if (this.passwordForm.valid) {
+      this.isSaving.set(true);
+      this.errorMessage.set('');
+      this.successMessage.set('');
+
+      const passwordData = this.passwordForm.value;
+      
+      this.authService.changePassword(passwordData.currentPassword, passwordData.newPassword).subscribe({
+        next: (response) => {
+          this.isSaving.set(false);
+          this.successMessage.set('Contraseña cambiada correctamente');
+          this.passwordForm.reset();
+        },
+        error: (error) => {
+          this.isSaving.set(false);
+          this.errorMessage.set(error.message || 'Error al cambiar la contraseña');
+        }
+      });
+    } else {
+      this.markFormGroupTouched(this.passwordForm);
+    }
+  }
+
+  /**
+   * Marca todos los campos del formulario como tocados
+   */
+  private markFormGroupTouched(form: FormGroup): void {
+    Object.keys(form.controls).forEach(key => {
+      const control = form.get(key);
+      control?.markAsTouched();
     });
   }
 
-  editProfile(): void {
-    // Implementar edición de perfil
-    console.log('Edit profile clicked');
+  /**
+   * Obtiene el error de un campo específico
+   */
+  getFieldError(form: FormGroup, fieldName: string): string {
+    const field = form.get(fieldName);
+    if (field?.errors && field.touched) {
+      if (field.errors['required']) {
+        return `validation.${fieldName}.required`;
+      }
+      if (field.errors['email']) {
+        return `validation.${fieldName}.email`;
+      }
+      if (field.errors['minlength']) {
+        return `validation.${fieldName}.minlength`;
+      }
+      if (field.errors['passwordMismatch']) {
+        return 'validation.password.mismatch';
+      }
+    }
+    return '';
   }
 
-  changePassword(): void {
-    // Implementar cambio de contraseña
-    console.log('Change password clicked');
+  /**
+   * Limpia los mensajes
+   */
+  clearMessages(): void {
+    this.errorMessage.set('');
+    this.successMessage.set('');
   }
 
-  logout(): void {
-    this.authMonitorService.logout();
+  /**
+   * Obtiene la URL del avatar del usuario
+   */
+  getAvatarUrl(): string {
+    const user = this.currentUser();
+    return user?.urlAvatar || 'https://www.w3schools.com/howto/img_avatar.png';
   }
 }

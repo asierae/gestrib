@@ -72,7 +72,18 @@
     },
     "password": {
       "required": "Pasahitza beharrezkoa da",
-      "minlength": "Pasahitzak gutxienez 6 karaktere izan behar ditu"
+      "minlength": "Pasahitzak gutxienez 6 karaktere izan behar ditu",
+      "mismatch": "Pasahitzak ez datoz bat"
+    },
+    "currentPassword": {
+      "required": "Uneko pasahitza beharrezkoa da"
+    },
+    "newPassword": {
+      "required": "Pasahitz berria beharrezkoa da",
+      "minlength": "Pasahitz berriak gutxienez 6 karaktere izan behar ditu"
+    },
+    "confirmPassword": {
+      "required": "Pasahitzaren berrespena beharrezkoa da"
     },
     "required": "Eremu hau beharrezkoa da",
     "minlength": "Gutxienez {0} karaktere izan behar ditu",
@@ -97,6 +108,7 @@
     "supplementSpecialties": "Ordezkoaren Espezialitateak",
     "directionComments": "Zuzendaritzaren Iruzkinak",
     "workTitle": "Lanaren Izenburua",
+    "language": "Hizkuntza",
     "name": "Izena",
     "description": "Deskribapena",
     "type": "Mota",
@@ -224,5 +236,22 @@
     "faq": "Ohiko Galderak",
     "contact": "Kontaktua",
     "support": "Laguntza Teknikoa"
+  },
+  "profile": {
+    "title": "Erabiltzaile Profila",
+    "firstName": "Izena",
+    "lastName": "Abizenak",
+    "email": "Helbide elektronikoa",
+    "phone": "Telefonoa",
+    "position": "Postua",
+    "company": "Enpresa",
+    "description": "Deskribapena",
+    "changePassword": "Pasahitza aldatu",
+    "currentPassword": "Uneko pasahitza",
+    "newPassword": "Pasahitz berria",
+    "confirmPassword": "Pasahitza berretsi",
+    "passwordRequirements": "Pasahitzaren baldintzak",
+    "passwordUpdated": "Pasahitza ondo eguneratu da",
+    "profileUpdated": "Profila ondo eguneratu da"
   }
 }

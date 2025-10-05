@@ -71,20 +71,20 @@
 
           <!-- User Menu -->
           <div class="user-menu">
-            <button class="user-button" type="button">
+            <button class="user-button" type="button" (click)="toggleUserMenu()">
               <div class="user-avatar">
                 <span class="material-icons">person</span>
               </div>
               <span class="user-name">{{ currentUser()?.nombre || 'Usuario' }}</span>
-              <span class="material-icons">arrow_drop_down</span>
+              <span class="material-icons" [class.rotated]="isUserMenuOpen()">arrow_drop_down</span>
             </button>
             
-            <div class="user-dropdown">
-              <a href="#" class="dropdown-item">
+            <div class="user-dropdown" [class.show]="isUserMenuOpen()">
+              <a routerLink="/profile" class="dropdown-item" (click)="closeUserMenu()">
                 <span class="material-icons">person</span>
                 <app-user-menu-item translateKey="common.profile"></app-user-menu-item>
               </a>
-              <a href="#" class="dropdown-item">
+              <a href="#" class="dropdown-item" (click)="closeUserMenu()">
                 <span class="material-icons">settings</span>
                 <app-user-menu-item translateKey="common.settings"></app-user-menu-item>
               </a>
@@ -104,7 +104,7 @@
                 </select>
               </div>
               <div class="dropdown-divider"></div>
-              <a href="#" class="dropdown-item logout" (click)="logout()">
+              <a href="#" class="dropdown-item logout" (click)="logout(); closeUserMenu()">
                 <span class="material-icons">logout</span>
                 <app-user-menu-item translateKey="common.logout"></app-user-menu-item>
               </a>

@@ -4,6 +4,8 @@ import { BehaviorSubject, Observable, throwError } from 'rxjs';
 import { map, catchError, tap } from 'rxjs/operators';
 import { Router } from '@angular/router';
 import { API_CONFIG, buildApiUrl } from '../config/api.config';
+import { TranslationService } from './translation.service';
+import { Language } from '../models/user.model';
 
 export interface LoginRequest {
   idDb: number;
@@ -76,6 +78,10 @@ export class AuthService {
   // BehaviorSubjects para compatibilidad con código existente
   private userSubject = new BehaviorSubject<User | null>(null);
   public user$ = this.userSubject.asObservable();
+  
+  // Subject para notificar cuando el usuario esté completamente cargado
+  private userLoadedSubject = new BehaviorSubject<boolean>(false);
+  public userLoaded$ = this.userLoadedSubject.asObservable();
 
   // Computed signals
   public isAuthenticated = computed(() => this._isAuthenticated());
@@ -84,7 +90,8 @@ export class AuthService {
 
   constructor(
     private http: HttpClient,
-    private router: Router
+    private router: Router,
+    private translationService: TranslationService
   ) {
     this.initializeAuth();
   }
@@ -93,11 +100,42 @@ export class AuthService {
     const token = this.getToken();
     const user = this.getStoredUser();
     
+    console.log('Initializing auth:', { hasToken: !!token, hasUser: !!user, userId: user?.id, userLanguage: user?.idIdioma });
+    
     if (token && user) {
       this._isAuthenticated.set(true);
       this._currentUser.set(user);
       this.userSubject.next(user);
+      
+      // Notificar que el usuario está completamente cargado
+      this.userLoadedSubject.next(true);
+      console.log('User loaded completely, language can be configured');
+    } else {
+      // Notificar que no hay usuario cargado
+      this.userLoadedSubject.next(false);
+      console.log('No user loaded');
     }
+  }
+
+  /**
+   * Convierte idIdioma numérico a Language enum
+   */
+  private idIdiomaToLanguage(idIdioma: number): Language {
+    switch (idIdioma) {
+      case 1: return Language.ES;
+      case 2: return Language.EN;
+      case 3: return Language.EU;
+      default: return Language.ES;
+    }
+  }
+
+  /**
+   * Configura el idioma del usuario
+   */
+  private setUserLanguage(idIdioma: number): void {
+    const language = this.idIdiomaToLanguage(idIdioma);
+    console.log(`Setting user language: idIdioma=${idIdioma}, language=${language}`);
+    this.translationService.setLanguage(language);
   }
 
   /**
@@ -192,6 +230,12 @@ export class AuthService {
 
     // Almacenar usuario en localStorage
     this.setStoredUser(user);
+
+    // Notificar que el usuario está completamente cargado
+    this.userLoadedSubject.next(true);
+
+    // Configurar el idioma del usuario
+    this.setUserLanguage(user.idIdioma);
 
     console.log('Login successful:', user);
   }
@@ -378,23 +422,56 @@ export class AuthService {
   /**
    * Actualiza el perfil del usuario
    */
-  updateProfile(profileData: Partial<User>): Observable<any> {
+  updateProfile(profileData: any): Observable<any> {
     const user = this._currentUser();
     if (!user) {
       return throwError(() => new Error('Usuario no autenticado'));
     }
 
-    return this.http.put(buildApiUrl(`/Usuarios/${user.id}`), profileData, {
+    const request = {
+      Id: user.id,
+      idDb: user.idDb,
+      Nombre: profileData.firstName,
+      Apellidos: profileData.lastName,
+      Email: profileData.email,
+      Telefono: profileData.phone,
+      Entidad: profileData.company,
+      Puesto: profileData.position,
+      Descripcion: profileData.description
+    };
+
+    return this.http.post(buildApiUrl('/Usuarios/updateProfile'), request, {
       headers: this.getAuthHeaders()
     }).pipe(
-      tap(updatedUser => {
-        // Actualizar usuario local
-        const newUser = { ...user, ...updatedUser };
-        this._currentUser.set(newUser);
-        this.userSubject.next(newUser);
-        this.setStoredUser(newUser);
+      tap((response) => {
+        // Actualizar el usuario local con los nuevos datos
+        const updatedUser = { ...user, ...request };
+        this._currentUser.set(updatedUser);
+        this.userSubject.next(updatedUser);
+        this.setStoredUser(updatedUser);
+      }),
+      catchError(error => {
+        console.error('Update profile error:', error);
+        return throwError(() => this.handleUpdateProfileError(error));
       })
     );
+  }
+
+  /**
+   * Maneja errores de actualización de perfil
+   */
+  private handleUpdateProfileError(error: any): any {
+    if (error.status === 400) {
+      return { message: 'Datos inválidos', code: 'INVALID_DATA' };
+    } else if (error.status === 401) {
+      return { message: 'Usuario no autenticado', code: 'UNAUTHORIZED' };
+    } else if (error.status === 403) {
+      return { message: 'No tienes permisos para actualizar este perfil', code: 'FORBIDDEN' };
+    } else if (error.status === 0) {
+      return { message: 'Error de conexión con el servidor', code: 'CONNECTION_ERROR' };
+    } else {
+      return { message: error.error?.message || 'Error desconocido', code: 'UNKNOWN_ERROR' };
+    }
   }
 
   /**
@@ -411,8 +488,88 @@ export class AuthService {
           this._currentUser.set(user);
           this.userSubject.next(user);
           this.setStoredUser(user);
+          
+          // Configurar el idioma en el TranslationService
+          this.setUserLanguage(idIdioma);
         }
       })
     );
+  }
+
+
+  /**
+   * Solicita reset de contraseña
+   */
+  resetPassword(email: string): Observable<any> {
+    const request = {
+      idDb: 0, // Siempre usar idDb = 0
+      email: email
+    };
+
+    return this.http.post(buildApiUrl('/Usuario/reset_password'), request, {
+      headers: new HttpHeaders({
+        'Content-Type': 'application/json'
+      })
+    }).pipe(
+      catchError(error => {
+        console.error('Reset password error:', error);
+        return throwError(() => this.handleResetPasswordError(error));
+      })
+    );
+  }
+
+  /**
+   * Maneja errores de reset de contraseña
+   */
+  private handleResetPasswordError(error: any): any {
+    if (error.status === 404) {
+      return { message: 'Usuario no encontrado', code: 'USER_NOT_FOUND' };
+    } else if (error.status === 400) {
+      return { message: 'Error al procesar la solicitud', code: 'BAD_REQUEST' };
+    } else if (error.status === 0) {
+      return { message: 'Error de conexión con el servidor', code: 'CONNECTION_ERROR' };
+    } else {
+      return { message: error.error?.message || 'Error desconocido', code: 'UNKNOWN_ERROR' };
+    }
+  }
+
+  /**
+   * Cambia la contraseña del usuario actual
+   */
+  changePassword(currentPassword: string, newPassword: string): Observable<any> {
+    const user = this._currentUser();
+    if (!user) {
+      return throwError(() => new Error('Usuario no autenticado'));
+    }
+
+    const request = {
+      id: user.id,
+      currentPassword: currentPassword,
+      newPassword: newPassword
+    };
+
+    return this.http.post(buildApiUrl('/Usuario/changePassword'), request, {
+      headers: this.getAuthHeaders()
+    }).pipe(
+      catchError(error => {
+        console.error('Change password error:', error);
+        return throwError(() => this.handleChangePasswordError(error));
+      })
+    );
+  }
+
+  /**
+   * Maneja errores de cambio de contraseña
+   */
+  private handleChangePasswordError(error: any): any {
+    if (error.status === 400) {
+      return { message: 'Contraseña actual incorrecta', code: 'INVALID_CURRENT_PASSWORD' };
+    } else if (error.status === 401) {
+      return { message: 'No autorizado', code: 'UNAUTHORIZED' };
+    } else if (error.status === 0) {
+      return { message: 'Error de conexión con el servidor', code: 'CONNECTION_ERROR' };
+    } else {
+      return { message: error.error?.message || 'Error al cambiar la contraseña', code: 'UNKNOWN_ERROR' };
+    }
   }
 }

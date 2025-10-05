@@ -19,6 +19,7 @@ import { DefensasService } from '../../services/defensas.service';
 import { ExcelService } from '../../services/excel.service';
 import { ProfesoresService } from '../../services/profesores.service';
 import { TranslationService } from '../../services/translation.service';
+import { GoogleTranslateService } from '../../services/google-translate.service';
 import { Defensa, CreateDefensaRequest, TipoEspecialidad, TipoGrado, Profesor, EstudianteDisplay } from '../../models/defensa.model';
 import { ESPECIALIDAD_OPTIONS } from '../../models/profesor.model';
 import { TranslatePipe } from '../../pipes/translate.pipe';
@@ -51,6 +52,7 @@ export class DefensasComponent implements OnInit, OnDestroy {
   private excelService = inject(ExcelService);
   private profesoresService = inject(ProfesoresService);
   private translationService = inject(TranslationService);
+  private googleTranslateService = inject(GoogleTranslateService);
   private snackBar = inject(MatSnackBar);
   private fb = inject(FormBuilder);
   private cdr = inject(ChangeDetectorRef);
@@ -90,6 +92,13 @@ export class DefensasComponent implements OnInit, OnDestroy {
     { value: TipoEspecialidad.INGENIERIA_SOFTWARE, label: 'Ing. Software' },
     { value: TipoEspecialidad.INGENIERIA_COMPUTACION, label: 'Ing. Comp.' },
     { value: TipoEspecialidad.COMPUTACION, label: 'Computación' }
+  ];
+  
+  // Opciones de idiomas
+  idiomas = [
+    { value: 'es', label: 'Español' },
+    { value: 'eu', label: 'Euskera' },
+    { value: 'en', label: 'English' }
   ];
   
   // Áreas de conocimiento fijas para Inteligencia Artificial
@@ -206,11 +215,29 @@ export class DefensasComponent implements OnInit, OnDestroy {
   }
   
   private filterEstudiantes(value: any): EstudianteDisplay[] {
+    // Primero filtrar por grado seleccionado
+    const gradoSeleccionado = this.defensaForm.get('grado')?.value as TipoGrado;
+    let estudiantesFiltradosPorGrado = this.estudiantes;
+    
+    if (gradoSeleccionado) {
+      estudiantesFiltradosPorGrado = this.estudiantes.filter(estudiante => {
+        const titulacion = (estudiante as any)?.titulacion || '';
+        if (gradoSeleccionado === TipoGrado.INGENIERIA_INFORMATICA) {
+          return titulacion.toLowerCase().includes('ingeniería informática') || 
+                 titulacion.toLowerCase().includes('ingenieria informatica');
+        } else if (gradoSeleccionado === TipoGrado.INTELIGENCIA_ARTIFICIAL) {
+          return titulacion.toLowerCase().includes('inteligencia artificial');
+        }
+        return true;
+      });
+    }
+    
+    // Luego filtrar por texto de búsqueda
     if (!value || typeof value !== 'string') {
-      return this.estudiantes;
+      return estudiantesFiltradosPorGrado;
     }
     const filterValue = value.toLowerCase();
-    return this.estudiantes.filter(estudiante => {
+    return estudiantesFiltradosPorGrado.filter(estudiante => {
       const nombreCompleto = estudiante?.nombreCompleto || '';
       return nombreCompleto.toLowerCase().includes(filterValue);
     });
@@ -232,6 +259,7 @@ export class DefensasComponent implements OnInit, OnDestroy {
       grado: [TipoGrado.INGENIERIA_INFORMATICA, Validators.required],
       especialidad: [TipoEspecialidad.INGENIERIA_COMPUTACION], // Sin validador required aquí
       titulo: ['', [Validators.required, Validators.minLength(5)]],
+      idioma: ['es', Validators.required], // Idioma por defecto español
       estudiante: [null, Validators.required], // Cambiar a null para objetos
       directorTribunal: ['', Validators.required],
       codirectorTribunal: [''], // Opcional
@@ -245,6 +273,7 @@ export class DefensasComponent implements OnInit, OnDestroy {
     // Configurar especialidades iniciales para GII
     this.mostrarEspecialidades = true;
     this.updateAreasConocimiento();
+    this.updateEstudiantesFiltrados();
   }
   
   loadEstudiantes(): void {
@@ -344,7 +373,8 @@ export class DefensasComponent implements OnInit, OnDestroy {
       especialidadControl?.updateValueAndValidity();
       
       this.defensaForm.patchValue({
-        especialidad: null
+        especialidad: null,
+        estudiante: null // Limpiar estudiante seleccionado
       });
       
       // Actualizar áreas de conocimiento para IA
@@ -355,12 +385,16 @@ export class DefensasComponent implements OnInit, OnDestroy {
       especialidadControl?.updateValueAndValidity();
       
       this.defensaForm.patchValue({
-        especialidad: TipoEspecialidad.INGENIERIA_COMPUTACION
+        especialidad: TipoEspecialidad.INGENIERIA_COMPUTACION,
+        estudiante: null // Limpiar estudiante seleccionado
       });
       
       // Actualizar áreas de conocimiento para GII
       this.updateAreasConocimiento();
     }
+    
+    // Actualizar la lista de estudiantes filtrados según el grado
+    this.updateEstudiantesFiltrados();
   }
 
   onEspecialidadChange(): void {
@@ -369,8 +403,8 @@ export class DefensasComponent implements OnInit, OnDestroy {
   }
   
   onEstudianteFieldClick(): void {
-    // Inicializar la lista filtrada con todos los estudiantes
-    this.filteredEstudiantes = [...this.estudiantes];
+    // Actualizar la lista filtrada según el grado seleccionado
+    this.updateEstudiantesFiltrados();
     this.cdr.detectChanges();
   }
   
@@ -449,6 +483,15 @@ export class DefensasComponent implements OnInit, OnDestroy {
     });
   }
   
+  private updateEstudiantesFiltrados(): void {
+    // Obtener el valor actual del campo estudiante para mantener el filtro de texto
+    const valorActualEstudiante = this.defensaForm.get('estudiante')?.value;
+    const textoBusqueda = typeof valorActualEstudiante === 'string' ? valorActualEstudiante : '';
+    
+    // Aplicar el filtro completo (grado + texto)
+    this.filteredEstudiantes = this.filterEstudiantes(textoBusqueda);
+  }
+  
   onVocalEspecialidadChange(event: any): void {
     const value = event.source.value;
     if (event.checked) {
@@ -489,6 +532,116 @@ export class DefensasComponent implements OnInit, OnDestroy {
     });
   }
   
+  detectarIdioma(): void {
+    const titulo = this.defensaForm.get('titulo')?.value || '';
+    console.log('Detectando idioma para título:', titulo);
+    
+    if (titulo.trim().length < 3) {
+      console.log('Título muy corto, no detectando idioma');
+      return; // No detectar idioma si el título es muy corto
+    }
+    
+    // Usar Google Translate API para detectar el idioma
+    this.googleTranslateService.detectLanguage(titulo).subscribe({
+      next: (idiomaDetectado) => {
+        console.log('Idioma detectado por Google Translate:', idiomaDetectado);
+        this.actualizarIdioma(idiomaDetectado);
+      },
+      error: (error) => {
+        console.warn('Error detectando idioma con Google Translate:', error);
+        // Fallback a detección por palabras clave
+        const idiomaFallback = this.detectarIdiomaPorPalabras(titulo);
+        this.actualizarIdioma(idiomaFallback);
+      }
+    });
+  }
+  
+  private detectarIdiomaPorPalabras(titulo: string): string {
+    const texto = titulo.toLowerCase();
+    
+    // Palabras clave en inglés
+    const palabrasIngles = [
+      'good', 'morning', 'afternoon', 'evening', 'night', 'hello', 'hi', 'bye', 'thanks', 'thank you',
+      'please', 'yes', 'no', 'the', 'and', 'or', 'but', 'with', 'for', 'from', 'to', 'in', 'on', 'at',
+      'by', 'of', 'is', 'are', 'was', 'were', 'be', 'been', 'being', 'have', 'has', 'had', 'do', 'does',
+      'did', 'will', 'would', 'could', 'should', 'may', 'might', 'can', 'must', 'shall', 'this', 'that',
+      'these', 'those', 'i', 'you', 'he', 'she', 'it', 'we', 'they', 'me', 'him', 'her', 'us', 'them',
+      'my', 'your', 'his', 'her', 'its', 'our', 'their', 'mine', 'yours', 'hers', 'ours', 'theirs',
+      'system', 'application', 'software', 'hardware', 'database', 'network', 'security', 'analysis',
+      'design', 'development', 'implementation', 'testing', 'management', 'algorithm', 'data', 'information',
+      'technology', 'computer', 'programming', 'code', 'function', 'method', 'class', 'object', 'variable',
+      'array', 'string', 'integer', 'boolean', 'interface', 'abstract', 'static', 'public', 'private',
+      'protected', 'final', 'abstract', 'extends', 'implements', 'import', 'package', 'return', 'if', 'else',
+      'while', 'for', 'switch', 'case', 'break', 'continue', 'try', 'catch', 'finally', 'throw', 'throws'
+    ];
+    
+    // Palabras clave en español
+    const palabrasEspanol = [
+      'buenos', 'días', 'tardes', 'noches', 'hola', 'adiós', 'gracias', 'por favor', 'sí', 'no',
+      'el', 'la', 'los', 'las', 'un', 'una', 'unos', 'unas', 'de', 'del', 'en', 'con', 'por', 'para',
+      'desde', 'hasta', 'sobre', 'bajo', 'entre', 'durante', 'antes', 'después', 'ahora', 'entonces',
+      'es', 'son', 'era', 'eran', 'fue', 'fueron', 'será', 'serán', 'he', 'has', 'ha', 'han', 'había',
+      'habías', 'había', 'habíamos', 'habíais', 'habían', 'habré', 'habrás', 'habrá', 'habremos',
+      'habréis', 'habrán', 'este', 'esta', 'estos', 'estas', 'ese', 'esa', 'esos', 'esas', 'aquel',
+      'aquella', 'aquellos', 'aquellas', 'yo', 'tú', 'él', 'ella', 'nosotros', 'nosotras', 'vosotros',
+      'vosotras', 'ellos', 'ellas', 'me', 'te', 'lo', 'la', 'nos', 'os', 'los', 'las', 'mi', 'tu',
+      'su', 'nuestro', 'nuestra', 'vuestro', 'vuestra', 'suyo', 'suya', 'sistema', 'aplicación',
+      'software', 'hardware', 'base', 'datos', 'red', 'seguridad', 'análisis', 'diseño', 'desarrollo',
+      'implementación', 'pruebas', 'gestión', 'algoritmo', 'información', 'tecnología', 'computadora',
+      'programación', 'código', 'función', 'método', 'clase', 'objeto', 'variable', 'arreglo', 'cadena',
+      'entero', 'booleano', 'interfaz', 'abstracto', 'estático', 'público', 'privado', 'protegido',
+      'final', 'extiende', 'implementa', 'importa', 'paquete', 'retorna', 'si', 'sino', 'mientras',
+      'para', 'cambiar', 'caso', 'romper', 'continuar', 'intentar', 'capturar', 'finalmente', 'lanzar'
+    ];
+    
+    // Palabras clave en euskera
+    const palabrasEuskera = [
+      'egun', 'on', 'arratsalde', 'on', 'gau', 'on', 'kaixo', 'agur', 'eskerrik', 'asko', 'mesedez',
+      'bai', 'ez', 'eta', 'edo', 'baina', 'rekin', 'zergatik', 'nola', 'non', 'noiz', 'zein', 'zenbat',
+      'da', 'dira', 'zen', 'ziren', 'izango', 'dira', 'dut', 'duzu', 'du', 'dute', 'dun', 'duzue',
+      'nuen', 'zuen', 'zuen', 'genuen', 'zenuten', 'zuten', 'izango', 'dut', 'duzu', 'du', 'dute',
+      'dun', 'duzue', 'dira', 'hau', 'hori', 'horiek', 'horiek', 'hura', 'hura', 'horiek', 'horiek',
+      'ni', 'zu', 'hura', 'hura', 'gu', 'zuek', 'haiek', 'niri', 'zuri', 'hari', 'guri', 'zuei',
+      'haiei', 'nire', 'zure', 'bere', 'gure', 'zuen', 'beren', 'sistema', 'aplikazioa', 'software',
+      'hardware', 'datu', 'base', 'sarea', 'segurtasuna', 'analisia', 'diseinua', 'garapena',
+      'inplementazioa', 'probak', 'kudeaketa', 'algoritmoa', 'datuak', 'informazioa', 'teknologia',
+      'ordenagailua', 'programazioa', 'kodea', 'funtzioa', 'metodoa', 'klasea', 'objektua', 'aldagaia',
+      'array', 'katea', 'osokoa', 'boolearra', 'interfazea', 'abstraktua', 'estatikoa', 'publikoa',
+      'pribatua', 'babestua', 'finala', 'zabaltzen', 'inplementatzen', 'inportatzen', 'paketea',
+      'itzultzen', 'bada', 'bestela', 'bitartean', 'aldaketa', 'kasua', 'hautsi', 'jarraitu', 'saiatu',
+      'harrapatu', 'azkenean', 'bota'
+    ];
+    
+    // Contar ocurrencias de cada idioma
+    const contadorIngles = palabrasIngles.filter(palabra => texto.includes(palabra)).length;
+    const contadorEspanol = palabrasEspanol.filter(palabra => texto.includes(palabra)).length;
+    const contadorEuskera = palabrasEuskera.filter(palabra => texto.includes(palabra)).length;
+    
+    console.log('Conteo de palabras - Inglés:', contadorIngles, 'Español:', contadorEspanol, 'Euskera:', contadorEuskera);
+    
+    // Si hay al menos 2 palabras de un idioma, considerarlo detectado
+    if (contadorIngles >= 2) return 'en';
+    if (contadorEspanol >= 2) return 'es';
+    if (contadorEuskera >= 2) return 'eu';
+    
+    return 'es'; // Por defecto español
+  }
+  
+  
+  private actualizarIdioma(idiomaDetectado: string): void {
+    const idiomaActual = this.defensaForm.get('idioma')?.value;
+    if (idiomaDetectado && idiomaDetectado !== idiomaActual) {
+      console.log('Actualizando idioma de', idiomaActual, 'a', idiomaDetectado);
+      this.defensaForm.patchValue({
+        idioma: idiomaDetectado
+      });
+      this.cdr.detectChanges(); // Forzar detección de cambios
+    } else {
+      console.log('No se actualiza el idioma. Detectado:', idiomaDetectado, 'Actual:', idiomaActual);
+    }
+  }
+  
+  
   
   createDefensa(): void {
     // Validación especial para especialidad solo si es GII
@@ -517,6 +670,7 @@ export class DefensasComponent implements OnInit, OnDestroy {
       grado: formValue.grado,
       especialidad: formValue.especialidad,
       titulo: formValue.titulo,
+      idioma: formValue.idioma,
       estudiante: formValue.estudiante, // Ahora es el objeto completo
       directorTribunal: this.profesores.find(p => `${p.nombre} ${p.apellidos}` === formValue.directorTribunal)!,
       codirectorTribunal: formValue.codirectorTribunal ? this.profesores.find(p => `${p.nombre} ${p.apellidos}` === formValue.codirectorTribunal) : undefined,
@@ -564,6 +718,7 @@ export class DefensasComponent implements OnInit, OnDestroy {
       grado: TipoGrado.INGENIERIA_INFORMATICA,
       especialidad: TipoEspecialidad.INGENIERIA_COMPUTACION,
       titulo: '',
+      idioma: 'es', // Resetear a español por defecto
       estudiante: null, // Cambiar a null para objetos
       directorTribunal: '',
       codirectorTribunal: '',
@@ -597,6 +752,7 @@ export class DefensasComponent implements OnInit, OnDestroy {
     // Restaurar configuración inicial para GII
     this.mostrarEspecialidades = true;
     this.updateAreasConocimiento();
+    this.updateEstudiantesFiltrados();
   }
   
   async exportToPDF(): Promise<void> {

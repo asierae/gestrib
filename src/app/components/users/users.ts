@@ -316,29 +316,39 @@ export class UsersComponent implements OnInit {
 
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
-        // Aquí implementarías la eliminación del profesor
-        // Por ahora solo eliminamos de la lista local
-        const originalIndex = this.profesores.findIndex(p => p.id === profesor.id);
-        if (originalIndex > -1) {
-          this.profesores.splice(originalIndex, 1);
-          this.totalProfesores = this.profesores.length;
-          this.filterProfesores();
-          
-          // Ajustar el índice de página si es necesario
-          const totalPages = Math.ceil(this.filteredProfesores.length / this.pageSizeProfesores);
-          if (this.pageIndexProfesores >= totalPages && totalPages > 0) {
-            this.pageIndexProfesores = totalPages - 1;
+        this.profesoresService.deleteProfesor(profesor.id).subscribe({
+          next: () => {
+            // Eliminar de la lista local
+            const originalIndex = this.profesores.findIndex(p => p.id === profesor.id);
+            if (originalIndex > -1) {
+              this.profesores.splice(originalIndex, 1);
+              this.totalProfesores = this.profesores.length;
+              this.filterProfesores();
+              
+              // Ajustar el índice de página si es necesario
+              const totalPages = Math.ceil(this.filteredProfesores.length / this.pageSizeProfesores);
+              if (this.pageIndexProfesores >= totalPages && totalPages > 0) {
+                this.pageIndexProfesores = totalPages - 1;
+              }
+            }
+            
+            this.snackBar.open(
+              `✅ Profesor eliminado: ${profesor.nombre} ${profesor.apellidos}`, 
+              'Cerrar', 
+              { 
+                duration: 3000,
+                panelClass: ['success-snackbar']
+              }
+            );
+          },
+          error: (error) => {
+            console.error('Error eliminando profesor:', error);
+            this.snackBar.open('❌ Error al eliminar el profesor', 'Cerrar', { 
+              duration: 4000,
+              panelClass: ['error-snackbar']
+            });
           }
-        }
-        
-        this.snackBar.open(
-          `✅ Profesor eliminado: ${profesor.nombre} ${profesor.apellidos}`, 
-          'Cerrar', 
-          { 
-            duration: 3000,
-            panelClass: ['success-snackbar']
-          }
-        );
+        });
       }
     });
   }

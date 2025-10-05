@@ -366,6 +366,11 @@
   font-weight: 500;
 }
 
+.material-icons.rotated {
+  transform: rotate(180deg);
+  transition: transform 0.2s ease;
+}
+
 .user-dropdown {
   position: absolute;
   top: 100%;
@@ -382,6 +387,11 @@
   display: none;
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
+
+  &.show {
+    display: block;
+    animation: dropdownFadeIn 0.2s ease-out;
+  }
 
   .user-menu:hover & {
     display: block;

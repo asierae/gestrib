@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test User Menu - Gestrib</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+        .test-title {
+            color: #333;
+            margin-bottom: 15px;
+        }
+        .test-steps {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+        }
+        .test-steps ol {
+            margin: 0;
+            padding-left: 20px;
+        }
+        .test-steps li {
+            margin-bottom: 8px;
+        }
+        .expected-result {
+            background: #e8f5e8;
+            padding: 15px;
+            border-radius: 4px;
+            border-left: 4px solid #28a745;
+        }
+        .note {
+            background: #fff3cd;
+            padding: 15px;
+            border-radius: 4px;
+            border-left: 4px solid #ffc107;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🧪 Test del Menú de Usuario</h1>
+        
+        <div class="test-section">
+            <h2 class="test-title">📋 Pasos para Probar el Menú de Usuario</h2>
+            
+            <div class="test-steps">
+                <ol>
+                    <li><strong>Inicia sesión</strong> en la aplicación con un usuario válido</li>
+                    <li><strong>Localiza el menú de usuario</strong> en la esquina superior derecha (avatar + nombre)</li>
+                    <li><strong>Haz clic en el botón del usuario</strong> (avatar + nombre + flecha)</li>
+                    <li><strong>Verifica que aparece el dropdown</strong> con las opciones del menú</li>
+                    <li><strong>Haz clic en "Perfil"</strong> en el dropdown</li>
+                    <li><strong>Verifica que navega</strong> a la página de perfil (/profile)</li>
+                </ol>
+            </div>
+            
+            <div class="expected-result">
+                <h3>✅ Resultado Esperado:</h3>
+                <ul>
+                    <li>El dropdown del menú de usuario se abre al hacer clic</li>
+                    <li>La flecha rota 180 grados cuando el menú está abierto</li>
+                    <li>Al hacer clic en "Perfil" navega a la página de perfil</li>
+                    <li>El dropdown se cierra automáticamente al hacer clic en una opción</li>
+                    <li>El dropdown se cierra al hacer clic fuera de él</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2 class="test-title">🔧 Funcionalidades Implementadas</h2>
+            
+            <div class="test-steps">
+                <h3>Menú de Usuario:</h3>
+                <ul>
+                    <li>✅ <strong>Toggle del dropdown</strong> - Clic para abrir/cerrar</li>
+                    <li>✅ <strong>Animación de flecha</strong> - Rota cuando está abierto</li>
+                    <li>✅ <strong>Cierre automático</strong> - Al hacer clic en opciones</li>
+                    <li>✅ <strong>Cierre al hacer clic fuera</strong> - HostListener implementado</li>
+                    <li>✅ <strong>Navegación a perfil</strong> - routerLink="/profile"</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2 class="test-title">🎨 Estilos y UX</h2>
+            
+            <div class="test-steps">
+                <ul>
+                    <li>✅ <strong>Diseño moderno</strong> - Sombras, bordes redondeados</li>
+                    <li>✅ <strong>Animaciones suaves</strong> - Transiciones CSS</li>
+                    <li>✅ <strong>Backdrop blur</strong> - Efecto de desenfoque</li>
+                    <li>✅ <strong>Z-index alto</strong> - Se muestra por encima de otros elementos</li>
+                    <li>✅ <strong>Responsive</strong> - Se adapta a diferentes tamaños</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="note">
+            <h3>📝 Notas Importantes:</h3>
+            <ul>
+                <li>El menú de usuario solo es visible cuando hay un usuario autenticado</li>
+                <li>La página de perfil requiere autenticación (AuthGuard)</li>
+                <li>El dropdown mantiene compatibilidad con hover para mejor UX</li>
+                <li>Todas las opciones del menú tienen iconos Material Design</li>
+            </ul>
+        </div>
+
+        <div class="test-section">
+            <h2 class="test-title">🐛 Posibles Problemas y Soluciones</h2>
+            
+            <div class="test-steps">
+                <h3>Si el menú no se abre:</h3>
+                <ul>
+                    <li>Verifica que el usuario esté autenticado</li>
+                    <li>Revisa la consola del navegador por errores JavaScript</li>
+                    <li>Verifica que los estilos CSS se estén cargando correctamente</li>
+                </ul>
+                
+                <h3>Si no navega al perfil:</h3>
+                <ul>
+                    <li>Verifica que la ruta '/profile' esté configurada en app.routes.ts</li>
+                    <li>Verifica que el componente UserProfileComponent esté importado</li>
+                    <li>Revisa la consola por errores de routing</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

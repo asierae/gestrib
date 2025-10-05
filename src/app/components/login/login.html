@@ -24,6 +24,12 @@
         {{ errorMessage() }}
       </div>
 
+      <!-- Success Message -->
+      <div class="success-message" *ngIf="successMessage()">
+        <span class="material-icons">check_circle</span>
+        {{ successMessage() }}
+      </div>
+
       <!-- Login Form -->
       <form [formGroup]="loginForm" (ngSubmit)="onLoginSubmit()">
         <div class="form-control">
@@ -70,7 +76,12 @@
         </button>
 
         <div class="login-help">
-          <a href="#">{{ 'login.forgotPassword' | translate }}</a>
+          <a href="#" (click)="onForgotPassword(); $event.preventDefault()" [class.loading]="isResettingPassword()">
+            <span class="material-icons" *ngIf="!isResettingPassword()">lock_reset</span>
+            <span class="material-icons" *ngIf="isResettingPassword()">hourglass_empty</span>
+            <span *ngIf="!isResettingPassword()">{{ 'login.forgotPassword' | translate }}</span>
+            <span *ngIf="isResettingPassword()">Enviando...</span>
+          </a>
         </div>
       </form>
 

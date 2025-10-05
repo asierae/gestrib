@@ -50,12 +50,28 @@
             <input 
               matInput
               formControlName="titulo"
-              [placeholder]="'defensas.workTitle' | translate">
+              [placeholder]="'defensas.workTitle' | translate"
+              (input)="detectarIdioma()"
+              (blur)="detectarIdioma()">
             <mat-error *ngIf="defensaForm.get('titulo')?.hasError('required')">
               {{ 'validation.required' | translate }}
             </mat-error>
             <mat-error *ngIf="defensaForm.get('titulo')?.hasError('minlength')">
               {{ 'validation.minlength' | translate }}
+            </mat-error>
+          </mat-form-field>
+        </div>
+        
+        <div class="form-row">
+          <mat-form-field appearance="outline" class="form-field">
+            <mat-label>{{ 'defensas.language' | translate }}</mat-label>
+            <mat-select formControlName="idioma">
+              <mat-option *ngFor="let idioma of idiomas" [value]="idioma.value">
+                {{ idioma.label }}
+              </mat-option>
+            </mat-select>
+            <mat-error *ngIf="defensaForm.get('idioma')?.hasError('required')">
+              {{ 'validation.required' | translate }}
             </mat-error>
           </mat-form-field>
         </div>

@@ -1,4 +1,4 @@
-import { Component, signal, inject, OnInit } from '@angular/core';
+import { Component, signal, inject, OnInit, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterOutlet, RouterModule } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
@@ -26,6 +26,7 @@ export class LayoutComponent implements OnInit {
   
   isSidebarOpen = signal(true);
   isMobileMenuOpen = signal(false);
+  isUserMenuOpen = signal(false);
   currentLanguage = signal<Language>(Language.ES);
   breadcrumbs = this.breadcrumbService.getBreadcrumbs();
   currentUser = this.authMonitorService.currentUser;
@@ -120,17 +121,46 @@ export class LayoutComponent implements OnInit {
     this.isMobileMenuOpen.update(open => !open);
   }
 
+  toggleUserMenu(): void {
+    this.isUserMenuOpen.update(open => !open);
+  }
+
+  closeUserMenu(): void {
+    this.isUserMenuOpen.set(false);
+  }
+
   changeLanguage(language: Language): void {
     this.currentLanguage.set(language);
     this.translationService.setLanguage(language);
+    
     // Update user language if logged in
     if (this.currentUser()) {
       // Convert Language enum to number for API
       const languageId = language === Language.ES ? 1 : language === Language.EN ? 2 : 3;
-      this.authService.changeLanguage(languageId).subscribe();
+      
+      this.authService.changeLanguage(languageId).subscribe({
+        next: (response) => {
+          console.log('Idioma cambiado correctamente:', response);
+          // Update breadcrumbs with new translations
+          this.breadcrumbService.updateTranslations();
+        },
+        error: (error) => {
+          console.error('Error al cambiar idioma:', error);
+          // Revert language change on error
+          const user = this.currentUser();
+          if (user) {
+            const currentLanguageId = user.idIdioma;
+            const currentLanguage = currentLanguageId === 1 ? Language.ES : 
+                                  currentLanguageId === 2 ? Language.EN : Language.EU;
+            this.currentLanguage.set(currentLanguage);
+            this.translationService.setLanguage(currentLanguage);
+          }
+        }
+      });
+    } else {
+      // Update breadcrumbs with new translations
+      this.breadcrumbService.updateTranslations();
     }
-    // Update breadcrumbs with new translations
-    this.breadcrumbService.updateTranslations();
   }
 
   logout(): void {
@@ -144,5 +174,15 @@ export class LayoutComponent implements OnInit {
       active: item === activeItem
     }));
     this.menuItems.set(updatedItems);
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: Event): void {
+    const target = event.target as HTMLElement;
+    const userMenu = target.closest('.user-menu');
+    
+    if (!userMenu && this.isUserMenuOpen()) {
+      this.isUserMenuOpen.set(false);
+    }
   }
 }

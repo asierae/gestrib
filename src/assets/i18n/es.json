@@ -74,7 +74,18 @@
     },
     "password": {
       "required": "La contraseña es obligatoria",
-      "minlength": "La contraseña debe tener al menos 6 caracteres"
+      "minlength": "La contraseña debe tener al menos 6 caracteres",
+      "mismatch": "Las contraseñas no coinciden"
+    },
+    "currentPassword": {
+      "required": "La contraseña actual es obligatoria"
+    },
+    "newPassword": {
+      "required": "La nueva contraseña es obligatoria",
+      "minlength": "La nueva contraseña debe tener al menos 6 caracteres"
+    },
+    "confirmPassword": {
+      "required": "La confirmación de contraseña es obligatoria"
     },
     "required": "Este campo es obligatorio",
     "minlength": "Debe tener al menos {0} caracteres",
@@ -99,6 +110,7 @@
     "supplementSpecialties": "Especialidades del Suplente",
     "directionComments": "Comentarios de la Dirección",
     "workTitle": "Título del Trabajo",
+    "language": "Idioma",
     "name": "Nombre",
     "description": "Descripción",
     "type": "Tipo",
@@ -248,5 +260,22 @@
     "faq": "Preguntas Frecuentes",
     "contact": "Contacto",
     "support": "Soporte Técnico"
+  },
+  "profile": {
+    "title": "Perfil de Usuario",
+    "firstName": "Nombre",
+    "lastName": "Apellidos",
+    "email": "Email",
+    "phone": "Teléfono",
+    "position": "Puesto",
+    "company": "Empresa",
+    "description": "Descripción",
+    "changePassword": "Cambiar Contraseña",
+    "currentPassword": "Contraseña Actual",
+    "newPassword": "Nueva Contraseña",
+    "confirmPassword": "Confirmar Contraseña",
+    "passwordRequirements": "Requisitos de la contraseña",
+    "passwordUpdated": "Contraseña actualizada correctamente",
+    "profileUpdated": "Perfil actualizado correctamente"
   }
 }

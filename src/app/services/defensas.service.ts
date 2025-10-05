@@ -63,11 +63,62 @@ export class DefensasService {
    * Crea una nueva defensa
    */
   createDefensa(defensa: CreateDefensaRequest): Observable<DefensaResponse> {
-    return this.http.post<DefensaResponse>(this.baseUrl, defensa)
+    // Mapear los datos del frontend al formato del backend
+    const backendRequest = {
+      IdCurso: parseInt(defensa.curso) || 0,
+      IdGrado: this.mapGradoToId(defensa.grado),
+      IdEspecialidad: defensa.especialidad ? this.mapEspecialidadToId(defensa.especialidad) : null,
+      Titulo: defensa.titulo,
+      IdAlumno: defensa.estudiante.id || 0, // Necesitamos el ID del estudiante
+      IdDirectorTribunal: defensa.directorTribunal.id,
+      IdCodirectorTribunal: defensa.codirectorTribunal?.id || null,
+      IdVocalTribunal: defensa.vocalTribunal.id,
+      IdSuplente: defensa.suplente.id,
+      IdPresidente: null, // Por defecto null
+      EspecialidadesVocal: defensa.especialidadesVocal.join(', '),
+      EspecialidadesSuplente: defensa.especialidadesSuplente.join(', '),
+      ComentariosDireccion: defensa.comentariosDireccion,
+      FechaDefensa: null, // Por defecto null
+      HoraDefensa: null, // Por defecto null
+      LugarDefensa: null, // Por defecto null
+      Estado: 'Pendiente', // Estado por defecto
+      Idioma: defensa.idioma,
+      Lugar: null, // Por defecto null
+      CreatedBy: 1, // ID del usuario actual (se puede obtener del AuthService)
+      UpdatedBy: null,
+      IsActive: true
+    };
+
+    console.log('Frontend sending data:', backendRequest);
+
+    return this.http.post<DefensaResponse>(this.baseUrl, backendRequest)
       .pipe(
         timeout<DefensaResponse>(environment.timeout),
         catchError(this.handleError)
       );
+  }
+
+  /**
+   * Mapea el enum TipoGrado a ID numérico
+   */
+  private mapGradoToId(grado: string): number {
+    switch (grado) {
+      case 'ingenieria_informatica': return 1;
+      case 'inteligencia_artificial': return 2;
+      default: return 1;
+    }
+  }
+
+  /**
+   * Mapea el enum TipoEspecialidad a ID numérico
+   */
+  private mapEspecialidadToId(especialidad: string): number {
+    switch (especialidad) {
+      case 'ingenieria_computacion': return 1;
+      case 'ingenieria_software': return 2;
+      case 'computacion': return 3;
+      default: return 1;
+    }
   }
 
   /**

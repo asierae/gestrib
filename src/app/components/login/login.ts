@@ -25,6 +25,8 @@ export class LoginComponent {
   
   isLoading = signal(false);
   errorMessage = signal('');
+  successMessage = signal('');
+  isResettingPassword = signal(false);
 
   constructor() {
     // Login form (email and password)
@@ -104,5 +106,55 @@ export class LoginComponent {
     setTimeout(() => {
       console.log('Translations after force load:', this.translationService.areTranslationsLoaded());
     }, 1000);
+  }
+
+  /**
+   * Maneja el clic en "Olvidé mi contraseña"
+   */
+  onForgotPassword(): void {
+    const email = this.loginForm.get('email')?.value;
+    
+    if (!email) {
+      this.errorMessage.set('Por favor, introduce tu email primero');
+      return;
+    }
+
+    if (!this.isValidEmail(email)) {
+      this.errorMessage.set('Por favor, introduce un email válido');
+      return;
+    }
+
+    this.isResettingPassword.set(true);
+    this.errorMessage.set('');
+    this.successMessage.set('');
+
+    this.authService.resetPassword(email).subscribe({
+      next: (response) => {
+        this.isResettingPassword.set(false);
+        this.successMessage.set('Se ha enviado una nueva contraseña a tu email. Revisa tu bandeja de entrada.');
+        console.log('Password reset successful:', response);
+      },
+      error: (error) => {
+        this.isResettingPassword.set(false);
+        this.errorMessage.set(error.message || 'Error al enviar la nueva contraseña');
+        console.error('Password reset error:', error);
+      }
+    });
+  }
+
+  /**
+   * Valida si el email tiene formato correcto
+   */
+  private isValidEmail(email: string): boolean {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  }
+
+  /**
+   * Limpia los mensajes
+   */
+  clearMessages(): void {
+    this.errorMessage.set('');
+    this.successMessage.set('');
   }
 }

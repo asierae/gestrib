@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test - Inicialización de Idioma</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .test-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+        .test-section h3 {
+            margin-top: 0;
+            color: #2c3e50;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+        input, select, button {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        button:disabled {
+            background-color: #bdc3c7;
+            cursor: not-allowed;
+        }
+        .result {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        .loading {
+            background-color: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+        .language-selector {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .language-selector button {
+            flex: 1;
+            padding: 10px;
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .language-selector button:hover {
+            background-color: #c0392b;
+        }
+        .language-selector button.active {
+            background-color: #27ae60;
+        }
+        .current-language {
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 20px;
+        }
+        .debug-info {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 15px;
+            margin: 15px 0;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        .step {
+            margin: 10px 0;
+            padding: 10px;
+            border-left: 4px solid #007bff;
+            background-color: #f8f9fa;
+        }
+        .step h4 {
+            margin: 0 0 5px 0;
+            color: #007bff;
+        }
+        .flow-diagram {
+            background-color: #e3f2fd;
+            border: 1px solid #2196f3;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .flow-step {
+            background-color: white;
+            border: 1px solid #2196f3;
+            border-radius: 4px;
+            padding: 10px;
+            margin: 10px 0;
+            position: relative;
+        }
+        .flow-step::before {
+            content: "→";
+            position: absolute;
+            left: -15px;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: #2196f3;
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+        }
+        .flow-step:first-child::before {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔄 Test - Inicialización de Idioma al Recargar</h1>
+        
+        <div class="current-language">
+            Idioma actual: <span id="currentLanguage">Español</span>
+        </div>
+
+        <div class="language-selector">
+            <button onclick="changeLanguage(1, 'Español')">🇪🇸 Español</button>
+            <button onclick="changeLanguage(2, 'English')">🇬🇧 English</button>
+            <button onclick="changeLanguage(3, 'Euskera')">🇪🇸 Euskera</button>
+        </div>
+
+        <div class="flow-diagram">
+            <h3>🔄 Flujo de Inicialización Corregido</h3>
+            <div class="flow-step">
+                <strong>1. App.ts ngOnInit()</strong><br>
+                Se ejecuta cuando se carga la aplicación
+            </div>
+            <div class="flow-step">
+                <strong>2. AuthService.initializeAuth()</strong><br>
+                Carga el usuario desde localStorage (si existe)
+            </div>
+            <div class="flow-step">
+                <strong>3. App.initializeLanguage()</strong><br>
+                Configura el idioma basado en el usuario autenticado
+            </div>
+            <div class="flow-step">
+                <strong>4. TranslationService.setLanguage()</strong><br>
+                Aplica las traducciones del idioma seleccionado
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>📋 Pasos para Verificar la Corrección</h3>
+            <div class="step">
+                <h4>Paso 1: Cambiar Idioma</h4>
+                <p>Selecciona un idioma diferente usando los botones de arriba</p>
+            </div>
+            <div class="step">
+                <h4>Paso 2: Verificar en Base de Datos</h4>
+                <p>Verifica que el campo <code>idIdioma</code> se actualizó en la tabla <code>usuarios</code></p>
+            </div>
+            <div class="step">
+                <h4>Paso 3: Recargar Página</h4>
+                <p>Recarga la página (F5) y verifica que el idioma se mantiene</p>
+            </div>
+            <div class="step">
+                <h4>Paso 4: Verificar Logs</h4>
+                <p>Abre la consola (F12) y verifica que aparecen los logs de inicialización</p>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>🔧 Test Manual de Cambio de Idioma</h3>
+            <div class="form-group">
+                <label for="languageId">ID del Idioma:</label>
+                <select id="languageId">
+                    <option value="1">1 - Español</option>
+                    <option value="2">2 - English</option>
+                    <option value="3">3 - Euskera</option>
+                </select>
+            </div>
+            <button onclick="testChangeLanguage()">🔄 Cambiar Idioma</button>
+            <div id="testResult"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>📊 Estado Actual del Sistema</h3>
+            <div id="currentStatus">
+                <p><strong>Usuario autenticado:</strong> <span id="authStatus">Verificando...</span></p>
+                <p><strong>Token JWT:</strong> <span id="tokenStatus">Verificando...</span></p>
+                <p><strong>Idioma en localStorage:</strong> <span id="languageStatus">Verificando...</span></p>
+                <p><strong>Idioma en base de datos:</strong> <span id="dbLanguageStatus">Verificando...</span></p>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>🐛 Información de Debug</h3>
+            <div class="debug-info" id="debugInfo">
+                Cargando información de debug...
+            </div>
+            <button onclick="refreshDebugInfo()">🔄 Actualizar Debug</button>
+        </div>
+
+        <div class="test-section">
+            <h3>🔄 Test de Recarga</h3>
+            <p>Después de cambiar el idioma, haz clic en el botón de abajo para simular una recarga de página:</p>
+            <button onclick="simulatePageReload()">🔄 Simular Recarga de Página</button>
+            <div id="reloadResult"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>📝 Logs Esperados en Consola</h3>
+            <div class="debug-info">
+                <strong>Al cargar la página:</strong><br>
+                <code>Initializing auth: {hasToken: true, hasUser: true, userId: X, userLanguage: Y}</code><br>
+                <code>User loaded, language will be configured by App component</code><br>
+                <code>App: Configurando idioma del usuario: Y -> Language</code><br><br>
+                
+                <strong>Al cambiar idioma:</strong><br>
+                <code>Changing language to: X (LanguageName)</code><br>
+                <code>API Response: {message: "Idioma cambiado correctamente", userId: X, newLanguageId: Y}</code><br>
+                <code>Idioma cambiado correctamente: {message: "...", userId: X, newLanguageId: Y}</code>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'https://gestrib-api.azurewebsites.net';
+        let currentLanguageId = 1;
+
+        // Verificar estado al cargar la página
+        window.onload = function() {
+            checkCurrentStatus();
+            refreshDebugInfo();
+        };
+
+        async function checkCurrentStatus() {
+            try {
+                // Verificar autenticación
+                const token = localStorage.getItem('authToken');
+                const user = JSON.parse(localStorage.getItem('currentUser') || 'null');
+                
+                document.getElementById('authStatus').textContent = user ? '✅ Sí' : '❌ No';
+                document.getElementById('tokenStatus').textContent = token ? '✅ Presente' : '❌ Ausente';
+                document.getElementById('languageStatus').textContent = user ? `ID: ${user.idIdioma}` : 'No disponible';
+                
+                if (user && user.idIdioma) {
+                    currentLanguageId = user.idIdioma;
+                    updateCurrentLanguageDisplay();
+                }
+
+                // Verificar idioma en base de datos
+                if (user && token) {
+                    await checkDatabaseLanguage(user.id);
+                }
+            } catch (error) {
+                console.error('Error checking status:', error);
+                document.getElementById('authStatus').textContent = '❌ Error';
+                document.getElementById('tokenStatus').textContent = '❌ Error';
+                document.getElementById('languageStatus').textContent = '❌ Error';
+            }
+        }
+
+        async function checkDatabaseLanguage(userId) {
+            try {
+                const token = localStorage.getItem('authToken');
+                const response = await fetch(`${API_BASE_URL}/Usuarios/${userId}`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'include'
+                });
+
+                if (response.ok) {
+                    const userData = await response.json();
+                    document.getElementById('dbLanguageStatus').textContent = `ID: ${userData.idIdioma || 'No disponible'}`;
+                } else {
+                    document.getElementById('dbLanguageStatus').textContent = '❌ Error al consultar';
+                }
+            } catch (error) {
+                console.error('Error checking database language:', error);
+                document.getElementById('dbLanguageStatus').textContent = '❌ Error de conexión';
+            }
+        }
+
+        function updateCurrentLanguageDisplay() {
+            const languageNames = {
+                1: 'Español',
+                2: 'English', 
+                3: 'Euskera'
+            };
+            document.getElementById('currentLanguage').textContent = languageNames[currentLanguageId] || 'Desconocido';
+            
+            // Actualizar botones activos
+            document.querySelectorAll('.language-selector button').forEach((btn, index) => {
+                btn.classList.toggle('active', index + 1 === currentLanguageId);
+            });
+        }
+
+        async function changeLanguage(idIdioma, languageName) {
+            const resultDiv = document.getElementById('testResult');
+            resultDiv.innerHTML = '<div class="loading">🔄 Cambiando idioma...</div>';
+
+            try {
+                const token = localStorage.getItem('authToken');
+                if (!token) {
+                    throw new Error('No hay token de autenticación. Por favor, inicia sesión primero.');
+                }
+
+                console.log(`Changing language to: ${idIdioma} (${languageName})`);
+
+                const response = await fetch(`${API_BASE_URL}/Usuarios/change-language/${idIdioma}`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'include'
+                });
+
+                const data = await response.json();
+                console.log('API Response:', data);
+
+                if (response.ok) {
+                    // Actualizar usuario local
+                    const user = JSON.parse(localStorage.getItem('currentUser') || '{}');
+                    user.idIdioma = idIdioma;
+                    localStorage.setItem('currentUser', JSON.stringify(user));
+                    
+                    currentLanguageId = idIdioma;
+                    updateCurrentLanguageDisplay();
+                    
+                    resultDiv.innerHTML = `
+                        <div class="success">
+                            ✅ Idioma cambiado correctamente a ${languageName}<br>
+                            <strong>Respuesta:</strong> ${data.message}<br>
+                            <strong>Usuario actualizado:</strong> ID ${user.id}, Idioma ${user.idIdioma}
+                        </div>
+                    `;
+
+                    // Verificar en base de datos
+                    await checkDatabaseLanguage(user.id);
+                    refreshDebugInfo();
+                } else {
+                    throw new Error(data.message || 'Error al cambiar idioma');
+                }
+            } catch (error) {
+                console.error('Error changing language:', error);
+                resultDiv.innerHTML = `
+                    <div class="error">
+                        ❌ Error al cambiar idioma<br>
+                        <strong>Error:</strong> ${error.message}
+                    </div>
+                `;
+            }
+        }
+
+        async function testChangeLanguage() {
+            const languageId = document.getElementById('languageId').value;
+            const languageNames = {
+                1: 'Español',
+                2: 'English',
+                3: 'Euskera'
+            };
+            
+            await changeLanguage(parseInt(languageId), languageNames[languageId]);
+        }
+
+        function refreshDebugInfo() {
+            const token = localStorage.getItem('authToken');
+            const user = JSON.parse(localStorage.getItem('currentUser') || 'null');
+            
+            const debugInfo = {
+                timestamp: new Date().toISOString(),
+                localStorage: {
+                    authToken: token ? 'Presente' : 'Ausente',
+                    currentUser: user ? {
+                        id: user.id,
+                        nombre: user.nombre,
+                        email: user.email,
+                        idIdioma: user.idIdioma
+                    } : 'No disponible'
+                },
+                currentLanguage: currentLanguageId,
+                userAgent: navigator.userAgent
+            };
+
+            document.getElementById('debugInfo').innerHTML = `
+                <pre>${JSON.stringify(debugInfo, null, 2)}</pre>
+            `;
+        }
+
+        function simulatePageReload() {
+            const resultDiv = document.getElementById('reloadResult');
+            resultDiv.innerHTML = '<div class="loading">🔄 Simulando recarga...</div>';
+
+            setTimeout(() => {
+                const user = JSON.parse(localStorage.getItem('currentUser') || 'null');
+                const languageNames = {
+                    1: 'Español',
+                    2: 'English',
+                    3: 'Euskera'
+                };
+
+                if (user && user.idIdioma) {
+                    resultDiv.innerHTML = `
+                        <div class="success">
+                            ✅ Después de la recarga:<br>
+                            <strong>Usuario:</strong> ${user.nombre} (ID: ${user.id})<br>
+                            <strong>Idioma:</strong> ${languageNames[user.idIdioma]} (ID: ${user.idIdioma})<br>
+                            <strong>Estado:</strong> El idioma se mantiene correctamente<br>
+                            <strong>Nota:</strong> Ahora el App.ts configurará automáticamente el idioma
+                        </div>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `
+                        <div class="error">
+                            ❌ Después de la recarga:<br>
+                            <strong>Error:</strong> No se pudo cargar el usuario o el idioma
+                        </div>
+                    `;
+                }
+            }, 1000);
+        }
+    </script>
+</body>
+</html>

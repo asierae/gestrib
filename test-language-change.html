@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test - Cambio de Idioma</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .test-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+        .test-section h3 {
+            margin-top: 0;
+            color: #2c3e50;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+        input, select, button {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        button:disabled {
+            background-color: #bdc3c7;
+            cursor: not-allowed;
+        }
+        .result {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        .loading {
+            background-color: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+        .language-selector {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .language-selector button {
+            flex: 1;
+            padding: 10px;
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .language-selector button:hover {
+            background-color: #c0392b;
+        }
+        .language-selector button.active {
+            background-color: #27ae60;
+        }
+        .current-language {
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌐 Test - Cambio de Idioma del Usuario</h1>
+        
+        <div class="current-language">
+            Idioma actual: <span id="currentLanguage">Español</span>
+        </div>
+
+        <div class="language-selector">
+            <button onclick="changeLanguage(1, 'Español')">🇪🇸 Español</button>
+            <button onclick="changeLanguage(2, 'English')">🇬🇧 English</button>
+            <button onclick="changeLanguage(3, 'Euskera')">🇪🇸 Euskera</button>
+        </div>
+
+        <div class="test-section">
+            <h3>📋 Información del Test</h3>
+            <p><strong>Endpoint:</strong> <code>GET /Usuarios/change-language/{id_idioma}</code></p>
+            <p><strong>Autenticación:</strong> Requerida (JWT Token)</p>
+            <p><strong>Parámetros:</strong></p>
+            <ul>
+                <li><code>id_idioma</code>: 1 (Español), 2 (English), 3 (Euskera)</li>
+            </ul>
+            <p><strong>Funcionalidad:</strong></p>
+            <ul>
+                <li>✅ Cambia el idioma del usuario en la base de datos</li>
+                <li>✅ Actualiza el idioma en el frontend automáticamente</li>
+                <li>✅ Persiste el idioma para futuras sesiones</li>
+            </ul>
+        </div>
+
+        <div class="test-section">
+            <h3>🔧 Test Manual</h3>
+            <div class="form-group">
+                <label for="userId">ID del Usuario:</label>
+                <input type="number" id="userId" value="1" placeholder="ID del usuario">
+            </div>
+            <div class="form-group">
+                <label for="languageId">ID del Idioma:</label>
+                <select id="languageId">
+                    <option value="1">1 - Español</option>
+                    <option value="2">2 - English</option>
+                    <option value="3">3 - Euskera</option>
+                </select>
+            </div>
+            <button onclick="testChangeLanguage()">🔄 Cambiar Idioma</button>
+            <div id="testResult"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>📊 Estado Actual</h3>
+            <div id="currentStatus">
+                <p><strong>Usuario autenticado:</strong> <span id="authStatus">Verificando...</span></p>
+                <p><strong>Token JWT:</strong> <span id="tokenStatus">Verificando...</span></p>
+                <p><strong>Idioma actual:</strong> <span id="languageStatus">Verificando...</span></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'https://gestrib-api.azurewebsites.net';
+        let currentLanguageId = 1;
+
+        // Verificar estado al cargar la página
+        window.onload = function() {
+            checkCurrentStatus();
+        };
+
+        async function checkCurrentStatus() {
+            try {
+                // Verificar autenticación
+                const token = localStorage.getItem('authToken');
+                const user = JSON.parse(localStorage.getItem('currentUser') || 'null');
+                
+                document.getElementById('authStatus').textContent = user ? '✅ Sí' : '❌ No';
+                document.getElementById('tokenStatus').textContent = token ? '✅ Presente' : '❌ Ausente';
+                document.getElementById('languageStatus').textContent = user ? `ID: ${user.idIdioma}` : 'No disponible';
+                
+                if (user && user.idIdioma) {
+                    currentLanguageId = user.idIdioma;
+                    updateCurrentLanguageDisplay();
+                }
+            } catch (error) {
+                console.error('Error checking status:', error);
+                document.getElementById('authStatus').textContent = '❌ Error';
+                document.getElementById('tokenStatus').textContent = '❌ Error';
+                document.getElementById('languageStatus').textContent = '❌ Error';
+            }
+        }
+
+        function updateCurrentLanguageDisplay() {
+            const languageNames = {
+                1: 'Español',
+                2: 'English', 
+                3: 'Euskera'
+            };
+            document.getElementById('currentLanguage').textContent = languageNames[currentLanguageId] || 'Desconocido';
+            
+            // Actualizar botones activos
+            document.querySelectorAll('.language-selector button').forEach((btn, index) => {
+                btn.classList.toggle('active', index + 1 === currentLanguageId);
+            });
+        }
+
+        async function changeLanguage(idIdioma, languageName) {
+            const resultDiv = document.getElementById('testResult');
+            resultDiv.innerHTML = '<div class="loading">🔄 Cambiando idioma...</div>';
+
+            try {
+                const token = localStorage.getItem('authToken');
+                if (!token) {
+                    throw new Error('No hay token de autenticación. Por favor, inicia sesión primero.');
+                }
+
+                const response = await fetch(`${API_BASE_URL}/Usuarios/change-language/${idIdioma}`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'include'
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    // Actualizar usuario local
+                    const user = JSON.parse(localStorage.getItem('currentUser') || '{}');
+                    user.idIdioma = idIdioma;
+                    localStorage.setItem('currentUser', JSON.stringify(user));
+                    
+                    currentLanguageId = idIdioma;
+                    updateCurrentLanguageDisplay();
+                    
+                    resultDiv.innerHTML = `
+                        <div class="success">
+                            ✅ Idioma cambiado correctamente a ${languageName}<br>
+                            <strong>Respuesta:</strong> ${data.message}
+                        </div>
+                    `;
+                } else {
+                    throw new Error(data.message || 'Error al cambiar idioma');
+                }
+            } catch (error) {
+                console.error('Error changing language:', error);
+                resultDiv.innerHTML = `
+                    <div class="error">
+                        ❌ Error al cambiar idioma<br>
+                        <strong>Error:</strong> ${error.message}
+                    </div>
+                `;
+            }
+        }
+
+        async function testChangeLanguage() {
+            const userId = document.getElementById('userId').value;
+            const languageId = document.getElementById('languageId').value;
+            
+            if (!userId) {
+                alert('Por favor, ingresa un ID de usuario');
+                return;
+            }
+
+            const resultDiv = document.getElementById('testResult');
+            resultDiv.innerHTML = '<div class="loading">🔄 Probando cambio de idioma...</div>';
+
+            try {
+                const token = localStorage.getItem('authToken');
+                if (!token) {
+                    throw new Error('No hay token de autenticación. Por favor, inicia sesión primero.');
+                }
+
+                const response = await fetch(`${API_BASE_URL}/Usuarios/change-language/${languageId}`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'include'
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    // Actualizar usuario local
+                    const user = JSON.parse(localStorage.getItem('currentUser') || '{}');
+                    user.idIdioma = parseInt(languageId);
+                    localStorage.setItem('currentUser', JSON.stringify(user));
+                    
+                    currentLanguageId = parseInt(languageId);
+                    updateCurrentLanguageDisplay();
+                    
+                    resultDiv.innerHTML = `
+                        <div class="success">
+                            ✅ Test exitoso<br>
+                            <strong>Usuario ID:</strong> ${userId}<br>
+                            <strong>Idioma ID:</strong> ${languageId}<br>
+                            <strong>Respuesta:</strong> ${data.message}
+                        </div>
+                    `;
+                } else {
+                    throw new Error(data.message || 'Error al cambiar idioma');
+                }
+            } catch (error) {
+                console.error('Error in test:', error);
+                resultDiv.innerHTML = `
+                    <div class="error">
+                        ❌ Test fallido<br>
+                        <strong>Error:</strong> ${error.message}
+                    </div>
+                `;
+            }
+        }
+    </script>
+</body>
+</html>

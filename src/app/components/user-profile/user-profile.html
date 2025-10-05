@@ -1,0 +1,263 @@
+<div class="user-profile-container">
+  <div class="profile-header">
+    <div class="profile-avatar">
+      <img [src]="getAvatarUrl()" [alt]="currentUser()?.nombre || 'Usuario'" class="avatar-image">
+      <button class="avatar-edit-btn" type="button">
+        <span class="material-icons">camera_alt</span>
+      </button>
+    </div>
+    <div class="profile-info">
+      <h1 class="profile-name">{{ currentUser()?.nombre }} {{ currentUser()?.apellidos }}</h1>
+      <p class="profile-email">{{ currentUser()?.email }}</p>
+      <p class="profile-role">{{ currentUser()?.puesto || 'Usuario' }}</p>
+    </div>
+  </div>
+
+  <!-- Messages -->
+  <div class="message success-message" *ngIf="successMessage()">
+    <span class="material-icons">check_circle</span>
+    {{ successMessage() }}
+  </div>
+
+  <div class="message error-message" *ngIf="errorMessage()">
+    <span class="material-icons">error</span>
+    {{ errorMessage() }}
+  </div>
+
+  <div class="profile-content">
+    <!-- Profile Information Tab -->
+    <div class="profile-section">
+      <div class="section-header">
+        <h2 class="section-title">
+          <span class="material-icons">person</span>
+          Información Personal
+        </h2>
+      </div>
+
+      <form [formGroup]="profileForm" (ngSubmit)="onSaveProfile()" class="profile-form">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="nombre">
+              <span class="material-icons">person</span>
+              {{ 'profile.firstName' | translate }}
+            </label>
+            <input 
+              id="nombre" 
+              type="text" 
+              formControlName="nombre" 
+              class="form-input"
+              placeholder="{{ 'profile.firstName' | translate }}" />
+            <div class="form-error" *ngIf="getFieldError(profileForm, 'nombre')">
+              <span class="material-icons">error</span>
+              {{ getFieldError(profileForm, 'nombre') | translate }}
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="apellidos">
+              <span class="material-icons">person</span>
+              {{ 'profile.lastName' | translate }}
+            </label>
+            <input 
+              id="apellidos" 
+              type="text" 
+              formControlName="apellidos" 
+              class="form-input"
+              placeholder="{{ 'profile.lastName' | translate }}" />
+            <div class="form-error" *ngIf="getFieldError(profileForm, 'apellidos')">
+              <span class="material-icons">error</span>
+              {{ getFieldError(profileForm, 'apellidos') | translate }}
+            </div>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="email">
+              <span class="material-icons">email</span>
+              {{ 'profile.email' | translate }}
+            </label>
+            <input 
+              id="email" 
+              type="email" 
+              formControlName="email" 
+              class="form-input"
+              placeholder="{{ 'profile.email' | translate }}" />
+            <div class="form-error" *ngIf="getFieldError(profileForm, 'email')">
+              <span class="material-icons">error</span>
+              {{ getFieldError(profileForm, 'email') | translate }}
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="telefono">
+              <span class="material-icons">phone</span>
+              {{ 'profile.phone' | translate }}
+            </label>
+            <input 
+              id="telefono" 
+              type="tel" 
+              formControlName="telefono" 
+              class="form-input"
+              placeholder="{{ 'profile.phone' | translate }}" />
+            <div class="form-error" *ngIf="getFieldError(profileForm, 'telefono')">
+              <span class="material-icons">error</span>
+              {{ getFieldError(profileForm, 'telefono') | translate }}
+            </div>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="puesto">
+              <span class="material-icons">work</span>
+              {{ 'profile.position' | translate }}
+            </label>
+            <input 
+              id="puesto" 
+              type="text" 
+              formControlName="puesto" 
+              class="form-input"
+              placeholder="{{ 'profile.position' | translate }}" />
+            <div class="form-error" *ngIf="getFieldError(profileForm, 'puesto')">
+              <span class="material-icons">error</span>
+              {{ getFieldError(profileForm, 'puesto') | translate }}
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="empresa">
+              <span class="material-icons">business</span>
+              {{ 'profile.company' | translate }}
+            </label>
+            <input 
+              id="empresa" 
+              type="text" 
+              formControlName="empresa" 
+              class="form-input"
+              placeholder="{{ 'profile.company' | translate }}" />
+            <div class="form-error" *ngIf="getFieldError(profileForm, 'empresa')">
+              <span class="material-icons">error</span>
+              {{ getFieldError(profileForm, 'empresa') | translate }}
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="descripcion">
+            <span class="material-icons">description</span>
+            {{ 'profile.description' | translate }}
+          </label>
+          <textarea 
+            id="descripcion" 
+            formControlName="descripcion" 
+            class="form-textarea"
+            rows="4"
+            placeholder="{{ 'profile.description' | translate }}"></textarea>
+          <div class="form-error" *ngIf="getFieldError(profileForm, 'descripcion')">
+            <span class="material-icons">error</span>
+            {{ getFieldError(profileForm, 'descripcion') | translate }}
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button 
+            type="submit" 
+            class="btn btn-primary"
+            [disabled]="isSaving()">
+            <span class="material-icons" *ngIf="!isSaving()">save</span>
+            <span class="material-icons" *ngIf="isSaving()">hourglass_empty</span>
+            <span *ngIf="!isSaving()">{{ 'common.save' | translate }}</span>
+            <span *ngIf="isSaving()">{{ 'common.loading' | translate }}</span>
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Change Password Section -->
+    <div class="profile-section">
+      <div class="section-header">
+        <h2 class="section-title">
+          <span class="material-icons">lock</span>
+          Cambiar Contraseña
+        </h2>
+      </div>
+
+      <form [formGroup]="passwordForm" (ngSubmit)="onChangePassword()" class="password-form">
+        <div class="form-group">
+          <label class="form-label" for="currentPassword">
+            <span class="material-icons">lock</span>
+            Contraseña Actual
+          </label>
+          <input 
+            id="currentPassword" 
+            type="password" 
+            formControlName="currentPassword" 
+            class="form-input"
+            placeholder="Introduce tu contraseña actual" />
+          <div class="form-error" *ngIf="getFieldError(passwordForm, 'currentPassword')">
+            <span class="material-icons">error</span>
+            {{ getFieldError(passwordForm, 'currentPassword') | translate }}
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="newPassword">
+              <span class="material-icons">lock_reset</span>
+              Nueva Contraseña
+            </label>
+            <input 
+              id="newPassword" 
+              type="password" 
+              formControlName="newPassword" 
+              class="form-input"
+              placeholder="Introduce tu nueva contraseña" />
+            <div class="form-error" *ngIf="getFieldError(passwordForm, 'newPassword')">
+              <span class="material-icons">error</span>
+              {{ getFieldError(passwordForm, 'newPassword') | translate }}
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="confirmPassword">
+              <span class="material-icons">lock_reset</span>
+              Confirmar Contraseña
+            </label>
+            <input 
+              id="confirmPassword" 
+              type="password" 
+              formControlName="confirmPassword" 
+              class="form-input"
+              placeholder="Confirma tu nueva contraseña" />
+            <div class="form-error" *ngIf="getFieldError(passwordForm, 'confirmPassword')">
+              <span class="material-icons">error</span>
+              {{ getFieldError(passwordForm, 'confirmPassword') | translate }}
+            </div>
+          </div>
+        </div>
+
+        <div class="password-requirements">
+          <h4>Requisitos de la contraseña:</h4>
+          <ul>
+            <li>Mínimo 6 caracteres</li>
+            <li>Debe ser diferente a la contraseña actual</li>
+            <li>Se recomienda usar mayúsculas, minúsculas y números</li>
+          </ul>
+        </div>
+
+        <div class="form-actions">
+          <button 
+            type="submit" 
+            class="btn btn-primary"
+            [disabled]="isSaving()">
+            <span class="material-icons" *ngIf="!isSaving()">lock_reset</span>
+            <span class="material-icons" *ngIf="isSaving()">hourglass_empty</span>
+            <span *ngIf="!isSaving()">Cambiar Contraseña</span>
+            <span *ngIf="isSaving()">{{ 'common.loading' | translate }}</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

@@ -74,7 +74,18 @@
     },
     "password": {
       "required": "Password is required",
-      "minlength": "Password must be at least 6 characters"
+      "minlength": "Password must be at least 6 characters",
+      "mismatch": "Passwords do not match"
+    },
+    "currentPassword": {
+      "required": "Current password is required"
+    },
+    "newPassword": {
+      "required": "New password is required",
+      "minlength": "New password must be at least 6 characters"
+    },
+    "confirmPassword": {
+      "required": "Password confirmation is required"
     },
     "required": "This field is required",
     "minlength": "Must be at least {0} characters",
@@ -99,6 +110,7 @@
     "supplementSpecialties": "Supplement Specialties",
     "directionComments": "Direction Comments",
     "workTitle": "Work Title",
+    "language": "Language",
     "name": "Name",
     "description": "Description",
     "type": "Type",
@@ -248,5 +260,22 @@
     "faq": "Frequently Asked Questions",
     "contact": "Contact",
     "support": "Technical Support"
+  },
+  "profile": {
+    "title": "User Profile",
+    "firstName": "First Name",
+    "lastName": "Last Name",
+    "email": "Email",
+    "phone": "Phone",
+    "position": "Position",
+    "company": "Company",
+    "description": "Description",
+    "changePassword": "Change Password",
+    "currentPassword": "Current Password",
+    "newPassword": "New Password",
+    "confirmPassword": "Confirm Password",
+    "passwordRequirements": "Password requirements",
+    "passwordUpdated": "Password updated successfully",
+    "profileUpdated": "Profile updated successfully"
   }
 }
