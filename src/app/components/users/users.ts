@@ -7,7 +7,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatTableModule } from '@angular/material/table';
+import { MatTableModule, MatTableDataSource } from '@angular/material/table';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { ScrollingModule } from '@angular/cdk/scrolling';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -50,7 +50,7 @@ export class UsersComponent implements OnInit {
 
   // Alumnos data
   alumnos: any[] = [];
-  filteredAlumnos: any[] = [];
+  alumnosDataSource: MatTableDataSource<any>;
   displayedColumns: string[] = ['dni', 'nombre', 'apellidos', 'titulacion', 'asignatura', 'creditos', 'media', 'tipoGrado', 'actions'];
   isLoadingAlumnos = signal(false);
   alumnosError?: string;
@@ -61,7 +61,7 @@ export class UsersComponent implements OnInit {
 
   // Profesores data
   profesores: any[] = [];
-  filteredProfesores: any[] = [];
+  profesoresDataSource: MatTableDataSource<any>;
   displayedColumnsProfesores: string[] = ['nombre', 'apellidos', 'email', 'especialidad', 'actions'];
   isLoadingProfesores = signal(false);
   profesoresError?: string;
@@ -76,7 +76,11 @@ export class UsersComponent implements OnInit {
     private profesoresService: ProfesoresService,
     private dialog: MatDialog,
     private cdr: ChangeDetectorRef
-  ) {}
+  ) {
+    // Inicializar los DataSources
+    this.alumnosDataSource = new MatTableDataSource<any>([]);
+    this.profesoresDataSource = new MatTableDataSource<any>([]);
+  }
 
   ngOnInit(): void {
     // Cargar datos de forma secuencial para evitar problemas de rendimiento
@@ -97,20 +101,22 @@ export class UsersComponent implements OnInit {
         if (Array.isArray(data)) {
           this.alumnos = data;
           this.totalAlumnos = data.length;
-          this.filteredAlumnos = [...data];
+          // Forzar actualización del DataSource
+          this.alumnosDataSource = new MatTableDataSource<any>(data);
+          console.log('DEBUG: Alumnos cargados:', data.length, 'primeros 3:', data.slice(0, 3));
         } else {
           this.alumnos = [];
-          this.filteredAlumnos = [];
+          this.alumnosDataSource = new MatTableDataSource<any>([]);
           this.totalAlumnos = 0;
+          console.log('DEBUG: No hay datos de alumnos');
         }
         this.isLoadingAlumnos.set(false);
-        this.cdr.markForCheck(); // Forzar detección de cambios
+        this.cdr.detectChanges(); // Forzar detección de cambios
       },
       error: (error) => {
         console.error('Error cargando alumnos:', error);
         this.alumnosError = 'Error al cargar los alumnos. Inténtelo de nuevo.';
         this.isLoadingAlumnos.set(false);
-        this.cdr.markForCheck();
         this.snackBar.open('❌ Error al cargar los alumnos', 'Cerrar', { 
           duration: 4000,
           panelClass: ['error-snackbar']
@@ -132,13 +138,15 @@ export class UsersComponent implements OnInit {
 
   private filterAlumnos(): void {
     if (!this.searchTerm.trim()) {
-      this.filteredAlumnos = [...this.alumnos];
+      this.alumnosDataSource = new MatTableDataSource<any>(this.alumnos);
     } else {
       const searchLower = this.searchTerm.toLowerCase().trim();
-      this.filteredAlumnos = this.alumnos.filter(alumno => 
+      const filtered = this.alumnos.filter(alumno => 
         this.matchesSearchAlumno(alumno, searchLower)
       );
+      this.alumnosDataSource = new MatTableDataSource<any>(filtered);
     }
+    this.cdr.detectChanges(); // Forzar detección de cambios
   }
 
   private matchesSearchAlumno(alumno: any, searchTerm: string): boolean {
@@ -161,14 +169,8 @@ export class UsersComponent implements OnInit {
     this.pageSize = event.pageSize;
   }
 
-  get paginatedAlumnos(): any[] {
-    const startIndex = this.pageIndex * this.pageSize;
-    const endIndex = startIndex + this.pageSize;
-    return this.filteredAlumnos.slice(startIndex, endIndex);
-  }
-
   trackByAlumnoId(index: number, alumno: any): any {
-    return alumno.id || index;
+    return alumno?.id || alumno?.dni || index;
   }
 
   deleteAlumno(alumno: any): void {
@@ -192,12 +194,6 @@ export class UsersComponent implements OnInit {
               this.alumnos.splice(originalIndex, 1);
               this.totalAlumnos = this.alumnos.length;
               this.filterAlumnos();
-              
-              // Ajustar el índice de página si es necesario
-              const totalPages = Math.ceil(this.filteredAlumnos.length / this.pageSize);
-              if (this.pageIndex >= totalPages && totalPages > 0) {
-                this.pageIndex = totalPages - 1;
-              }
             }
             
             this.snackBar.open(
@@ -231,20 +227,18 @@ export class UsersComponent implements OnInit {
         if (Array.isArray(data)) {
           this.profesores = data;
           this.totalProfesores = data.length;
-          this.filteredProfesores = [...data];
+          this.profesoresDataSource = new MatTableDataSource<any>(data);
         } else {
           this.profesores = [];
-          this.filteredProfesores = [];
+          this.profesoresDataSource = new MatTableDataSource<any>([]);
           this.totalProfesores = 0;
         }
         this.isLoadingProfesores.set(false);
-        this.cdr.markForCheck(); // Forzar detección de cambios
       },
       error: (error) => {
         console.error('Error cargando profesores:', error);
         this.profesoresError = 'Error al cargar los profesores. Inténtelo de nuevo.';
         this.isLoadingProfesores.set(false);
-        this.cdr.markForCheck();
         this.snackBar.open('❌ Error al cargar los profesores', 'Cerrar', { 
           duration: 4000,
           panelClass: ['error-snackbar']
@@ -266,13 +260,15 @@ export class UsersComponent implements OnInit {
 
   private filterProfesores(): void {
     if (!this.searchTermProfesores.trim()) {
-      this.filteredProfesores = [...this.profesores];
+      this.profesoresDataSource = new MatTableDataSource<any>(this.profesores);
     } else {
       const searchLower = this.searchTermProfesores.toLowerCase().trim();
-      this.filteredProfesores = this.profesores.filter(profesor => 
+      const filtered = this.profesores.filter(profesor => 
         this.matchesSearchProfesor(profesor, searchLower)
       );
+      this.profesoresDataSource = new MatTableDataSource<any>(filtered);
     }
+    this.cdr.detectChanges(); // Forzar detección de cambios
   }
 
   private matchesSearchProfesor(profesor: any, searchTerm: string): boolean {
@@ -293,14 +289,8 @@ export class UsersComponent implements OnInit {
     this.pageSizeProfesores = event.pageSize;
   }
 
-  get paginatedProfesores(): any[] {
-    const startIndex = this.pageIndexProfesores * this.pageSizeProfesores;
-    const endIndex = startIndex + this.pageSizeProfesores;
-    return this.filteredProfesores.slice(startIndex, endIndex);
-  }
-
   trackByProfesorId(index: number, profesor: any): any {
-    return profesor.id || index;
+    return profesor?.id || profesor?.email || index;
   }
 
   deleteProfesor(profesor: any): void {
@@ -324,12 +314,6 @@ export class UsersComponent implements OnInit {
               this.profesores.splice(originalIndex, 1);
               this.totalProfesores = this.profesores.length;
               this.filterProfesores();
-              
-              // Ajustar el índice de página si es necesario
-              const totalPages = Math.ceil(this.filteredProfesores.length / this.pageSizeProfesores);
-              if (this.pageIndexProfesores >= totalPages && totalPages > 0) {
-                this.pageIndexProfesores = totalPages - 1;
-              }
             }
             
             this.snackBar.open(

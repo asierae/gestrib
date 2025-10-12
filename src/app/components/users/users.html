@@ -22,7 +22,7 @@
                 <mat-icon class="card-icon">school</mat-icon>
                 <div>
                   <mat-card-title>Lista de Alumnos</mat-card-title>
-                  <mat-card-subtitle>Total: {{ filteredAlumnos.length }} de {{ totalAlumnos }} alumnos</mat-card-subtitle>
+                  <mat-card-subtitle>Total: {{ alumnosDataSource.data.length }} de {{ totalAlumnos }} alumnos</mat-card-subtitle>
                 </div>
               </div>
               <div class="card-actions">
@@ -53,7 +53,14 @@
             </div>
 
             <div class="table-container" *ngIf="!isLoadingAlumnos()">
-              <table mat-table [dataSource]="paginatedAlumnos" class="alumnos-table">
+              <!-- Debug info -->
+              <div style="background: yellow; padding: 10px; margin: 10px 0;">
+                <strong>DEBUG:</strong> 
+                Total alumnos: {{ totalAlumnos }} | 
+                DataSource length: {{ alumnosDataSource.data.length }} | 
+                Loading: {{ isLoadingAlumnos() }}
+              </div>
+              <table mat-table [dataSource]="alumnosDataSource" class="alumnos-table" style="border: 2px solid red;">
                 <!-- DNI Column -->
                 <ng-container matColumnDef="dni">
                   <th mat-header-cell *matHeaderCellDef>DNI</th>
@@ -110,7 +117,7 @@
                             color="warn" 
                             (click)="deleteAlumno(alumno)"
                             matTooltip="Eliminar alumno">
-                      <mat-icon>delete_forever</mat-icon>
+                      <mat-icon>delete</mat-icon>
                     </button>
                   </td>
                 </ng-container>
@@ -119,15 +126,15 @@
                 <tr mat-row *matRowDef="let row; columns: displayedColumns; trackBy: trackByAlumnoId"></tr>
               </table>
               
-              <!-- Paginator -->
-              <mat-paginator 
+              <!-- Paginator temporalmente deshabilitado para debug -->
+              <!-- <mat-paginator 
                 [length]="filteredAlumnos.length"
                 [pageSize]="pageSize"
                 [pageIndex]="pageIndex"
                 [pageSizeOptions]="[5, 10, 25, 50]"
                 (page)="onPageChange($event)"
                 showFirstLastButtons>
-              </mat-paginator>
+              </mat-paginator> -->
             </div>
 
             <!-- Loading State -->
@@ -153,7 +160,7 @@
             </div>
 
             <!-- No Results State -->
-            <div class="empty-container" *ngIf="!isLoadingAlumnos() && !alumnosError && totalAlumnos > 0 && filteredAlumnos.length === 0">
+            <div class="empty-container" *ngIf="!isLoadingAlumnos() && !alumnosError && totalAlumnos > 0 && alumnosDataSource.data.length === 0">
               <mat-icon>search_off</mat-icon>
               <p>No se encontraron alumnos que coincidan con "{{ searchTerm }}"</p>
               <button mat-raised-button color="primary" (click)="clearSearch()">
@@ -175,7 +182,7 @@
                 <mat-icon class="card-icon">person</mat-icon>
                 <div>
                   <mat-card-title>Lista de Profesores</mat-card-title>
-                  <mat-card-subtitle>Total: {{ filteredProfesores.length }} de {{ totalProfesores }} profesores</mat-card-subtitle>
+                  <mat-card-subtitle>Total: {{ profesoresDataSource.data.length }} de {{ totalProfesores }} profesores</mat-card-subtitle>
                 </div>
               </div>
               <div class="card-actions">
@@ -206,7 +213,7 @@
             </div>
 
             <div class="table-container" *ngIf="!isLoadingProfesores()">
-              <table mat-table [dataSource]="paginatedProfesores" class="profesores-table">
+              <table mat-table [dataSource]="profesoresDataSource" class="profesores-table">
                 <!-- Nombre Column -->
                 <ng-container matColumnDef="nombre">
                   <th mat-header-cell *matHeaderCellDef>Nombre</th>
@@ -239,7 +246,7 @@
                             color="warn" 
                             (click)="deleteProfesor(profesor)"
                             matTooltip="Eliminar profesor">
-                      <mat-icon>delete_forever</mat-icon>
+                      <mat-icon>delete</mat-icon>
                     </button>
                   </td>
                 </ng-container>
@@ -248,15 +255,15 @@
                 <tr mat-row *matRowDef="let row; columns: displayedColumnsProfesores; trackBy: trackByProfesorId"></tr>
               </table>
               
-              <!-- Paginator -->
-              <mat-paginator 
+              <!-- Paginator temporalmente deshabilitado para debug -->
+              <!-- <mat-paginator 
                 [length]="filteredProfesores.length"
                 [pageSize]="pageSizeProfesores"
                 [pageIndex]="pageIndexProfesores"
                 [pageSizeOptions]="[5, 10, 25, 50]"
                 (page)="onPageChangeProfesores($event)"
                 showFirstLastButtons>
-              </mat-paginator>
+              </mat-paginator> -->
             </div>
 
             <!-- Loading State -->
@@ -282,7 +289,7 @@
             </div>
 
             <!-- No Results State -->
-            <div class="empty-container" *ngIf="!isLoadingProfesores() && !profesoresError && totalProfesores > 0 && filteredProfesores.length === 0">
+            <div class="empty-container" *ngIf="!isLoadingProfesores() && !profesoresError && totalProfesores > 0 && profesoresDataSource.data.length === 0">
               <mat-icon>search_off</mat-icon>
               <p>No se encontraron profesores que coincidan con "{{ searchTermProfesores }}"</p>
               <button mat-raised-button color="primary" (click)="clearSearchProfesores()">

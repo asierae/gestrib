@@ -14,6 +14,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { TranslatePipe } from '../../pipes/translate.pipe';
 import { AlumnosService, AlumnoRequest } from '../../services/alumnos.service';
+import { ProfesoresService, ProfesorRequest } from '../../services/profesores.service';
 import * as XLSX from 'xlsx';
 
 @Component({
@@ -36,10 +37,16 @@ export class AdministrationComponent {
   isSyncingProfesores = signal(false);
   isDragOverAlumnos = signal(false);
   isDragOverProfesores = signal(false);
+  
+  // Estados para preview de datos
+  profesoresPreview = signal<ProfesorRequest[]>([]);
+  showProfesoresPreview = signal(false);
+  isProcessingProfesoresFile = signal(false);
 
   constructor(
     private snackBar: MatSnackBar,
-    private alumnosService: AlumnosService
+    private alumnosService: AlumnosService,
+    private profesoresService: ProfesoresService
   ) {}
 
 
@@ -80,16 +87,71 @@ export class AdministrationComponent {
     else this.isDragOverProfesores.set(false);
   }
 
-  private setFile(file: File, type: 'alumnos' | 'profesores'): void {
+  private async setFile(file: File, type: 'alumnos' | 'profesores'): Promise<void> {
     if (!file.name.toLowerCase().endsWith('.xlsx')) {
       this.snackBar.open('Formato no válido. Debe ser .xlsx', 'Cerrar', { duration: 2500 });
       return;
     }
-    if (type === 'alumnos') this.alumnosFile = file; else this.profesoresFile = file;
+    
+    if (type === 'alumnos') {
+      this.alumnosFile = file;
+    } else {
+      this.profesoresFile = file;
+      // Procesar inmediatamente el archivo de profesores para mostrar preview
+      await this.processProfesoresFile(file);
+    }
   }
 
   openPicker(type: 'alumnos' | 'profesores', inputEl: HTMLInputElement): void {
     inputEl.click();
+  }
+
+  private async processProfesoresFile(file: File): Promise<void> {
+    this.isProcessingProfesoresFile.set(true);
+    
+    try {
+      // Leer el archivo Excel
+      const excelData = await this.readExcelFile(file);
+      console.log('Datos del Excel de profesores leídos para preview:', excelData);
+      
+      // Procesar los datos
+      console.log('AdministrationComponent: Procesando datos de Excel...');
+      const profesoresData = this.profesoresService.processExcelData(excelData);
+      console.log('AdministrationComponent: Datos procesados para preview:', profesoresData);
+      console.log('AdministrationComponent: Total profesores procesados:', profesoresData.length);
+      
+      // Mostrar preview
+      this.profesoresPreview.set(profesoresData);
+      this.showProfesoresPreview.set(true);
+      
+      if (profesoresData.length === 0) {
+        console.error('AdministrationComponent: No se encontraron profesores válidos');
+        console.error('AdministrationComponent: Datos del Excel:', excelData);
+        console.error('AdministrationComponent: Primera fila:', excelData[0]);
+        console.error('AdministrationComponent: Columnas encontradas:', Object.keys(excelData[0] || {}));
+        
+        const columnas = Object.keys(excelData[0] || {});
+        this.snackBar.open(
+          `No se encontraron profesores válidos. Columnas encontradas: ${columnas.join(', ')}. Se necesitan: Nombre, Apellidos, Direc. Mail UPV, Nombre unidad org.`, 
+          'Cerrar', 
+          { duration: 10000 }
+        );
+        this.showProfesoresPreview.set(false);
+      } else {
+        console.log('AdministrationComponent: Profesores encontrados, mostrando preview');
+        this.snackBar.open(`Archivo cargado: ${profesoresData.length} profesores encontrados`, 'Cerrar', { duration: 3000 });
+      }
+      
+    } catch (error) {
+      console.error('Error procesando archivo de profesores:', error);
+      this.snackBar.open('Error al procesar el archivo: ' + (error as any)?.message || 'Error desconocido', 'Cerrar', { 
+        duration: 5000,
+        panelClass: ['error-snackbar']
+      });
+      this.showProfesoresPreview.set(false);
+    } finally {
+      this.isProcessingProfesoresFile.set(false);
+    }
   }
 
   async syncAlumnos(): Promise<void> {
@@ -202,15 +264,100 @@ export class AdministrationComponent {
     });
   }
 
-  syncProfesores(): void {
-    if (!this.profesoresFile) {
-      this.snackBar.open('Seleccione un archivo de profesores (.xlsx)', 'Cerrar', { duration: 2500 });
+  async syncProfesores(): Promise<void> {
+    const profesoresData = this.profesoresPreview();
+    
+    if (profesoresData.length === 0) {
+      this.snackBar.open('No hay profesores para sincronizar', 'Cerrar', { duration: 2500 });
       return;
     }
+
     this.isSyncingProfesores.set(true);
-    setTimeout(() => {
+    
+    try {
+      // Validar los datos
+      const validation = this.profesoresService.validateProfesoresData(profesoresData);
+      if (!validation.valid) {
+        // Mostrar solo los primeros 5 errores para no saturar la pantalla
+        const errorPreview = validation.errors.slice(0, 5);
+        const errorMessage = errorPreview.length < validation.errors.length 
+          ? `${errorPreview.join(', ')}... (y ${validation.errors.length - errorPreview.length} errores más)`
+          : errorPreview.join(', ');
+        
+        this.snackBar.open(
+          `❌ Errores de validación encontrados: ${errorMessage}`, 
+          'Cerrar', 
+          { 
+            duration: 8000,
+            panelClass: ['error-snackbar']
+          }
+        );
+        
+        // Log todos los errores en consola para debugging
+        console.error('Errores de validación completos:', validation.errors);
+        this.isSyncingProfesores.set(false);
+        return;
+      }
+
+      // Enviar a la API
+      console.log('Enviando datos de profesores a la API:', profesoresData);
+      const response = await this.profesoresService.createBulkProfesores(profesoresData).toPromise();
+      console.log('Respuesta de la API:', response);
+      
+      if (response) {
+        this.snackBar.open(
+          `✅ Sincronización realizada correctamente: ${response.profesoresProcesados} profesores procesados de ${response.totalProcesados} total`, 
+          'Cerrar', 
+          { 
+            duration: 6000,
+            panelClass: ['success-snackbar']
+          }
+        );
+        
+        // Limpiar después del éxito
+        this.clearProfesoresData();
+      } else {
+        this.snackBar.open('❌ Error en la sincronización: No se recibió respuesta del servidor', 'Cerrar', { 
+          duration: 4000,
+          panelClass: ['error-snackbar']
+        });
+      }
+      
+    } catch (error) {
+      console.error('Error sincronizando profesores:', error);
+      this.snackBar.open('❌ Error en la sincronización: ' + (error as any)?.message || 'Error desconocido', 'Cerrar', { 
+        duration: 5000,
+        panelClass: ['error-snackbar']
+      });
+    } finally {
       this.isSyncingProfesores.set(false);
-      this.snackBar.open(`Profesores sincronizados para ${this.currentYear}-${this.nextYear}`, 'Cerrar', { duration: 2500 });
-    }, 1200);
+    }
+  }
+
+  clearProfesoresData(): void {
+    this.profesoresFile = undefined;
+    this.profesoresPreview.set([]);
+    this.showProfesoresPreview.set(false);
+    
+    // Resetear el input file
+    const fileInput = document.getElementById('profesores-file-input') as HTMLInputElement;
+    if (fileInput) fileInput.value = '';
+  }
+
+  trackByProfesor(index: number, profesor: ProfesorRequest): string {
+    return `${profesor.email}-${profesor.dni}`;
+  }
+
+  getEspecialidadLabel(tipoEspecialidad: string): string {
+    switch (tipoEspecialidad) {
+      case 'ingenieria_computacion':
+        return 'Ing. Computación';
+      case 'ingenieria_software':
+        return 'Ing. Software';
+      case 'computacion':
+        return 'Computación';
+      default:
+        return 'Sin especificar';
+    }
   }
 }

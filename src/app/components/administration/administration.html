@@ -36,17 +36,63 @@
             <mat-card-title>Profesores</mat-card-title>
           </mat-card-header>
           <mat-card-content>
-            <div class="droparea" [class.over]="isDragOverProfesores()" (dragover)="onDragOver('profesores', $event)" (dragleave)="onDragLeave('profesores', $event)" (drop)="onDrop('profesores', $event)" (click)="openPicker('profesores', profesoresInput)">
+            <!-- Área de drag & drop (solo visible cuando no hay preview) -->
+            <div *ngIf="!showProfesoresPreview()" class="droparea" [class.over]="isDragOverProfesores()" (dragover)="onDragOver('profesores', $event)" (dragleave)="onDragLeave('profesores', $event)" (drop)="onDrop('profesores', $event)" (click)="openPicker('profesores', profesoresInput)">
               <mat-icon>upload_file</mat-icon>
               Arrastra y suelta aquí el XLSX de profesores
               <div class="filename" *ngIf="profesoresFile">Seleccionado: {{ profesoresFile.name }}</div>
             </div>
-            <input #profesoresInput hidden type="file" accept=".xlsx" (change)="onProfesoresFileChange($event)">
+
+            <!-- Preview de profesores (visible cuando hay datos) -->
+            <div *ngIf="showProfesoresPreview()" class="preview-container">
+              <div class="preview-header">
+                <h3>Vista previa de profesores ({{ profesoresPreview().length }} encontrados)</h3>
+                <button mat-icon-button (click)="clearProfesoresData()" title="Cerrar vista previa">
+                  <mat-icon>close</mat-icon>
+                </button>
+              </div>
+              
+              <!-- Spinner de procesamiento -->
+              <div *ngIf="isProcessingProfesoresFile()" class="processing-spinner">
+                <mat-spinner diameter="40"></mat-spinner>
+                <p>Procesando archivo...</p>
+              </div>
+
+              <!-- Lista de profesores -->
+              <div *ngIf="!isProcessingProfesoresFile()" class="profesores-list">
+                <div class="profesores-table-header">
+                  <div class="col-nombre">Nombre</div>
+                  <div class="col-apellidos">Apellidos</div>
+                  <div class="col-email">Email</div>
+                  <div class="col-dni">DNI</div>
+                  <div class="col-especialidad">Especialidad</div>
+                </div>
+                
+                <div class="profesores-table-body">
+                  <div *ngFor="let profesor of profesoresPreview(); trackBy: trackByProfesor" class="profesor-row">
+                    <div class="col-nombre">{{ profesor.nombre }}</div>
+                    <div class="col-apellidos">{{ profesor.apellidos }}</div>
+                    <div class="col-email">{{ profesor.email }}</div>
+                    <div class="col-dni">{{ profesor.dni }}</div>
+                    <div class="col-especialidad">
+                      <span class="especialidad-badge" [class]="'especialidad-' + profesor.tipoEspecialidad">
+                        {{ getEspecialidadLabel(profesor.tipoEspecialidad) }}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <input #profesoresInput id="profesores-file-input" hidden type="file" accept=".xlsx" (change)="onProfesoresFileChange($event)">
+            
             <div class="actions">
-              <button mat-raised-button color="primary" (click)="syncProfesores()" [disabled]="isSyncingProfesores()">
-                <mat-spinner *ngIf="isSyncingProfesores()" diameter="20" class="button-spinner"></mat-spinner>
-                <mat-icon *ngIf="!isSyncingProfesores()">sync</mat-icon>
-                {{ isSyncingProfesores() ? 'Sincronizando...' : 'Sincronizar lista' }}
+              <button mat-raised-button color="primary" (click)="syncProfesores()" [disabled]="isSyncingProfesores() || !showProfesoresPreview()">
+                <div class="button-content">
+                  <mat-spinner *ngIf="isSyncingProfesores()" diameter="20" class="button-spinner"></mat-spinner>
+                  <mat-icon *ngIf="!isSyncingProfesores()">sync</mat-icon>
+                  <span>{{ isSyncingProfesores() ? 'Sincronizando...' : 'Sincronizar lista' }}</span>
+                </div>
               </button>
             </div>
             <div class="hint">Sobrescribirá los datos del curso {{ currentYear }}-{{ nextYear }}.</div>
