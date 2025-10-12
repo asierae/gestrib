@@ -258,13 +258,13 @@ export class DefensasComponent implements OnInit, OnDestroy {
       curso: [`${this.currentYear}-${this.nextYear}`, Validators.required],
       grado: [TipoGrado.INGENIERIA_INFORMATICA, Validators.required],
       especialidad: [TipoEspecialidad.INGENIERIA_COMPUTACION], // Sin validador required aquí
-      titulo: ['', [Validators.required, Validators.minLength(5)]],
+      titulo: ['', Validators.required],
       idioma: ['es', Validators.required], // Idioma por defecto español
       estudiante: [null, Validators.required], // Cambiar a null para objetos
       directorTribunal: ['', Validators.required],
       codirectorTribunal: [''], // Opcional
-      vocalTribunal: ['', Validators.required],
-      suplente: ['', Validators.required],
+      vocalTribunal: [''], // Opcional
+      suplente: [''], // Opcional
       comentariosDireccion: [''],
       especialidadesVocal: [[]],
       especialidadesSuplente: [[]]
@@ -674,8 +674,8 @@ export class DefensasComponent implements OnInit, OnDestroy {
       estudiante: formValue.estudiante, // Ahora es el objeto completo
       directorTribunal: this.profesores.find(p => `${p.nombre} ${p.apellidos}` === formValue.directorTribunal)!,
       codirectorTribunal: formValue.codirectorTribunal ? this.profesores.find(p => `${p.nombre} ${p.apellidos}` === formValue.codirectorTribunal) : undefined,
-      vocalTribunal: this.profesores.find(p => `${p.nombre} ${p.apellidos}` === formValue.vocalTribunal)!,
-      suplente: this.profesores.find(p => `${p.nombre} ${p.apellidos}` === formValue.suplente)!,
+      vocalTribunal: formValue.vocalTribunal ? this.profesores.find(p => `${p.nombre} ${p.apellidos}` === formValue.vocalTribunal) : undefined,
+      suplente: formValue.suplente ? this.profesores.find(p => `${p.nombre} ${p.apellidos}` === formValue.suplente) : undefined,
       comentariosDireccion: formValue.comentariosDireccion,
       especialidadesVocal: formValue.especialidadesVocal,
       especialidadesSuplente: formValue.especialidadesSuplente
@@ -870,8 +870,6 @@ export class DefensasComponent implements OnInit, OnDestroy {
     pdf.text('EUSKAL HERRIKO UNIBERTSITATEA', pageWidth / 2, yPosition, { align: 'center' });
     yPosition += 15;
     
-    pdf.setFontSize(10);
-    pdf.text('Escuela de Ingeniería de Gipuzkoa', pageWidth / 2, yPosition, { align: 'center' });
     yPosition += 25;
     
     this.continuePDFGeneration(pdf, formValue, yPosition, pageWidth, maxY, margin, checkPageBreak);
@@ -960,29 +958,44 @@ export class DefensasComponent implements OnInit, OnDestroy {
     pdf.setFont('helvetica', 'normal');
     const estudianteText = formValue.estudiante ? formValue.estudiante.nombreCompleto || `${formValue.estudiante.nombre} ${formValue.estudiante.apellido1} ${formValue.estudiante.apellido2}`.trim() : 'No especificado';
     pdf.text(estudianteText, margin, yPosition);
-    yPosition += 26;
+    yPosition += 16;
     
-    // Información del tribunal
+    // DNI del estudiante
+    if (formValue.estudiante && formValue.estudiante.dni) {
+      checkPageBreak(20);
+      pdf.text(`DNI: ${formValue.estudiante.dni}`, margin, yPosition);
+      yPosition += 20;
+    } else {
+      yPosition += 10;
+    }
+    
+    // Información de la dirección
     checkPageBreak(60);
     pdf.setFont('helvetica', 'bold');
-    pdf.text(`${this.translationService.getTranslation('defensas.pdf.committee') || 'COMPOSICIÓN DEL TRIBUNAL:'}`, margin, yPosition);
+    pdf.text('Zuzendaria(k) / Dirección:', margin, yPosition);
     yPosition += 16;
     
     checkPageBreak(30);
     pdf.setFont('helvetica', 'normal');
-    writeWrappedLines(pdf.splitTextToSize(`${this.translationService.getTranslation('defensas.pdf.director') || 'Director del Tribunal'}: ${formValue.directorTribunal}`, pageWidth - 2 * margin), margin, 16);
+    writeWrappedLines(pdf.splitTextToSize(`${formValue.directorTribunal}`, pageWidth - 2 * margin), margin, 16);
     
     // Co-director (solo si está seleccionado)
     if (formValue.codirectorTribunal) {
       checkPageBreak(25);
-      writeWrappedLines(pdf.splitTextToSize(`Co-director del Tribunal: ${formValue.codirectorTribunal}`, pageWidth - 2 * margin), margin, 16);
+      writeWrappedLines(pdf.splitTextToSize(`${formValue.codirectorTribunal}`, pageWidth - 2 * margin), margin, 16);
     }
     
-    checkPageBreak(25);
-    writeWrappedLines(pdf.splitTextToSize(`${this.translationService.getTranslation('defensas.pdf.vocal') || 'Vocal del Tribunal'}: ${formValue.vocalTribunal}`, pageWidth - 2 * margin), margin, 16);
+    // Vocal (solo si está seleccionado)
+    if (formValue.vocalTribunal) {
+      checkPageBreak(25);
+      writeWrappedLines(pdf.splitTextToSize(`${formValue.vocalTribunal}`, pageWidth - 2 * margin), margin, 16);
+    }
     
-    checkPageBreak(25);
-    writeWrappedLines(pdf.splitTextToSize(`${this.translationService.getTranslation('defensas.pdf.supplement') || 'Suplente'}: ${formValue.suplente}`, pageWidth - 2 * margin), margin, 16);
+    // Suplente (solo si está seleccionado)
+    if (formValue.suplente) {
+      checkPageBreak(25);
+      writeWrappedLines(pdf.splitTextToSize(`${formValue.suplente}`, pageWidth - 2 * margin), margin, 16);
+    }
     yPosition += 10;
     
     
@@ -1032,22 +1045,6 @@ export class DefensasComponent implements OnInit, OnDestroy {
       yPosition += 8;
     }
     
-    // Información adicional del acta
-    checkPageBreak(60);
-    pdf.setFont('helvetica', 'bold');
-    pdf.text(`${this.translationService.getTranslation('defensas.pdf.recordInfo') || 'INFORMACIÓN DEL ACTA:'}`, margin, yPosition);
-    yPosition += 18;
-    
-    checkPageBreak(35);
-    pdf.setFont('helvetica', 'normal');
-    writeWrappedLines(pdf.splitTextToSize(`• ${this.translationService.getTranslation('defensas.pdf.recordPoint1') || 'Este acta certifica la composición del tribunal para la defensa del trabajo'}`, pageWidth - 2 * margin), margin, 16);
-    
-    checkPageBreak(30);
-    writeWrappedLines(pdf.splitTextToSize(`• ${this.translationService.getTranslation('defensas.pdf.recordPoint2') || 'El tribunal se compromete a seguir las normativas académicas vigentes'}`, pageWidth - 2 * margin), margin, 16);
-    
-    checkPageBreak(30);
-    writeWrappedLines(pdf.splitTextToSize(`• ${this.translationService.getTranslation('defensas.pdf.recordPoint3') || 'La evaluación se realizará según los criterios establecidos por la universidad'}`, pageWidth - 2 * margin), margin, 16);
-    yPosition += 8;
     
     // Firma - Asegurar que hay espacio suficiente
     checkPageBreak(140);
@@ -1064,18 +1061,34 @@ export class DefensasComponent implements OnInit, OnDestroy {
     
     checkPageBreak(40);
     pdf.setFont('helvetica', 'normal');
-    pdf.text(`${this.translationService.getTranslation('defensas.pdf.director') || 'Director del Tribunal'}:`, margin, yPosition);
-    pdf.text(`${this.translationService.getTranslation('defensas.pdf.vocal') || 'Vocal del Tribunal'}:`, pageWidth / 2, yPosition);
-    yPosition += 24;
     
-    checkPageBreak(30);
-    pdf.text('_________________', margin, yPosition);
-    pdf.text('_________________', pageWidth / 2, yPosition);
-    yPosition += 16;
-    
-    checkPageBreak(30);
-    pdf.text(formValue.directorTribunal, margin, yPosition);
-    pdf.text(formValue.vocalTribunal, pageWidth / 2, yPosition);
+    // Solo firmar director y codirector (si hay)
+    if (formValue.codirectorTribunal) {
+      // Si hay codirector, mostrar ambos
+      pdf.text('Zuzendaria / Director:', margin, yPosition);
+      pdf.text('Kozuzendaria / Codirector:', pageWidth / 2, yPosition);
+      yPosition += 24;
+      
+      checkPageBreak(30);
+      pdf.text('_________________', margin, yPosition);
+      pdf.text('_________________', pageWidth / 2, yPosition);
+      yPosition += 16;
+      
+      checkPageBreak(30);
+      pdf.text(formValue.directorTribunal, margin, yPosition);
+      pdf.text(formValue.codirectorTribunal, pageWidth / 2, yPosition);
+    } else {
+      // Solo director
+      pdf.text('Zuzendaria / Director:', margin, yPosition);
+      yPosition += 24;
+      
+      checkPageBreak(30);
+      pdf.text('_________________', margin, yPosition);
+      yPosition += 16;
+      
+      checkPageBreak(30);
+      pdf.text(formValue.directorTribunal, margin, yPosition);
+    }
     yPosition += 20;
     
     // Fecha eliminada según petición

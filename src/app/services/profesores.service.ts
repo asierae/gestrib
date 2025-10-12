@@ -2,13 +2,14 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, map, catchError, of } from 'rxjs';
 import { Profesor, TipoEspecialidad } from '../models/profesor.model';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ProfesoresService {
   private http = inject(HttpClient);
-  private apiUrl = 'https://gestrib-api.azurewebsites.net/usuarios';
+  private apiUrl = `${environment.apiUrl}/usuarios`;
 
   /**
    * Obtiene todos los profesores desde la API
@@ -294,6 +295,9 @@ export class ProfesoresService {
    */
   createBulkProfesores(profesores: ProfesorRequest[]): Observable<any> {
     console.log('ProfesoresService: Enviando profesores a la API...');
+    console.log('ProfesoresService: URL completa:', `${this.apiUrl}/bulk-profesores`);
+    console.log('ProfesoresService: Datos a enviar:', { profesores });
+    
     return this.http.post(`${this.apiUrl}/bulk-profesores`, { profesores }).pipe(
       map(response => {
         console.log('ProfesoresService: Profesores creados exitosamente:', response);
@@ -301,6 +305,10 @@ export class ProfesoresService {
       }),
       catchError(error => {
         console.error('ProfesoresService: Error al crear profesores:', error);
+        console.error('ProfesoresService: Status:', error.status);
+        console.error('ProfesoresService: StatusText:', error.statusText);
+        console.error('ProfesoresService: URL:', error.url);
+        console.error('ProfesoresService: Error details:', error.error);
         throw error;
       })
     );

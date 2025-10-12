@@ -15,6 +15,7 @@ import { MatInputModule } from '@angular/material/input';
 import { TranslatePipe } from '../../pipes/translate.pipe';
 import { AlumnosService, AlumnoRequest } from '../../services/alumnos.service';
 import { ProfesoresService, ProfesorRequest } from '../../services/profesores.service';
+import { AuthService } from '../../services/auth.service';
 import * as XLSX from 'xlsx';
 
 @Component({
@@ -46,7 +47,8 @@ export class AdministrationComponent {
   constructor(
     private snackBar: MatSnackBar,
     private alumnosService: AlumnosService,
-    private profesoresService: ProfesoresService
+    private profesoresService: ProfesoresService,
+    private authService: AuthService
   ) {}
 
 
@@ -272,6 +274,21 @@ export class AdministrationComponent {
       return;
     }
 
+    // Verificar autenticación
+    if (!this.authService.isLoggedIn()) {
+      this.snackBar.open('Debes estar autenticado para sincronizar profesores', 'Cerrar', { duration: 3000 });
+      return;
+    }
+
+    const currentUser = this.authService.currentUser();
+    const token = this.authService.getToken();
+    console.log('AdministrationComponent: Usuario actual:', currentUser);
+    console.log('AdministrationComponent: Token disponible:', !!token);
+    console.log('AdministrationComponent: Token (primeros 20 chars):', token ? token.substring(0, 20) + '...' : 'NO TOKEN');
+    console.log('AdministrationComponent: Es administración:', this.authService.isAdministracion());
+    console.log('AdministrationComponent: Tipo usuario:', currentUser?.tipoUsuario);
+    console.log('AdministrationComponent: Role:', currentUser?.role);
+
     this.isSyncingProfesores.set(true);
     
     try {
@@ -305,14 +322,30 @@ export class AdministrationComponent {
       console.log('Respuesta de la API:', response);
       
       if (response) {
+        // Mensaje de éxito detallado
+        const mensajeExito = `✅ ¡Sincronización completada exitosamente! 
+        
+📊 Resumen:
+• Profesores procesados: ${response.profesoresProcesados}
+• Total enviados: ${response.totalProcesados}
+• Errores: ${response.errores?.length || 0}
+
+Los profesores han sido creados como usuarios en el sistema.`;
+
+        // Snackbar de éxito
         this.snackBar.open(
-          `✅ Sincronización realizada correctamente: ${response.profesoresProcesados} profesores procesados de ${response.totalProcesados} total`, 
-          'Cerrar', 
+          `✅ Sincronización exitosa: ${response.profesoresProcesados}/${response.totalProcesados} profesores creados`, 
+          'Ver detalles', 
           { 
-            duration: 6000,
+            duration: 8000,
             panelClass: ['success-snackbar']
           }
         );
+
+        // Alert adicional con más detalles
+        setTimeout(() => {
+          alert(mensajeExito);
+        }, 1000);
         
         // Limpiar después del éxito
         this.clearProfesoresData();
@@ -325,10 +358,33 @@ export class AdministrationComponent {
       
     } catch (error) {
       console.error('Error sincronizando profesores:', error);
-      this.snackBar.open('❌ Error en la sincronización: ' + (error as any)?.message || 'Error desconocido', 'Cerrar', { 
-        duration: 5000,
-        panelClass: ['error-snackbar']
-      });
+      
+      // Mensaje de error detallado
+      const errorMessage = (error as any)?.message || 'Error desconocido';
+      const errorStatus = (error as any)?.status;
+      
+      let mensajeError = `❌ Error en la sincronización de profesores
+
+🔍 Detalles del error:
+• Mensaje: ${errorMessage}
+${errorStatus ? `• Código: ${errorStatus}` : ''}
+
+Por favor, verifica tu conexión y vuelve a intentarlo.`;
+
+      // Snackbar de error
+      this.snackBar.open(
+        `❌ Error en la sincronización: ${errorMessage}`, 
+        'Ver detalles', 
+        { 
+          duration: 6000,
+          panelClass: ['error-snackbar']
+        }
+      );
+
+      // Alert con detalles del error
+      setTimeout(() => {
+        alert(mensajeError);
+      }, 1000);
     } finally {
       this.isSyncingProfesores.set(false);
     }

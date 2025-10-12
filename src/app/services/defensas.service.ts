@@ -17,7 +17,7 @@ import {
 })
 export class DefensasService {
   private http = inject(HttpClient);
-  private baseUrl = `${environment.apiUrl}/${environment.apiVersion}/defensas`;
+  private baseUrl = `${environment.apiUrl}/api/defensas`;
 
   /**
    * Obtiene todas las defensas con filtros opcionales
@@ -60,20 +60,20 @@ export class DefensasService {
   }
 
   /**
-   * Crea una nueva defensa
+   * Crea una nueva defensa - Entry Point: generar_defensa
    */
   createDefensa(defensa: CreateDefensaRequest): Observable<DefensaResponse> {
     // Mapear los datos del frontend al formato del backend
     const backendRequest = {
-      IdCurso: parseInt(defensa.curso) || 0,
+      IdCurso: this.mapCursoToId(defensa.curso),
       IdGrado: this.mapGradoToId(defensa.grado),
       IdEspecialidad: defensa.especialidad ? this.mapEspecialidadToId(defensa.especialidad) : null,
       Titulo: defensa.titulo,
       IdAlumno: defensa.estudiante.id || 0, // Necesitamos el ID del estudiante
       IdDirectorTribunal: defensa.directorTribunal.id,
       IdCodirectorTribunal: defensa.codirectorTribunal?.id || null,
-      IdVocalTribunal: defensa.vocalTribunal.id,
-      IdSuplente: defensa.suplente.id,
+      IdVocalTribunal: defensa.vocalTribunal?.id || null,
+      IdSuplente: defensa.suplente?.id || null,
       IdPresidente: null, // Por defecto null
       EspecialidadesVocal: defensa.especialidadesVocal.join(', '),
       EspecialidadesSuplente: defensa.especialidadesSuplente.join(', '),
@@ -89,13 +89,22 @@ export class DefensasService {
       IsActive: true
     };
 
-    console.log('Frontend sending data:', backendRequest);
+    console.log('Entry Point: generar_defensa - Frontend sending data:', backendRequest);
 
     return this.http.post<DefensaResponse>(this.baseUrl, backendRequest)
       .pipe(
         timeout<DefensaResponse>(environment.timeout),
         catchError(this.handleError)
       );
+  }
+
+  /**
+   * Mapea el curso (string) a ID numérico
+   */
+  private mapCursoToId(curso: string): number {
+    // Por ahora, usar un ID fijo. En el futuro se puede implementar lógica más compleja
+    // basada en el año o crear una tabla de cursos
+    return 1; // ID del curso actual
   }
 
   /**

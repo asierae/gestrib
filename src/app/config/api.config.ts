@@ -64,5 +64,9 @@ export function isPublicUrl(url: string): boolean {
  * Verifica si una URL pertenece a nuestra API
  */
 export function isApiUrl(url: string): boolean {
-  return url.startsWith(API_CONFIG.baseUrl);
+  const isApi = url.startsWith(API_CONFIG.baseUrl);
+  console.log('isApiUrl: URL:', url);
+  console.log('isApiUrl: baseUrl:', API_CONFIG.baseUrl);
+  console.log('isApiUrl: Resultado:', isApi);
+  return isApi;
 }

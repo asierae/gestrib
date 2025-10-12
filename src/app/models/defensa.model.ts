@@ -79,8 +79,8 @@ export interface CreateDefensaRequest {
   estudiante: EstudianteDisplay;
   directorTribunal: Profesor;
   codirectorTribunal?: Profesor; // Opcional
-  vocalTribunal: Profesor;
-  suplente: Profesor;
+  vocalTribunal?: Profesor; // Opcional
+  suplente?: Profesor; // Opcional
   comentariosDireccion: string;
   especialidadesVocal: string[];
   especialidadesSuplente: string[];

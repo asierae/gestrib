@@ -8,9 +8,18 @@ import { isApiUrl, isPublicUrl } from '../config/api.config';
 export function authInterceptor(req: HttpRequest<unknown>, next: HttpHandlerFn): Observable<HttpEvent<unknown>> {
   const authService = inject(AuthService);
   
+  // Debug logging
+  console.log('AuthInterceptor: URL:', req.url);
+  console.log('AuthInterceptor: isApiUrl:', isApiUrl(req.url));
+  console.log('AuthInterceptor: isPublicUrl:', isPublicUrl(req.url));
+  console.log('AuthInterceptor: isLoggedIn:', authService.isLoggedIn());
+  
   // Agregar token a las peticiones que lo requieran
   if (shouldAddToken(req, authService)) {
+    console.log('AuthInterceptor: Agregando token a la petición');
     req = addTokenToRequest(req, authService);
+  } else {
+    console.log('AuthInterceptor: NO se agregó token a la petición');
   }
 
   return next(req).pipe(
@@ -37,13 +46,18 @@ function shouldAddToken(req: HttpRequest<any>, authService: AuthService): boolea
 
 function addTokenToRequest(req: HttpRequest<any>, authService: AuthService): HttpRequest<any> {
   const token = authService.getToken();
+  console.log('AuthInterceptor: Token obtenido:', token ? 'SÍ' : 'NO');
   if (token) {
-    return req.clone({
+    console.log('AuthInterceptor: Token (primeros 20 chars):', token.substring(0, 20) + '...');
+    const newReq = req.clone({
       setHeaders: {
         'Authorization': `Bearer ${token}`
       }
     });
+    console.log('AuthInterceptor: Headers de la petición:', newReq.headers.keys());
+    return newReq;
   }
+  console.log('AuthInterceptor: No hay token disponible');
   return req;
 }
 
