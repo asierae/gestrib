@@ -65,7 +65,7 @@ export class LayoutComponent implements OnInit {
       label: 'navigation.availability', 
       route: '/scheduler',
       active: false,
-      roles: [1] // Solo Admin
+      roles: [1, 2] // Admin y Profesor
     },
     { 
       icon: 'people', 

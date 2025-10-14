@@ -3,28 +3,27 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, map, catchError, of } from 'rxjs';
 import { Profesor, TipoEspecialidad } from '../models/profesor.model';
 import { environment } from '../../environments/environment';
+import { AuthService } from './auth.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ProfesoresService {
   private http = inject(HttpClient);
+  private authService = inject(AuthService);
   private apiUrl = `${environment.apiUrl}/usuarios`;
 
   /**
    * Obtiene todos los profesores desde la API
    */
   getProfesores(): Observable<Profesor[]> {
-    console.log('ProfesoresService: Cargando profesores desde API...');
     return this.http.get<any[]>(`${this.apiUrl}/getAllUsuariosData`).pipe(
       map((response: any) => {
-        console.log('ProfesoresService: Respuesta de la API:', response);
         
         // Si la respuesta es un string JSON, parsearlo
         const data = typeof response === 'string' ? JSON.parse(response) : response;
         
         if (!data || data.length === 0) {
-          console.warn('ProfesoresService: No se recibieron profesores de la API, usando datos mock');
           return this.getProfesoresMockData();
         }
         
@@ -35,18 +34,33 @@ export class ProfesoresService {
             apellidos: usuario.Apellidos || usuario.apellidos || '',
             email: usuario.Email || usuario.email || '',
             tipoEspecialidad: this.mapTipoEspecialidad(usuario.TipoEspecialidad || usuario.tipoEspecialidad),
+            especialidadOriginal: usuario.Entidad || usuario.entidad || '',
             dni: usuario.DNI || usuario.dni || '',
             activo: usuario.IsActive !== false && usuario.isActive !== false
           };
         });
         
-        console.log(`ProfesoresService: ${profesoresMapeados.length} profesores mapeados`);
         return profesoresMapeados;
       }),
       catchError(error => {
-        console.error('ProfesoresService: Error al cargar profesores desde API:', error);
-        console.log('ProfesoresService: Usando datos mock como fallback');
+        console.error('Error al cargar profesores desde API:', error);
         return of(this.getProfesoresMockData());
+      })
+    );
+  }
+
+  /**
+   * Debug: Obtiene información del usuario actual
+   */
+  debugUserInfo(): Observable<any> {
+    return this.http.get(`${this.apiUrl}/debug-user-info`).pipe(
+      map(response => {
+        console.log('ProfesoresService: Información del usuario:', response);
+        return response;
+      }),
+      catchError(error => {
+        console.error('ProfesoresService: Error obteniendo info del usuario:', error);
+        throw error;
       })
     );
   }
@@ -55,14 +69,25 @@ export class ProfesoresService {
    * Elimina un profesor por ID
    */
   deleteProfesor(id: number): Observable<any> {
-    console.log(`ProfesoresService: Eliminando profesor con ID ${id}`);
+    console.log('ProfesoresService: Eliminando profesor con ID:', id);
+    console.log('ProfesoresService: URL completa:', `${this.apiUrl}/${id}`);
+    
+    // Verificar si hay token disponible
+    const token = this.authService.getToken();
+    console.log('ProfesoresService: Token disponible:', !!token);
+    console.log('ProfesoresService: Usuario autenticado:', this.authService.isLoggedIn());
+    
     return this.http.delete(`${this.apiUrl}/${id}`).pipe(
       map(response => {
-        console.log('ProfesoresService: Profesor eliminado exitosamente');
+        console.log('ProfesoresService: Profesor eliminado exitosamente:', response);
         return response;
       }),
       catchError(error => {
         console.error('ProfesoresService: Error al eliminar profesor:', error);
+        console.error('ProfesoresService: Status:', error.status);
+        console.error('ProfesoresService: StatusText:', error.statusText);
+        console.error('ProfesoresService: URL:', error.url);
+        console.error('ProfesoresService: Error details:', error.error);
         throw error;
       })
     );
@@ -163,29 +188,9 @@ export class ProfesoresService {
    * Procesa datos de Excel para profesores
    */
   processExcelData(excelData: any[]): ProfesorRequest[] {
-    console.log('ProfesoresService: Procesando datos de Excel...');
-    console.log('ProfesoresService: Total filas recibidas:', excelData.length);
-    
     if (!excelData || excelData.length === 0) {
-      console.warn('ProfesoresService: No hay datos para procesar');
       return [];
     }
-
-    // Mostrar las primeras filas para debug
-    console.log('ProfesoresService: Primera fila de datos:', excelData[0]);
-    console.log('ProfesoresService: Columnas disponibles:', Object.keys(excelData[0] || {}));
-    
-    // Debug detallado de las primeras 3 filas
-    excelData.slice(0, 3).forEach((row, index) => {
-      console.log(`ProfesoresService: Fila ${index + 1} completa:`, row);
-      console.log(`ProfesoresService: Fila ${index + 1} claves:`, Object.keys(row));
-      
-      // Debug específico para cada campo del Excel de profesores
-      console.log(`ProfesoresService: Fila ${index + 1} - NOMBRE:`, row['Nombre']);
-      console.log(`ProfesoresService: Fila ${index + 1} - APELLIDOS:`, row['Apellidos']);
-      console.log(`ProfesoresService: Fila ${index + 1} - EMAIL:`, row['Direc. Mail UPV']);
-      console.log(`ProfesoresService: Fila ${index + 1} - ESPECIALIDAD:`, row['Nombre unidad org.']);
-    });
 
     const profesores: ProfesorRequest[] = [];
     const emailsProcesados = new Set<string>(); // Para controlar emails duplicados
@@ -204,7 +209,8 @@ export class ProfesoresService {
           apellidos: apellidos,
           email: email,
           dni: this.generateDniFromEmail(email), // Siempre generar DNI automáticamente
-          tipoEspecialidad: this.mapTipoEspecialidadFromExcel(especialidad)
+          tipoEspecialidad: this.mapTipoEspecialidadFromExcel(especialidad),
+          especialidadOriginal: especialidad // Guardar el valor original del Excel
         };
 
         // Validar que los campos obligatorios estén presentes
@@ -214,40 +220,20 @@ export class ProfesoresService {
           
           // Verificar si el email ya fue procesado
           if (emailsProcesados.has(emailLower)) {
-            console.warn(`ProfesoresService: Fila ${index + 1} omitida - email duplicado: ${profesor.email}`);
+            // Email duplicado, omitir
           } else {
             // Agregar email a la lista de procesados
             emailsProcesados.add(emailLower);
             profesores.push(profesor);
-            console.log(`ProfesoresService: Fila ${index + 1} procesada correctamente:`, {
-              nombre: profesor.nombre,
-              apellidos: profesor.apellidos,
-              email: profesor.email,
-              dni: profesor.dni,
-              especialidad: profesor.tipoEspecialidad
-            });
           }
         } else {
-          console.warn(`ProfesoresService: Fila ${index + 1} omitida - faltan campos obligatorios:`, {
-            nombre: profesor.nombre,
-            apellidos: profesor.apellidos,
-            email: profesor.email,
-            dni: profesor.dni,
-            tieneNombre: !!profesor.nombre,
-            tieneApellidos: !!profesor.apellidos,
-            tieneEmail: !!profesor.email
-          });
+          // Faltan campos obligatorios, omitir fila
         }
       } catch (error) {
-        console.error(`ProfesoresService: Error procesando fila ${index + 1}:`, error);
+        console.error(`Error procesando fila ${index + 1}:`, error);
       }
     });
 
-    const duplicadosOmitidos = excelData.length - profesores.length;
-    console.log(`ProfesoresService: ${profesores.length} profesores procesados de ${excelData.length} filas`);
-    if (duplicadosOmitidos > 0) {
-      console.log(`ProfesoresService: ${duplicadosOmitidos} registros omitidos (emails duplicados o campos faltantes)`);
-    }
     return profesores;
   }
 
@@ -280,9 +266,6 @@ export class ProfesoresService {
       }
       
       // DNI es opcional, se genera automáticamente si no existe
-      if (!profesor.dni || profesor.dni.trim() === '') {
-        console.warn(`Fila ${rowNum}: DNI no encontrado, se generará automáticamente`);
-      }
     });
 
     // Los emails duplicados ya se manejan en el procesamiento, no es necesario validarlos aquí
@@ -294,21 +277,12 @@ export class ProfesoresService {
    * Crea profesores masivamente como usuarios
    */
   createBulkProfesores(profesores: ProfesorRequest[]): Observable<any> {
-    console.log('ProfesoresService: Enviando profesores a la API...');
-    console.log('ProfesoresService: URL completa:', `${this.apiUrl}/bulk-profesores`);
-    console.log('ProfesoresService: Datos a enviar:', { profesores });
-    
     return this.http.post(`${this.apiUrl}/bulk-profesores`, { profesores }).pipe(
       map(response => {
-        console.log('ProfesoresService: Profesores creados exitosamente:', response);
         return response;
       }),
       catchError(error => {
-        console.error('ProfesoresService: Error al crear profesores:', error);
-        console.error('ProfesoresService: Status:', error.status);
-        console.error('ProfesoresService: StatusText:', error.statusText);
-        console.error('ProfesoresService: URL:', error.url);
-        console.error('ProfesoresService: Error details:', error.error);
+        console.error('Error al crear profesores:', error);
         throw error;
       })
     );
@@ -318,18 +292,12 @@ export class ProfesoresService {
    * Obtiene el valor de un campo desde diferentes posibles nombres de columna
    */
   private getFieldValue(row: any, possibleNames: string[]): string {
-    console.log('ProfesoresService: Buscando campo en fila:', Object.keys(row));
-    console.log('ProfesoresService: Nombres posibles:', possibleNames);
-    
     for (const name of possibleNames) {
-      console.log(`ProfesoresService: Probando nombre "${name}":`, row[name]);
       if (row[name] !== undefined && row[name] !== null && row[name] !== '') {
         const value = String(row[name]).trim();
-        console.log(`ProfesoresService: Valor encontrado para "${name}":`, value);
         return value;
       }
     }
-    console.log('ProfesoresService: No se encontró ningún valor para los nombres:', possibleNames);
     return '';
   }
 
@@ -414,4 +382,5 @@ export interface ProfesorRequest {
   email: string;
   dni: string;
   tipoEspecialidad: TipoEspecialidad;
+  especialidadOriginal?: string; // Campo original del Excel "Nombre unidad org."
 }

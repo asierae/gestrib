@@ -19,17 +19,19 @@
 
     <nav class="sidebar-nav">
       <ul class="nav-list">
-        <li *ngFor="let item of menuItems()" class="nav-item">
-          <a 
-            [routerLink]="item.route" 
-            class="nav-link"
-            [class.active]="item.active"
-            (click)="setActiveMenuItem(item)"
-            [attr.title]="item.label | translate">
-            <span class="material-icons nav-icon">{{ item.icon }}</span>
-            <span class="nav-text" *ngIf="isSidebarOpen()">{{ item.label | translate }}</span>
-          </a>
-        </li>
+        <ng-container *ngFor="let item of menuItems()">
+          <li *ngIf="item.roles.includes(currentUser()?.tipoUsuario || 0)" class="nav-item">
+            <a 
+              [routerLink]="item.route" 
+              class="nav-link"
+              [class.active]="item.active"
+              (click)="setActiveMenuItem(item)"
+              [attr.title]="item.label | translate">
+              <span class="material-icons nav-icon">{{ item.icon }}</span>
+              <span class="nav-text" *ngIf="isSidebarOpen()">{{ item.label | translate }}</span>
+            </a>
+          </li>
+        </ng-container>
       </ul>
     </nav>
 

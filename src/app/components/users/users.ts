@@ -1,4 +1,4 @@
-import { Component, signal, OnInit, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
+import { Component, signal, OnInit, ChangeDetectionStrategy, ChangeDetectorRef, inject, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatTabsModule } from '@angular/material/tabs';
@@ -8,7 +8,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTableModule, MatTableDataSource } from '@angular/material/table';
-import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
+import { MatPaginatorModule, PageEvent, MatPaginator } from '@angular/material/paginator';
 import { ScrollingModule } from '@angular/cdk/scrolling';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -17,6 +17,7 @@ import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { TranslatePipe } from '../../pipes/translate.pipe';
 import { AlumnosService, AlumnoRequest } from '../../services/alumnos.service';
 import { ProfesoresService } from '../../services/profesores.service';
+import { AuthService } from '../../services/auth.service';
 import { DeleteConfirmationDialogComponent } from '../tribunals/delete-confirmation-dialog.component';
 
 @Component({
@@ -45,6 +46,9 @@ import { DeleteConfirmationDialogComponent } from '../tribunals/delete-confirmat
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class UsersComponent implements OnInit {
+  @ViewChild('alumnosPaginator') alumnosPaginator!: MatPaginator;
+  @ViewChild('profesoresPaginator') profesoresPaginator!: MatPaginator;
+  
   currentYear = new Date().getFullYear();
   nextYear = this.currentYear + 1;
 
@@ -58,6 +62,7 @@ export class UsersComponent implements OnInit {
   pageSize = 10;
   pageIndex = 0;
   totalAlumnos = 0;
+  filteredAlumnos: any[] = [];
 
   // Profesores data
   profesores: any[] = [];
@@ -69,13 +74,15 @@ export class UsersComponent implements OnInit {
   pageSizeProfesores = 10;
   pageIndexProfesores = 0;
   totalProfesores = 0;
+  filteredProfesores: any[] = [];
 
   constructor(
     private snackBar: MatSnackBar,
     private alumnosService: AlumnosService,
     private profesoresService: ProfesoresService,
     private dialog: MatDialog,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private authService: AuthService
   ) {
     // Inicializar los DataSources
     this.alumnosDataSource = new MatTableDataSource<any>([]);
@@ -89,6 +96,22 @@ export class UsersComponent implements OnInit {
     setTimeout(() => {
       this.loadProfesores();
     }, 100);
+    
+    // Debug: Probar conectividad con el backend
+    this.testBackendConnectivity();
+  }
+
+  private testBackendConnectivity(): void {
+    console.log('UsersComponent: Probando conectividad con el backend...');
+    this.profesoresService.debugUserInfo().subscribe({
+      next: (userInfo) => {
+        console.log('UsersComponent: Backend conectado correctamente:', userInfo);
+      },
+      error: (error) => {
+        console.error('UsersComponent: Error conectando con el backend:', error);
+        console.error('UsersComponent: El backend puede no estar funcionando o no se ha reiniciado');
+      }
+    });
   }
 
   // Alumnos methods
@@ -100,15 +123,19 @@ export class UsersComponent implements OnInit {
       next: (data) => {
         if (Array.isArray(data)) {
           this.alumnos = data;
+          this.filteredAlumnos = data;
           this.totalAlumnos = data.length;
-          // Forzar actualización del DataSource
+          // Configurar el DataSource con paginación
           this.alumnosDataSource = new MatTableDataSource<any>(data);
-          console.log('DEBUG: Alumnos cargados:', data.length, 'primeros 3:', data.slice(0, 3));
+          // Conectar el paginador al DataSource
+          if (this.alumnosPaginator) {
+            this.alumnosDataSource.paginator = this.alumnosPaginator;
+          }
         } else {
           this.alumnos = [];
+          this.filteredAlumnos = [];
           this.alumnosDataSource = new MatTableDataSource<any>([]);
           this.totalAlumnos = 0;
-          console.log('DEBUG: No hay datos de alumnos');
         }
         this.isLoadingAlumnos.set(false);
         this.cdr.detectChanges(); // Forzar detección de cambios
@@ -138,14 +165,20 @@ export class UsersComponent implements OnInit {
 
   private filterAlumnos(): void {
     if (!this.searchTerm.trim()) {
-      this.alumnosDataSource = new MatTableDataSource<any>(this.alumnos);
+      this.filteredAlumnos = this.alumnos;
     } else {
       const searchLower = this.searchTerm.toLowerCase().trim();
-      const filtered = this.alumnos.filter(alumno => 
+      this.filteredAlumnos = this.alumnos.filter(alumno => 
         this.matchesSearchAlumno(alumno, searchLower)
       );
-      this.alumnosDataSource = new MatTableDataSource<any>(filtered);
     }
+    this.totalAlumnos = this.filteredAlumnos.length;
+    this.alumnosDataSource = new MatTableDataSource<any>(this.filteredAlumnos);
+    // Conectar el paginador al DataSource
+    if (this.alumnosPaginator) {
+      this.alumnosDataSource.paginator = this.alumnosPaginator;
+    }
+    this.pageIndex = 0; // Reset a la primera página
     this.cdr.detectChanges(); // Forzar detección de cambios
   }
 
@@ -226,10 +259,16 @@ export class UsersComponent implements OnInit {
       next: (data) => {
         if (Array.isArray(data)) {
           this.profesores = data;
+          this.filteredProfesores = data;
           this.totalProfesores = data.length;
           this.profesoresDataSource = new MatTableDataSource<any>(data);
+          // Conectar el paginador al DataSource
+          if (this.profesoresPaginator) {
+            this.profesoresDataSource.paginator = this.profesoresPaginator;
+          }
         } else {
           this.profesores = [];
+          this.filteredProfesores = [];
           this.profesoresDataSource = new MatTableDataSource<any>([]);
           this.totalProfesores = 0;
         }
@@ -260,14 +299,20 @@ export class UsersComponent implements OnInit {
 
   private filterProfesores(): void {
     if (!this.searchTermProfesores.trim()) {
-      this.profesoresDataSource = new MatTableDataSource<any>(this.profesores);
+      this.filteredProfesores = this.profesores;
     } else {
       const searchLower = this.searchTermProfesores.toLowerCase().trim();
-      const filtered = this.profesores.filter(profesor => 
+      this.filteredProfesores = this.profesores.filter(profesor => 
         this.matchesSearchProfesor(profesor, searchLower)
       );
-      this.profesoresDataSource = new MatTableDataSource<any>(filtered);
     }
+    this.totalProfesores = this.filteredProfesores.length;
+    this.profesoresDataSource = new MatTableDataSource<any>(this.filteredProfesores);
+    // Conectar el paginador al DataSource
+    if (this.profesoresPaginator) {
+      this.profesoresDataSource.paginator = this.profesoresPaginator;
+    }
+    this.pageIndexProfesores = 0; // Reset a la primera página
     this.cdr.detectChanges(); // Forzar detección de cambios
   }
 
@@ -276,7 +321,7 @@ export class UsersComponent implements OnInit {
       profesor.nombre,
       profesor.apellidos,
       profesor.email,
-      profesor.tipoEspecialidad
+      profesor.especialidadOriginal
     ];
 
     return searchableFields.some(field => 
@@ -294,6 +339,29 @@ export class UsersComponent implements OnInit {
   }
 
   deleteProfesor(profesor: any): void {
+    console.log('deleteProfesor: Profesor a eliminar:', profesor);
+    console.log('deleteProfesor: ID del profesor:', profesor.id);
+    
+    // Debug: Verificar información del usuario actual
+    const currentUser = this.authService.currentUser();
+    console.log('deleteProfesor: Usuario actual:', currentUser);
+    console.log('deleteProfesor: Es administración:', this.authService.isAdministracion());
+    console.log('deleteProfesor: Tipo usuario:', currentUser?.tipoUsuario);
+    console.log('deleteProfesor: Role:', currentUser?.role);
+    
+    // Debug: Obtener información del usuario desde el backend
+    console.log('deleteProfesor: Llamando al endpoint de debug...');
+    this.profesoresService.debugUserInfo().subscribe({
+      next: (userInfo) => {
+        console.log('deleteProfesor: Info del usuario desde backend:', userInfo);
+        console.log('deleteProfesor: Backend respondió correctamente, procediendo con eliminación...');
+      },
+      error: (error) => {
+        console.error('deleteProfesor: Error obteniendo info del usuario:', error);
+        console.error('deleteProfesor: El backend no está respondiendo o hay un problema de autenticación');
+      }
+    });
+    
     const dialogRef = this.dialog.open(DeleteConfirmationDialogComponent, {
       width: '500px',
       data: {
@@ -306,6 +374,7 @@ export class UsersComponent implements OnInit {
 
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
+        console.log('deleteProfesor: Confirmado, eliminando profesor con ID:', profesor.id);
         this.profesoresService.deleteProfesor(profesor.id).subscribe({
           next: () => {
             // Eliminar de la lista local

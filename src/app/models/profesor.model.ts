@@ -4,6 +4,7 @@ export interface Profesor {
   apellidos: string;
   email: string;
   tipoEspecialidad: TipoEspecialidad;
+  especialidadOriginal?: string;
   dni: string;
   activo: boolean;
 }

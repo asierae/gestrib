@@ -22,7 +22,7 @@
                 <mat-icon class="card-icon">school</mat-icon>
                 <div>
                   <mat-card-title>Lista de Alumnos</mat-card-title>
-                  <mat-card-subtitle>Total: {{ alumnosDataSource.data.length }} de {{ totalAlumnos }} alumnos</mat-card-subtitle>
+                  <mat-card-subtitle>Total: {{ filteredAlumnos.length }} de {{ totalAlumnos }} alumnos</mat-card-subtitle>
                 </div>
               </div>
               <div class="card-actions">
@@ -53,14 +53,7 @@
             </div>
 
             <div class="table-container" *ngIf="!isLoadingAlumnos()">
-              <!-- Debug info -->
-              <div style="background: yellow; padding: 10px; margin: 10px 0;">
-                <strong>DEBUG:</strong> 
-                Total alumnos: {{ totalAlumnos }} | 
-                DataSource length: {{ alumnosDataSource.data.length }} | 
-                Loading: {{ isLoadingAlumnos() }}
-              </div>
-              <table mat-table [dataSource]="alumnosDataSource" class="alumnos-table" style="border: 2px solid red;">
+              <table mat-table [dataSource]="alumnosDataSource" class="alumnos-table">
                 <!-- DNI Column -->
                 <ng-container matColumnDef="dni">
                   <th mat-header-cell *matHeaderCellDef>DNI</th>
@@ -126,15 +119,11 @@
                 <tr mat-row *matRowDef="let row; columns: displayedColumns; trackBy: trackByAlumnoId"></tr>
               </table>
               
-              <!-- Paginator temporalmente deshabilitado para debug -->
-              <!-- <mat-paginator 
-                [length]="filteredAlumnos.length"
-                [pageSize]="pageSize"
-                [pageIndex]="pageIndex"
+              <mat-paginator 
+                #alumnosPaginator
                 [pageSizeOptions]="[5, 10, 25, 50]"
-                (page)="onPageChange($event)"
                 showFirstLastButtons>
-              </mat-paginator> -->
+              </mat-paginator>
             </div>
 
             <!-- Loading State -->
@@ -160,7 +149,7 @@
             </div>
 
             <!-- No Results State -->
-            <div class="empty-container" *ngIf="!isLoadingAlumnos() && !alumnosError && totalAlumnos > 0 && alumnosDataSource.data.length === 0">
+            <div class="empty-container" *ngIf="!isLoadingAlumnos() && !alumnosError && totalAlumnos > 0 && filteredAlumnos.length === 0">
               <mat-icon>search_off</mat-icon>
               <p>No se encontraron alumnos que coincidan con "{{ searchTerm }}"</p>
               <button mat-raised-button color="primary" (click)="clearSearch()">
@@ -182,7 +171,7 @@
                 <mat-icon class="card-icon">person</mat-icon>
                 <div>
                   <mat-card-title>Lista de Profesores</mat-card-title>
-                  <mat-card-subtitle>Total: {{ profesoresDataSource.data.length }} de {{ totalProfesores }} profesores</mat-card-subtitle>
+                  <mat-card-subtitle>Total: {{ filteredProfesores.length }} de {{ totalProfesores }} profesores</mat-card-subtitle>
                 </div>
               </div>
               <div class="card-actions">
@@ -235,7 +224,7 @@
                 <!-- Especialidad Column -->
                 <ng-container matColumnDef="especialidad">
                   <th mat-header-cell *matHeaderCellDef>Especialidad</th>
-                  <td mat-cell *matCellDef="let profesor">{{ profesor.tipoEspecialidad }}</td>
+                  <td mat-cell *matCellDef="let profesor">{{ profesor.especialidadOriginal || 'Sin especificar' }}</td>
                 </ng-container>
 
                 <!-- Actions Column -->
@@ -255,15 +244,11 @@
                 <tr mat-row *matRowDef="let row; columns: displayedColumnsProfesores; trackBy: trackByProfesorId"></tr>
               </table>
               
-              <!-- Paginator temporalmente deshabilitado para debug -->
-              <!-- <mat-paginator 
-                [length]="filteredProfesores.length"
-                [pageSize]="pageSizeProfesores"
-                [pageIndex]="pageIndexProfesores"
+              <mat-paginator 
+                #profesoresPaginator
                 [pageSizeOptions]="[5, 10, 25, 50]"
-                (page)="onPageChangeProfesores($event)"
                 showFirstLastButtons>
-              </mat-paginator> -->
+              </mat-paginator>
             </div>
 
             <!-- Loading State -->
@@ -289,7 +274,7 @@
             </div>
 
             <!-- No Results State -->
-            <div class="empty-container" *ngIf="!isLoadingProfesores() && !profesoresError && totalProfesores > 0 && profesoresDataSource.data.length === 0">
+            <div class="empty-container" *ngIf="!isLoadingProfesores() && !profesoresError && totalProfesores > 0 && filteredProfesores.length === 0">
               <mat-icon>search_off</mat-icon>
               <p>No se encontraron profesores que coincidan con "{{ searchTermProfesores }}"</p>
               <button mat-raised-button color="primary" (click)="clearSearchProfesores()">

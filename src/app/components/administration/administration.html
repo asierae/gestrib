@@ -63,9 +63,8 @@
                 <div class="profesores-table-header">
                   <div class="col-nombre">Nombre</div>
                   <div class="col-apellidos">Apellidos</div>
-                  <div class="col-email">Email</div>
-                  <div class="col-dni">DNI</div>
-                  <div class="col-especialidad">Especialidad</div>
+                  <div class="col-email">Direc. Mail UPV</div>
+                  <div class="col-especialidad">Nombre unidad org.</div>
                 </div>
                 
                 <div class="profesores-table-body">
@@ -73,10 +72,9 @@
                     <div class="col-nombre">{{ profesor.nombre }}</div>
                     <div class="col-apellidos">{{ profesor.apellidos }}</div>
                     <div class="col-email">{{ profesor.email }}</div>
-                    <div class="col-dni">{{ profesor.dni }}</div>
                     <div class="col-especialidad">
-                      <span class="especialidad-badge" [class]="'especialidad-' + profesor.tipoEspecialidad">
-                        {{ getEspecialidadLabel(profesor.tipoEspecialidad) }}
+                      <span class="especialidad-original">
+                        {{ profesor.especialidadOriginal || 'Sin especificar' }}
                       </span>
                     </div>
                   </div>
