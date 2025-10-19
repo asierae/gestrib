@@ -1,0 +1,186 @@
+.aulas-container {
+  padding: 2rem;
+  
+  h1 {
+    color: var(--text-primary);
+    margin-bottom: 1rem;
+  }
+
+  .header-actions {
+    margin-bottom: 24px;
+    display: flex;
+    justify-content: flex-end;
+    
+    .add-button {
+      height: 48px;
+      min-width: 160px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      box-shadow: 0 4px 12px rgba(33, 150, 243, 0.3);
+      border-radius: 8px;
+      color: white;
+      background: linear-gradient(135deg, #2196f3 0%, #1976d2 100%);
+      
+      &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(33, 150, 243, 0.4);
+        background: linear-gradient(135deg, #1976d2 0%, #1565c0 100%);
+      }
+      
+      &:active {
+        transform: translateY(0);
+      }
+      
+      mat-icon {
+        margin-right: 8px;
+        font-size: 20px;
+        width: 20px;
+        height: 20px;
+      }
+    }
+  }
+  
+  .full-width { 
+    width: 100%; 
+  }
+  
+  // Paginator styles
+  mat-paginator {
+    border-top: 1px solid #f1f5f9;
+    background: linear-gradient(135deg, #fefefe 0%, #f8fafc 100%);
+    border-radius: 0 0 16px 16px;
+    padding: 1rem 1.5rem;
+    
+    ::ng-deep .mat-mdc-paginator-container {
+      justify-content: space-between;
+      
+      .mat-mdc-paginator-page-size-label,
+      .mat-mdc-paginator-range-label {
+        color: #64748b;
+        font-weight: 500;
+      }
+      
+      .mat-mdc-icon-button {
+        color: #64748b;
+        transition: all 0.2s ease;
+        
+        &:hover {
+          color: #475569;
+          background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+        }
+        
+        &:disabled {
+          color: #cbd5e1;
+        }
+      }
+    }
+  }
+  
+  .mat-table {
+    width: 100%;
+    background: white;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+    border: 1px solid #e2e8f0;
+    position: relative;
+    border-collapse: separate;
+    border-spacing: 0;
+    
+    .mat-header-cell {
+      background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+      color: #475569;
+      font-weight: 600;
+      font-size: 0.875rem;
+      letter-spacing: 0.025em;
+      border-bottom: 2px solid #cbd5e1;
+      padding: 1.25rem 1rem;
+      text-transform: none;
+      position: relative;
+      
+      &:first-child {
+        border-top-left-radius: 12px;
+      }
+      
+      &:last-child {
+        border-top-right-radius: 12px;
+      }
+    }
+    
+    .mat-cell {
+      color: #334155;
+      border-bottom: 1px solid #f1f5f9;
+      padding: 1.25rem 1rem;
+      font-size: 0.875rem;
+      font-weight: 500;
+      vertical-align: middle;
+    }
+    
+    .mat-row {
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      background: white;
+      
+      &:hover {
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(148, 163, 184, 0.15);
+        border-left: 4px solid #94a3b8;
+      }
+      
+      &:nth-child(even) {
+        background: linear-gradient(135deg, #fefefe 0%, #f8fafc 100%);
+      }
+      
+      &:last-child {
+        .mat-cell {
+          border-bottom: none;
+        }
+      }
+    }
+    
+    // Actions cell
+    .actions-cell {
+      text-align: center;
+      width: 120px;
+      
+      button {
+        color: #64748b;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        border-radius: 8px;
+        width: 36px;
+        height: 36px;
+        background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+        border: 1px solid #cbd5e1;
+        margin: 0 2px;
+        
+        &:hover {
+          transform: scale(1.1) translateY(-1px);
+          box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+        
+        &:first-child:hover {
+          background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+          color: #1d4ed8;
+          border-color: #93c5fd;
+        }
+        
+        &:last-child:hover {
+          background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+          color: #dc2626;
+          border-color: #fca5a5;
+        }
+        
+        &:active {
+          transform: scale(1.05) translateY(0);
+        }
+        
+        mat-icon {
+          font-size: 18px;
+          width: 18px;
+          height: 18px;
+        }
+      }
+    }
+  }
+}

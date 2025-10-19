@@ -1,0 +1,35 @@
+<div class="aula-dialog">
+  <h2 mat-dialog-title>{{ title }}</h2>
+  
+  <mat-dialog-content>
+    <form [formGroup]="aulaForm" class="aula-form">
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>{{ 'administration.aulas.name' | translate }}</mat-label>
+        <input matInput 
+               formControlName="nombre" 
+               placeholder="{{ 'administration.aulas.namePlaceholder' | translate }}"
+               maxlength="100">
+        <mat-error *ngIf="aulaForm.get('nombre')?.hasError('required')">
+          {{ 'administration.aulas.nameRequired' | translate }}
+        </mat-error>
+        <mat-error *ngIf="aulaForm.get('nombre')?.hasError('maxlength')">
+          {{ 'administration.aulas.nameMaxLength' | translate }}
+        </mat-error>
+      </mat-form-field>
+    </form>
+  </mat-dialog-content>
+  
+  <mat-dialog-actions align="end">
+    <button mat-button (click)="onCancel()" [disabled]="isSubmitting">
+      {{ 'common.cancel' | translate }}
+    </button>
+    <button mat-raised-button 
+            color="primary" 
+            (click)="onSubmit()" 
+            [disabled]="aulaForm.invalid || isSubmitting">
+      <mat-icon *ngIf="isSubmitting">hourglass_empty</mat-icon>
+      <mat-icon *ngIf="!isSubmitting">{{ isEditMode ? 'save' : 'add' }}</mat-icon>
+      {{ isSubmitting ? 'Procesando...' : (isEditMode ? 'Guardar' : 'Crear') }}
+    </button>
+  </mat-dialog-actions>
+</div>

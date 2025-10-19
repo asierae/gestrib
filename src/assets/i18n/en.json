@@ -100,9 +100,10 @@
     "selectSpecialty": "Select specialty",
     "student": "Student",
     "selectStudent": "Select student",
-    "director": "Tribunal Director",
+    "director": "Director",
     "selectDirector": "Select director",
-    "vocal": "Tribunal Vocal",
+    "codirector": "Co-director",
+    "vocal": "Vocal",
     "selectVocal": "Select vocal",
     "supplement": "Supplement",
     "selectSupplement": "Select supplement",
@@ -132,7 +133,7 @@
     "delete": "Delete",
     "noDefensas": "No defenses available",
     "success": {
-      "created": "Defense created successfully",
+      "created": "Defense registered successfully",
       "updated": "Defense updated successfully",
       "deleted": "Defense deleted successfully",
       "loaded": "Defenses loaded successfully"
@@ -210,10 +211,24 @@
     "date": "Date",
     "time": "Time",
     "place": "Place",
+    "notAssigned": "Not assigned",
+    "schedule": "Schedule Config",
+    "configureSchedule": "Configure defense schedule",
+    "schedules": "schedules",
+    "notifySchedule": "Notify",
+    "notifyScheduleTooltip": "Send schedule notification by email",
     "from": "From",
     "to": "To",
+    "filter": "Filter",
+    "clearFilters": "Clear Filters",
     "exportExcel": "Export to Excel",
-    "status": "Status"
+    "status": "Status",
+    "deleteAll": "Delete All",
+    "deleteAllConfirm": "Confirm Deletion",
+    "deleteAllMessage": "Are you sure you want to delete ALL defenses?",
+    "deleteAllDetails": "This action cannot be undone. All defenses will be removed from the system.",
+    "deleteAllSuccess": "All defenses have been deleted successfully",
+    "deleteAllError": "Error deleting all defenses"
   },
   "cases": {
     "title": "Case Management",
@@ -252,7 +267,16 @@
     "systemSettings": "System Settings",
     "userManagement": "User Management",
     "backup": "Backup",
-    "logs": "Logs"
+    "logs": "Logs",
+    "aulas": {
+      "title": "Classroom Management",
+      "name": "Name",
+      "created": "Created Date",
+      "addAula": "New Classroom",
+      "namePlaceholder": "Enter classroom name",
+      "nameRequired": "Classroom name is required",
+      "nameMaxLength": "Name cannot exceed 100 characters"
+    }
   },
   "help": {
     "title": "Help and Support",

@@ -300,6 +300,7 @@ export class DefensasComponent implements OnInit, OnDestroy {
     // Datos de ejemplo como fallback
     this.estudiantes = [
       {
+        id: 1,
         nombreCompleto: 'Juan Pérez García',
         nombre: 'Juan',
         apellido1: 'Pérez',
@@ -312,6 +313,7 @@ export class DefensasComponent implements OnInit, OnDestroy {
         mediaExpediente: 8.5
       } as EstudianteDisplay,
       {
+        id: 2,
         nombreCompleto: 'María López Fernández',
         nombre: 'María',
         apellido1: 'López',
@@ -324,6 +326,7 @@ export class DefensasComponent implements OnInit, OnDestroy {
         mediaExpediente: 9.2
       } as EstudianteDisplay,
       {
+        id: 3,
         nombreCompleto: 'Carlos Ruiz Martínez',
         nombre: 'Carlos',
         apellido1: 'Ruiz',
@@ -502,13 +505,9 @@ export class DefensasComponent implements OnInit, OnDestroy {
       this.selectedVocalEspecialidades = this.selectedVocalEspecialidades.filter(v => v !== value);
     }
     
-    // Convertir IDs a objetos completos para el formulario
-    const especialidadesCompletas = this.selectedVocalEspecialidades.map(id => 
-      this.especialidadesVocal.find(esp => esp.id === id) || { id, label: id }
-    );
-    
+    // Mantener solo los IDs como strings para el formulario
     this.defensaForm.patchValue({
-      especialidadesVocal: especialidadesCompletas
+      especialidadesVocal: this.selectedVocalEspecialidades
     });
   }
   
@@ -522,13 +521,9 @@ export class DefensasComponent implements OnInit, OnDestroy {
       this.selectedSuplenteEspecialidades = this.selectedSuplenteEspecialidades.filter(v => v !== value);
     }
     
-    // Convertir IDs a objetos completos para el formulario
-    const especialidadesCompletas = this.selectedSuplenteEspecialidades.map(id => 
-      this.especialidadesSuplente.find(esp => esp.id === id) || { id, label: id }
-    );
-    
+    // Mantener solo los IDs como strings para el formulario
     this.defensaForm.patchValue({
-      especialidadesSuplente: especialidadesCompletas
+      especialidadesSuplente: this.selectedSuplenteEspecialidades
     });
   }
   
@@ -680,6 +675,11 @@ export class DefensasComponent implements OnInit, OnDestroy {
       especialidadesVocal: formValue.especialidadesVocal,
       especialidadesSuplente: formValue.especialidadesSuplente
     };
+    
+    console.log('DefensasComponent - Datos del formulario:');
+    console.log('  especialidadesVocal:', formValue.especialidadesVocal);
+    console.log('  especialidadesSuplente:', formValue.especialidadesSuplente);
+    console.log('DefensasComponent - CreateRequest completo:', createRequest);
     
     this.defensasService.createDefensa(createRequest).subscribe({
       next: (response) => {
@@ -984,19 +984,33 @@ export class DefensasComponent implements OnInit, OnDestroy {
       checkPageBreak(25);
       writeWrappedLines(pdf.splitTextToSize(`${formValue.codirectorTribunal}`, pageWidth - 2 * margin), margin, 16);
     }
-    
-    // Vocal (solo si está seleccionado)
-    if (formValue.vocalTribunal) {
-      checkPageBreak(25);
-      writeWrappedLines(pdf.splitTextToSize(`${formValue.vocalTribunal}`, pageWidth - 2 * margin), margin, 16);
-    }
-    
-    // Suplente (solo si está seleccionado)
-    if (formValue.suplente) {
-      checkPageBreak(25);
-      writeWrappedLines(pdf.splitTextToSize(`${formValue.suplente}`, pageWidth - 2 * margin), margin, 16);
-    }
     yPosition += 10;
+    
+    // Vocal (solo si está seleccionado) - Sección separada
+    if (formValue.vocalTribunal) {
+      checkPageBreak(40);
+      pdf.setFont('helvetica', 'bold');
+      pdf.text('Bokala / Vocal:', margin, yPosition);
+      yPosition += 16;
+      
+      checkPageBreak(30);
+      pdf.setFont('helvetica', 'normal');
+      writeWrappedLines(pdf.splitTextToSize(`${formValue.vocalTribunal}`, pageWidth - 2 * margin), margin, 16);
+      yPosition += 10;
+    }
+    
+    // Suplente (solo si está seleccionado) - Sección separada
+    if (formValue.suplente) {
+      checkPageBreak(40);
+      pdf.setFont('helvetica', 'bold');
+      pdf.text('Ordezkoa / Suplente:', margin, yPosition);
+      yPosition += 16;
+      
+      checkPageBreak(30);
+      pdf.setFont('helvetica', 'normal');
+      writeWrappedLines(pdf.splitTextToSize(`${formValue.suplente}`, pageWidth - 2 * margin), margin, 16);
+      yPosition += 10;
+    }
     
     
     // Áreas de conocimiento del vocal (para ambos grados si hay especialidades)

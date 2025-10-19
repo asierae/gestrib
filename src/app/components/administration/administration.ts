@@ -16,12 +16,13 @@ import { TranslatePipe } from '../../pipes/translate.pipe';
 import { AlumnosService, AlumnoRequest } from '../../services/alumnos.service';
 import { ProfesoresService, ProfesorRequest } from '../../services/profesores.service';
 import { AuthService } from '../../services/auth.service';
+import { AulasComponent } from './aulas/aulas.component';
 import * as XLSX from 'xlsx';
 
 @Component({
   selector: 'app-administration',
   standalone: true,
-  imports: [CommonModule, FormsModule, MatTabsModule, MatCardModule, MatButtonModule, MatIconModule, MatSnackBarModule, MatProgressSpinnerModule, MatTableModule, MatPaginatorModule, ScrollingModule, MatFormFieldModule, MatInputModule, TranslatePipe],
+  imports: [CommonModule, FormsModule, MatTabsModule, MatCardModule, MatButtonModule, MatIconModule, MatSnackBarModule, MatProgressSpinnerModule, MatTableModule, MatPaginatorModule, ScrollingModule, MatFormFieldModule, MatInputModule, TranslatePipe, AulasComponent],
   templateUrl: './administration.html',
   styleUrl: './administration.scss',
   changeDetection: ChangeDetectionStrategy.OnPush

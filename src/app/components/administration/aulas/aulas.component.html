@@ -1,0 +1,53 @@
+<div class="aulas-container">
+  <h1>{{ 'administration.aulas.title' | translate }}</h1>
+
+  <div class="header-actions">
+    <button mat-raised-button color="primary" class="add-button" (click)="openCreateDialog()">
+      <mat-icon>add</mat-icon>
+      {{ 'administration.aulas.addAula' | translate }}
+    </button>
+  </div>
+
+  <table mat-table [dataSource]="filteredData.slice(pageIndex*pageSize, (pageIndex+1)*pageSize)" 
+         matSort (matSortChange)="onSortChange($event)" 
+         class="mat-elevation-z2 full-width">
+    
+    <ng-container matColumnDef="nombre">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header="nombre">{{ 'administration.aulas.name' | translate }}</th>
+      <td mat-cell *matCellDef="let row">{{ row.nombre }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="created">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header="created">{{ 'administration.aulas.created' | translate }}</th>
+      <td mat-cell *matCellDef="let row">{{ formatDate(row.created) }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="actions">
+      <th mat-header-cell *matHeaderCellDef>{{ 'common.actions' | translate }}</th>
+      <td mat-cell *matCellDef="let row" class="actions-cell">
+        <button mat-icon-button 
+                color="primary" 
+                (click)="openEditDialog(row)"
+                matTooltip="{{ 'common.edit' | translate }}">
+          <mat-icon>edit</mat-icon>
+        </button>
+        <button mat-icon-button 
+                color="warn" 
+                (click)="deleteAula(row)"
+                matTooltip="{{ 'common.delete' | translate }}">
+          <mat-icon>delete</mat-icon>
+        </button>
+      </td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+  </table>
+
+  <mat-paginator [length]="filteredData.length" 
+                 [pageSize]="pageSize" 
+                 [pageIndex]="pageIndex" 
+                 (page)="onPageChange($event)"
+                 [pageSizeOptions]="[5,10,20]">
+  </mat-paginator>
+</div>

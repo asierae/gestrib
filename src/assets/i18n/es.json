@@ -100,9 +100,10 @@
     "selectSpecialty": "Seleccionar especialidad",
     "student": "Estudiante",
     "selectStudent": "Seleccionar estudiante",
-    "director": "Director del Tribunal",
+    "director": "Director",
     "selectDirector": "Seleccionar director",
-    "vocal": "Vocal del Tribunal",
+    "codirector": "Co-director",
+    "vocal": "Vocal",
     "selectVocal": "Seleccionar vocal",
     "supplement": "Suplente",
     "selectSupplement": "Seleccionar suplente",
@@ -132,7 +133,7 @@
     "delete": "Eliminar",
     "noDefensas": "No hay defensas disponibles",
     "success": {
-      "created": "Defensa creada exitosamente",
+      "created": "Defensa registrada correctamente",
       "updated": "Defensa actualizada exitosamente",
       "deleted": "Defensa eliminada exitosamente",
       "loaded": "Defensas cargadas exitosamente"
@@ -210,10 +211,24 @@
     "date": "Fecha",
     "time": "Hora",
     "place": "Lugar",
+    "notAssigned": "Sin asignar",
+    "schedule": "Conf. Horarios",
+    "configureSchedule": "Configurar horarios de la defensa",
+    "schedules": "horarios",
+    "notifySchedule": "Notificar",
+    "notifyScheduleTooltip": "Enviar notificación de horarios por email",
     "from": "Desde",
     "to": "Hasta",
+    "filter": "Filtrar",
+    "clearFilters": "Limpiar Filtros",
     "exportExcel": "Exportar a Excel",
-    "status": "Estado"
+    "status": "Estado",
+    "deleteAll": "Eliminar Todas",
+    "deleteAllConfirm": "Confirmar Eliminación",
+    "deleteAllMessage": "¿Está seguro de que desea eliminar TODAS las defensas?",
+    "deleteAllDetails": "Esta acción no se puede deshacer. Se eliminarán todas las defensas del sistema.",
+    "deleteAllSuccess": "Todas las defensas han sido eliminadas correctamente",
+    "deleteAllError": "Error al eliminar todas las defensas"
   },
   "cases": {
     "title": "Gestión de Casos",
@@ -252,7 +267,16 @@
     "systemSettings": "Configuración del Sistema",
     "userManagement": "Gestión de Usuarios",
     "backup": "Respaldo",
-    "logs": "Registros"
+    "logs": "Registros",
+    "aulas": {
+      "title": "Gestión de Aulas",
+      "name": "Nombre",
+      "created": "Fecha de Creación",
+      "addAula": "Nueva Aula",
+      "namePlaceholder": "Ingrese el nombre del aula",
+      "nameRequired": "El nombre del aula es requerido",
+      "nameMaxLength": "El nombre no puede exceder 100 caracteres"
+    }
   },
   "help": {
     "title": "Ayuda y Soporte",

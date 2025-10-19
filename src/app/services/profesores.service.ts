@@ -36,6 +36,7 @@ export class ProfesoresService {
             tipoEspecialidad: this.mapTipoEspecialidad(usuario.TipoEspecialidad || usuario.tipoEspecialidad),
             especialidadOriginal: usuario.Entidad || usuario.entidad || '',
             dni: usuario.DNI || usuario.dni || '',
+            tipoUsuario: usuario.TipoUsuario || usuario.tipoUsuario || 2, // Por defecto Profesor
             activo: usuario.IsActive !== false && usuario.isActive !== false
           };
         });
@@ -121,6 +122,7 @@ export class ProfesoresService {
         email: 'juan.martinez@ehu.eus',
         tipoEspecialidad: TipoEspecialidad.INGENIERIA_COMPUTACION,
         dni: '12345678A',
+        tipoUsuario: 1, // Admin
         activo: true
       },
       {
@@ -130,6 +132,7 @@ export class ProfesoresService {
         email: 'maria.lopez@ehu.eus',
         tipoEspecialidad: TipoEspecialidad.INGENIERIA_SOFTWARE,
         dni: '87654321B',
+        tipoUsuario: 2, // Profesor
         activo: true
       },
       {
@@ -139,6 +142,7 @@ export class ProfesoresService {
         email: 'carlos.ruiz@ehu.eus',
         tipoEspecialidad: TipoEspecialidad.COMPUTACION,
         dni: '11223344C',
+        tipoUsuario: 2, // Profesor
         activo: true
       },
       {
@@ -148,6 +152,7 @@ export class ProfesoresService {
         email: 'ana.garcia@ehu.eus',
         tipoEspecialidad: TipoEspecialidad.INGENIERIA_COMPUTACION,
         dni: '44332211D',
+        tipoUsuario: 2, // Profesor
         activo: true
       },
       {
@@ -157,6 +162,7 @@ export class ProfesoresService {
         email: 'david.fernandez@ehu.eus',
         tipoEspecialidad: TipoEspecialidad.INGENIERIA_SOFTWARE,
         dni: '55667788E',
+        tipoUsuario: 2, // Profesor
         activo: true
       },
       {
@@ -166,6 +172,7 @@ export class ProfesoresService {
         email: 'laura.sanchez@ehu.eus',
         tipoEspecialidad: TipoEspecialidad.COMPUTACION,
         dni: '99887766F',
+        tipoUsuario: 2, // Profesor
         activo: true
       }
     ];
@@ -370,6 +377,33 @@ export class ProfesoresService {
   private isValidEmail(email: string): boolean {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
+  }
+
+  /**
+   * Actualiza el tipo de usuario de un profesor
+   */
+  updateTipoUsuario(usuarioId: number, tipoUsuario: number): Observable<any> {
+    console.log('ProfesoresService: Actualizando tipo de usuario:', { usuarioId, tipoUsuario });
+    
+    const requestBody = {
+      id: usuarioId,
+      idTipo: tipoUsuario
+    };
+    
+    return this.http.post(`${this.apiUrl}/update-tipo-usuario`, requestBody).pipe(
+      map(response => {
+        console.log('ProfesoresService: Tipo de usuario actualizado exitosamente:', response);
+        return response;
+      }),
+      catchError(error => {
+        console.error('ProfesoresService: Error al actualizar tipo de usuario:', error);
+        console.error('ProfesoresService: Status:', error.status);
+        console.error('ProfesoresService: StatusText:', error.statusText);
+        console.error('ProfesoresService: URL:', error.url);
+        console.error('ProfesoresService: Error details:', error.error);
+        throw error;
+      })
+    );
   }
 }
 

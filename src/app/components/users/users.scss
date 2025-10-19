@@ -366,6 +366,79 @@
         }
       }
     }
+
+    // Estilos para la columna de tipo de usuario
+    .tipo-usuario-field {
+      width: 140px;
+      min-width: 120px;
+      
+      ::ng-deep .mat-mdc-form-field {
+        .mat-mdc-text-field-wrapper {
+          background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+          border-radius: 8px;
+          border: 1px solid #e2e8f0;
+          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+          
+          &:hover {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+          }
+          
+          &.mdc-text-field--focused {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+          }
+        }
+        
+        .mat-mdc-form-field-subscript-wrapper {
+          display: none;
+        }
+        
+        .mat-mdc-select {
+          font-size: 0.875rem;
+          font-weight: 500;
+          color: #334155;
+          
+          .mat-mdc-select-value {
+            color: #334155;
+          }
+          
+          .mat-mdc-select-placeholder {
+            color: #94a3b8;
+          }
+        }
+        
+        .mat-mdc-select-arrow {
+          color: #64748b;
+        }
+      }
+      
+      // Estilos para el dropdown
+      ::ng-deep .mat-mdc-select-panel {
+        border-radius: 8px;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        background: white;
+        
+        .mat-mdc-option {
+          font-size: 0.875rem;
+          font-weight: 500;
+          color: #334155;
+          transition: all 0.2s ease;
+          
+          &:hover {
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            color: #1e293b;
+          }
+          
+          &.mdc-list-item--selected {
+            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+            color: #1e40af;
+            font-weight: 600;
+          }
+        }
+      }
+    }
   }
 
   .loading-container {

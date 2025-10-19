@@ -1,0 +1,83 @@
+<div class="horarios-dialog">
+  <div class="dialog-header">
+    <h1 class="dialog-title">Seleccionar Horarios</h1>
+    <div class="defense-info">
+      <h2 class="defense-title">{{ data.title }}</h2>
+      <p class="student-name">{{ data.studentName }}</p>
+    </div>
+  </div>
+  
+  <mat-dialog-content>
+    <div class="horarios-form" [formGroup]="horariosForm">
+      <div class="form-section">
+        <h3 class="section-title">Agregar Nuevo Horario</h3>
+        <div class="form-row">
+          <div class="input-group">
+            <mat-form-field appearance="outline" class="date-field">
+              <mat-label>Fecha</mat-label>
+              <input matInput [matDatepicker]="datePicker" formControlName="selectedDate">
+              <mat-datepicker-toggle matSuffix [for]="datePicker"></mat-datepicker-toggle>
+              <mat-datepicker #datePicker></mat-datepicker>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="time-field">
+              <mat-label>Hora</mat-label>
+              <input matInput type="time" formControlName="selectedTime">
+            </mat-form-field>
+          </div>
+
+          <button mat-raised-button 
+                  color="primary" 
+                  (click)="addDateTime()" 
+                  [disabled]="!isFormValid"
+                  class="add-button"
+                  type="button">
+            <mat-icon>add</mat-icon>
+            Agregar
+          </button>
+        </div>
+      </div>
+
+      <div class="selected-dates-section" *ngIf="selectedDates.length > 0">
+        <h3 class="section-title">
+          <mat-icon>schedule</mat-icon>
+          Horarios Seleccionados ({{ selectedDates.length }})
+        </h3>
+        <div class="dates-list">
+          <mat-chip *ngFor="let date of selectedDates; let i = index" 
+                    [removable]="true" 
+                    (removed)="removeDateTime(i)"
+                    class="date-chip">
+            <mat-icon class="chip-icon">access_time</mat-icon>
+            {{ formatDateTime(date) }}
+            <mat-icon matChipRemove class="remove-icon">close</mat-icon>
+          </mat-chip>
+        </div>
+      </div>
+
+      <div class="no-dates" *ngIf="selectedDates.length === 0">
+        <div class="empty-state">
+          <mat-icon class="empty-icon">schedule</mat-icon>
+          <p>No hay horarios seleccionados</p>
+          <p class="empty-subtitle">Selecciona una fecha y hora para comenzar</p>
+        </div>
+      </div>
+    </div>
+  </mat-dialog-content>
+  
+  <mat-dialog-actions align="end" class="dialog-actions">
+    <button mat-button (click)="onCancel()" [disabled]="isSubmitting" class="cancel-button">
+      <mat-icon>close</mat-icon>
+      Cancelar
+    </button>
+    <button mat-raised-button 
+            color="primary" 
+            (click)="saveHorarios()" 
+            [disabled]="selectedDates.length === 0 || isSubmitting"
+            class="save-button">
+      <mat-icon *ngIf="isSubmitting">hourglass_empty</mat-icon>
+      <mat-icon *ngIf="!isSubmitting">save</mat-icon>
+      {{ isSubmitting ? 'Guardando...' : 'Guardar Horarios' }}
+    </button>
+  </mat-dialog-actions>
+</div>

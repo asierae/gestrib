@@ -14,6 +14,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { MatSelectModule } from '@angular/material/select';
 import { TranslatePipe } from '../../pipes/translate.pipe';
 import { AlumnosService, AlumnoRequest } from '../../services/alumnos.service';
 import { ProfesoresService } from '../../services/profesores.service';
@@ -36,9 +37,10 @@ import { DeleteConfirmationDialogComponent } from '../tribunals/delete-confirmat
     MatPaginatorModule, 
     ScrollingModule, 
     MatFormFieldModule, 
-    MatInputModule, 
+    MatInputModule,
     MatTooltipModule,
     MatDialogModule,
+    MatSelectModule,
     TranslatePipe
   ],
   templateUrl: './users.html',
@@ -67,7 +69,7 @@ export class UsersComponent implements OnInit {
   // Profesores data
   profesores: any[] = [];
   profesoresDataSource: MatTableDataSource<any>;
-  displayedColumnsProfesores: string[] = ['nombre', 'apellidos', 'email', 'especialidad', 'actions'];
+  displayedColumnsProfesores: string[] = ['nombre', 'apellidos', 'email', 'especialidad', 'tipoUsuario', 'actions'];
   isLoadingProfesores = signal(false);
   profesoresError?: string;
   searchTermProfesores = '';
@@ -82,7 +84,7 @@ export class UsersComponent implements OnInit {
     private profesoresService: ProfesoresService,
     private dialog: MatDialog,
     private cdr: ChangeDetectorRef,
-    private authService: AuthService
+    public authService: AuthService
   ) {
     // Inicializar los DataSources
     this.alumnosDataSource = new MatTableDataSource<any>([]);
@@ -336,6 +338,51 @@ export class UsersComponent implements OnInit {
 
   trackByProfesorId(index: number, profesor: any): any {
     return profesor?.id || profesor?.email || index;
+  }
+
+  getTipoUsuarioText(tipoUsuario: number): string {
+    switch (tipoUsuario) {
+      case 1:
+        return 'Admin';
+      case 2:
+        return 'Profesor';
+      default:
+        return 'Desconocido';
+    }
+  }
+
+  onTipoUsuarioChange(profesor: any, event: any): void {
+    const nuevoTipo = parseInt(event.value);
+    const tipoAnterior = profesor.tipoUsuario;
+    
+    // Actualizar temporalmente en la UI
+    profesor.tipoUsuario = nuevoTipo;
+    
+    // Llamar al servicio para actualizar en el backend
+    this.profesoresService.updateTipoUsuario(profesor.id, nuevoTipo).subscribe({
+      next: (response: any) => {
+        console.log('Tipo de usuario actualizado:', response);
+        this.snackBar.open(
+          `✅ ${profesor.nombre} ${profesor.apellidos} actualizado a ${this.getTipoUsuarioText(nuevoTipo)}`, 
+          'Cerrar', 
+          { 
+            duration: 3000,
+            panelClass: ['success-snackbar']
+          }
+        );
+        // Actualizar la lista local
+        this.filterProfesores();
+      },
+      error: (error: any) => {
+        console.error('Error actualizando tipo de usuario:', error);
+        // Revertir el cambio en la UI
+        profesor.tipoUsuario = tipoAnterior;
+        this.snackBar.open('❌ Error al actualizar el tipo de usuario', 'Cerrar', { 
+          duration: 4000,
+          panelClass: ['error-snackbar']
+        });
+      }
+    });
   }
 
   deleteProfesor(profesor: any): void {

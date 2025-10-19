@@ -1,0 +1,39 @@
+.aula-dialog {
+  .aula-form {
+    padding: 16px 0;
+    
+    .full-width {
+      width: 100%;
+    }
+  }
+  
+  mat-dialog-actions {
+    padding: 16px 24px;
+    margin: 0;
+    
+    button {
+      margin-left: 8px;
+      
+      &[color="primary"] {
+        background: linear-gradient(135deg, #2196f3 0%, #1976d2 100%);
+        color: white;
+        
+        &:hover:not(:disabled) {
+          background: linear-gradient(135deg, #1976d2 0%, #1565c0 100%);
+        }
+        
+        &:disabled {
+          background: #e0e0e0;
+          color: #9e9e9e;
+        }
+      }
+      
+      mat-icon {
+        margin-right: 8px;
+        font-size: 18px;
+        width: 18px;
+        height: 18px;
+      }
+    }
+  }
+}

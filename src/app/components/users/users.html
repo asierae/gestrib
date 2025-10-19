@@ -227,6 +227,22 @@
                   <td mat-cell *matCellDef="let profesor">{{ profesor.especialidadOriginal || 'Sin especificar' }}</td>
                 </ng-container>
 
+                <!-- Tipo Usuario Column -->
+                <ng-container matColumnDef="tipoUsuario">
+                  <th mat-header-cell *matHeaderCellDef>Tipo Usuario</th>
+                  <td mat-cell *matCellDef="let profesor">
+                    <mat-form-field appearance="outline" class="tipo-usuario-field">
+                      <mat-select 
+                        [value]="profesor.tipoUsuario" 
+                        (selectionChange)="onTipoUsuarioChange(profesor, $event)"
+                        [disabled]="!authService.isAdministracion()">
+                        <mat-option [value]="1">Administración</mat-option>
+                        <mat-option [value]="2">Profesor</mat-option>
+                      </mat-select>
+                    </mat-form-field>
+                  </td>
+                </ng-container>
+
                 <!-- Actions Column -->
                 <ng-container matColumnDef="actions">
                   <th mat-header-cell *matHeaderCellDef>Acciones</th>

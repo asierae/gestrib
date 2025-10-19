@@ -119,12 +119,12 @@
         
         <div class="form-row">
           <mat-form-field appearance="outline" class="form-field">
-            <mat-label>Co-director del tribunal</mat-label>
+            <mat-label>{{ 'defensas.codirector' | translate }}</mat-label>
             <input 
               matInput
               formControlName="codirectorTribunal"
               [matAutocomplete]="codirectorAuto"
-              placeholder="Co-director del tribunal"
+              [placeholder]="'defensas.codirector' | translate"
               (click)="onCodirectorFieldClick()">
             <mat-autocomplete #codirectorAuto="matAutocomplete" (optionSelected)="onCodirectorChange()">
               <mat-option *ngFor="let profesor of filteredCodirectores" [value]="profesor.nombre + ' ' + profesor.apellidos">
@@ -136,12 +136,12 @@
         
         <div class="form-row">
           <mat-form-field appearance="outline" class="form-field">
-            <mat-label>Vocal de tribunal propuesto</mat-label>
+            <mat-label>{{ 'defensas.vocal' | translate }}</mat-label>
             <input 
               matInput
               formControlName="vocalTribunal"
               [matAutocomplete]="vocalAuto"
-              placeholder="Vocal de tribunal propuesto"
+              [placeholder]="'defensas.vocal' | translate"
               (click)="onVocalFieldClick()">
             <mat-autocomplete #vocalAuto="matAutocomplete" (optionSelected)="onVocalChange()">
               <mat-option *ngFor="let profesor of filteredVocales" [value]="profesor.nombre + ' ' + profesor.apellidos">

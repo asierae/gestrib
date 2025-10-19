@@ -20,26 +20,15 @@ export class DefensasService {
   private baseUrl = `${environment.apiUrl}/api/defensas`;
 
   /**
-   * Obtiene todas las defensas con filtros opcionales
+   * Obtiene todas las defensas con filtros opcionales - Entry Point: get_defensas
    */
   getDefensas(filters?: DefensaFilters): Observable<DefensaResponse> {
-    let params = new HttpParams();
+    console.log('Entry Point: get_defensas - Frontend sending filters:', filters);
     
-    if (filters) {
-      if (filters.tipo) params = params.set('tipo', filters.tipo);
-      if (filters.estado) params = params.set('estado', filters.estado);
-      if (filters.activo !== undefined) params = params.set('activo', filters.activo.toString());
-      if (filters.creadoPor) params = params.set('creadoPor', filters.creadoPor.toString());
-      if (filters.fechaDesde) params = params.set('fechaDesde', filters.fechaDesde.toISOString());
-      if (filters.fechaHasta) params = params.set('fechaHasta', filters.fechaHasta.toISOString());
-      if (filters.search) params = params.set('search', filters.search);
-      if (filters.page) params = params.set('page', filters.page.toString());
-      if (filters.limit) params = params.set('limit', filters.limit.toString());
-      if (filters.sortBy) params = params.set('sortBy', filters.sortBy);
-      if (filters.sortOrder) params = params.set('sortOrder', filters.sortOrder);
-    }
+    // Preparar el cuerpo de la petición POST con solo los filtros
+    const requestBody = filters || {};
 
-    return this.http.get<DefensaResponse>(this.baseUrl, { params })
+    return this.http.post<DefensaResponse>(`${this.baseUrl}/get_defensas`, requestBody)
       .pipe(
         timeout<DefensaResponse>(environment.timeout),
         retry(environment.retryAttempts),
@@ -64,19 +53,31 @@ export class DefensasService {
    */
   createDefensa(defensa: CreateDefensaRequest): Observable<DefensaResponse> {
     // Mapear los datos del frontend al formato del backend
+    console.log('DefensasService - especialidadesVocal recibidas:', defensa.especialidadesVocal);
+    console.log('DefensasService - especialidadesSuplente recibidas:', defensa.especialidadesSuplente);
+    console.log('DefensasService - estudiante recibido:', defensa.estudiante);
+    console.log('DefensasService - estudiante.id:', defensa.estudiante?.id);
+    
+    const especialidadesVocalSerialized = this.serializeSpecialtyArray(defensa.especialidadesVocal);
+    const especialidadesSupleteSerialized = this.serializeSpecialtyArray(defensa.especialidadesSuplente);
+    
+    console.log('DefensasService - especialidadesVocal serializadas:', especialidadesVocalSerialized);
+    console.log('DefensasService - especialidadesSuplente serializadas:', especialidadesSupleteSerialized);
+    
     const backendRequest = {
       IdCurso: this.mapCursoToId(defensa.curso),
       IdGrado: this.mapGradoToId(defensa.grado),
       IdEspecialidad: defensa.especialidad ? this.mapEspecialidadToId(defensa.especialidad) : null,
+      Especialidad: defensa.especialidad ? this.mapEspecialidadToLabel(defensa.especialidad) : null,
       Titulo: defensa.titulo,
-      IdAlumno: defensa.estudiante.id || 0, // Necesitamos el ID del estudiante
+      IdAlumno: defensa.estudiante?.id || 0, // Necesitamos el ID del estudiante
       IdDirectorTribunal: defensa.directorTribunal.id,
       IdCodirectorTribunal: defensa.codirectorTribunal?.id || null,
       IdVocalTribunal: defensa.vocalTribunal?.id || null,
       IdSuplente: defensa.suplente?.id || null,
       IdPresidente: null, // Por defecto null
-      EspecialidadesVocal: defensa.especialidadesVocal.join(', '),
-      EspecialidadesSuplente: defensa.especialidadesSuplente.join(', '),
+      EspecialidadesVocal: especialidadesVocalSerialized,
+      EspecialidadesSuplente: especialidadesSupleteSerialized,
       ComentariosDireccion: defensa.comentariosDireccion,
       FechaDefensa: null, // Por defecto null
       HoraDefensa: null, // Por defecto null
@@ -131,6 +132,47 @@ export class DefensasService {
   }
 
   /**
+   * Mapea el enum TipoEspecialidad a label legible
+   */
+  private mapEspecialidadToLabel(especialidad: string): string {
+    switch (especialidad) {
+      case 'ingenieria_computacion': 
+        return 'Ing. Comp.';
+      case 'ingenieria_software': 
+        return 'Ing. Software';
+      case 'computacion': 
+        return 'Computación';
+      default: 
+        return especialidad;
+    }
+  }
+
+  /**
+   * Serializa un array de especialidades a JSON string
+   */
+  private serializeSpecialtyArray(specialties: any[]): string {
+    if (!specialties || specialties.length === 0) {
+      return '';
+    }
+    
+    // Si ya son strings, simplemente unirlos
+    if (typeof specialties[0] === 'string') {
+      return JSON.stringify(specialties);
+    }
+    
+    // Si son objetos, extraer las propiedades relevantes
+    const serializedSpecialties = specialties.map(specialty => {
+      if (typeof specialty === 'object' && specialty !== null) {
+        // Extraer el label o id del objeto
+        return specialty.label || specialty.id || specialty.nombre || specialty;
+      }
+      return specialty;
+    });
+    
+    return JSON.stringify(serializedSpecialties);
+  }
+
+  /**
    * Actualiza una defensa existente
    */
   updateDefensa(id: number, defensa: UpdateDefensaRequest): Observable<DefensaResponse> {
@@ -153,6 +195,27 @@ export class DefensasService {
   }
 
   /**
+   * Actualiza solo el estado de una defensa
+   */
+  updateEstado(id: number, estado: string): Observable<DefensaResponse> {
+    const updateRequest = { Estado: estado };
+    return this.http.patch<DefensaResponse>(`${this.baseUrl}/${id}/estado`, updateRequest)
+      .pipe(
+        timeout<DefensaResponse>(environment.timeout),
+        catchError(this.handleError)
+      );
+  }
+
+  updateLugar(id: number, lugar: string): Observable<DefensaResponse> {
+    const updateRequest = { LugarDefensa: lugar };
+    return this.http.patch<DefensaResponse>(`${this.baseUrl}/${id}/lugar`, updateRequest)
+      .pipe(
+        timeout<DefensaResponse>(environment.timeout),
+        catchError(this.handleError)
+      );
+  }
+
+  /**
    * Elimina una defensa (soft delete)
    */
   deleteDefensa(id: number): Observable<DefensaResponse> {
@@ -168,6 +231,17 @@ export class DefensasService {
    */
   hardDeleteDefensa(id: number): Observable<DefensaResponse> {
     return this.http.delete<DefensaResponse>(`${this.baseUrl}/${id}/permanent`)
+      .pipe(
+        timeout<DefensaResponse>(environment.timeout),
+        catchError(this.handleError)
+      );
+  }
+
+  /**
+   * Elimina todas las defensas
+   */
+  deleteAllDefensas(): Observable<DefensaResponse> {
+    return this.http.delete<DefensaResponse>(`${this.baseUrl}/all`)
       .pipe(
         timeout<DefensaResponse>(environment.timeout),
         catchError(this.handleError)
@@ -202,7 +276,7 @@ export class DefensasService {
   }
 
   /**
-   * Busca defensas por texto
+   * Busca defensas por texto - Entry Point: get_defensas
    */
   searchDefensas(searchTerm: string, filters?: Omit<DefensaFilters, 'search'>): Observable<DefensaResponse> {
     const filtersWithSearch = { ...filters, search: searchTerm };

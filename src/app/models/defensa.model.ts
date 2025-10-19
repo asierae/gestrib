@@ -104,15 +104,9 @@ export interface DefensaResponse {
 }
 
 export interface DefensaFilters {
-  tipo?: TipoDefensa;
-  estado?: EstadoDefensa;
-  activo?: boolean;
-  creadoPor?: number;
   fechaDesde?: Date;
   fechaHasta?: Date;
   search?: string;
   page?: number;
   limit?: number;
-  sortBy?: string;
-  sortOrder?: 'asc' | 'desc';
 }

@@ -60,6 +60,7 @@ export class ExcelService {
           const email = emailBase ? `${emailBase}@estudiante.ehu.eus` : 'sin.email@estudiante.ehu.eus';
           
           return {
+            id: datosAlumno.id || datosAlumno.Id, // Incluir el ID del alumno
             nombreCompleto: `${nombre} ${apellidos}`.trim(),
             nombre: nombre,
             apellido1: apellido1,
@@ -102,6 +103,7 @@ export class ExcelService {
   private getEstudiantesMockData(): EstudianteDisplay[] {
     return [
       {
+        id: 1,
         nombreCompleto: 'Juan Pérez García',
         nombre: 'Juan',
         apellido1: 'Pérez',
@@ -112,8 +114,9 @@ export class ExcelService {
         asignatura: 'Trabajo Fin de Grado',
         creditosSup: 240,
         mediaExpediente: 8.5
-      },
+      } as EstudianteDisplay,
       {
+        id: 2,
         nombreCompleto: 'María López Fernández',
         nombre: 'María',
         apellido1: 'López',
@@ -124,8 +127,9 @@ export class ExcelService {
         asignatura: 'Trabajo Fin de Grado',
         creditosSup: 240,
         mediaExpediente: 9.2
-      },
+      } as EstudianteDisplay,
       {
+        id: 3,
         nombreCompleto: 'Carlos Ruiz Martínez',
         nombre: 'Carlos',
         apellido1: 'Ruiz',
@@ -136,47 +140,52 @@ export class ExcelService {
         asignatura: 'Trabajo Fin de Grado',
         creditosSup: 240,
         mediaExpediente: 7.8
-      }
+      } as EstudianteDisplay
     ];
   }
 
   private getEstudiantesMock(): Observable<EstudianteDisplay[]> {
     const estudiantes: EstudianteDisplay[] = [
       {
+        id: 1,
         nombreCompleto: 'Juan Pérez García',
         nombre: 'Juan',
         apellido1: 'Pérez',
         apellido2: 'García',
         email: 'juan.perez@estudiante.ehu.eus'
-      },
+      } as EstudianteDisplay,
       {
+        id: 2,
         nombreCompleto: 'María López Fernández',
         nombre: 'María',
         apellido1: 'López',
         apellido2: 'Fernández',
         email: 'maria.lopez@estudiante.ehu.eus'
-      },
+      } as EstudianteDisplay,
       {
+        id: 3,
         nombreCompleto: 'Carlos Ruiz Martínez',
         nombre: 'Carlos',
         apellido1: 'Ruiz',
         apellido2: 'Martínez',
         email: 'carlos.ruiz@estudiante.ehu.eus'
-      },
+      } as EstudianteDisplay,
       {
+        id: 4,
         nombreCompleto: 'Ana García Sánchez',
         nombre: 'Ana',
         apellido1: 'García',
         apellido2: 'Sánchez',
         email: 'ana.garcia@estudiante.ehu.eus'
-      },
+      } as EstudianteDisplay,
       {
+        id: 5,
         nombreCompleto: 'David Martín Rodríguez',
         nombre: 'David',
         apellido1: 'Martín',
         apellido2: 'Rodríguez',
         email: 'david.martin@estudiante.ehu.eus'
-      }
+      } as EstudianteDisplay
     ];
 
     return new Observable(observer => {

@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatTableModule } from '@angular/material/table';
@@ -18,9 +18,17 @@ import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 import { TranslationService } from '../../services/translation.service';
 import { AlumnosService } from '../../services/alumnos.service';
+import { DefensasService } from '../../services/defensas.service';
+import { AuthService } from '../../services/auth.service';
+import { AulasService } from '../../services/aulas.service';
+import { Aula } from '../../models/aula.model';
+import { DefensasHorariosService } from '../../services/defensas-horarios.service';
+import { HorariosDialogComponent } from './horarios-dialog.component';
+import { NotificacionHorariosService, NotificarHorariosRequest } from '../../services/notificacion-horarios.service';
 import { TranslatePipe } from '../../pipes/translate.pipe';
 import * as XLSX from 'xlsx';
 import { DeleteConfirmationDialogComponent } from './delete-confirmation-dialog.component';
+import { EstadoDefensa } from '../../models/defensa.model';
 
 @Component({
   selector: 'app-tribunals',
@@ -35,7 +43,13 @@ export class TribunalsComponent implements OnInit {
   private router = inject(Router);
   private dialog = inject(MatDialog);
   private alumnosService = inject(AlumnosService);
-  displayedColumns = ['student','dni','title','specialty','director','codirector','president','vocal','replacement','field','language','date','time','place','status','actions'];
+  private defensasService = inject(DefensasService);
+  private authService = inject(AuthService);
+  private aulasService = inject(AulasService);
+  private defensasHorariosService = inject(DefensasHorariosService);
+  private notificacionHorariosService = inject(NotificacionHorariosService);
+  private cdr = inject(ChangeDetectorRef);
+  displayedColumns = ['student','dni','title','specialty','director','codirector','president','vocal','replacement','field','language','date','time','place','horarios','notificar','status','actions'];
   data: any[] = [];
   filteredData: any[] = [];
   pageSize = 10;
@@ -47,86 +61,186 @@ export class TribunalsComponent implements OnInit {
   sortDirection: 'asc' | 'desc' | '' = '';
   statusOptions = ['Aprobada', 'Pendiente', 'Rechazada'];
   editingStatus: { [key: string]: boolean } = {};
+  aulas: Aula[] = [];
+  editingPlace: { [key: string]: boolean } = {};
+
+  // Getter para verificar si el usuario es administrador
+  get isAdmin(): boolean {
+    return this.authService.isAdmin();
+  }
+
+  // Verificar si hay filtros activos
+  hasActiveFilters(): boolean {
+    return !!(this.fromDate || this.toDate || (this.filterText && this.filterText.trim() !== ''));
+  }
+
+  // Limpiar todos los filtros
+  clearFilters(): void {
+    this.fromDate = undefined;
+    this.toDate = undefined;
+    this.filterText = '';
+    this.applyFilters();
+    console.log('TribunalsComponent: Filtros limpiados');
+  }
 
   ngOnInit(): void {
+    console.log('TribunalsComponent: ngOnInit ejecutado');
     this.loadDefensas();
+    this.loadAulas();
   }
 
   loadDefensas(): void {
     console.log('TribunalsComponent: Cargando defensas desde la API...');
-    this.alumnosService.getAllAlumnos().subscribe({
-      next: (alumnos: any[]) => {
-        console.log('TribunalsComponent: Alumnos recibidos:', alumnos);
-        this.data = this.convertAlumnosToDefensas(alumnos);
-        this.applyFilters();
-        this.snackBar.open(`Cargadas ${this.data.length} defensas`, 'Cerrar', { duration: 2000 });
+    console.log('TribunalsComponent: DefensasService disponible:', !!this.defensasService);
+    
+    // Preparar filtros por defecto para obtener todas las defensas
+    const filters = {
+      page: 1,
+      limit: 1000 // Obtener todas las defensas
+    };
+    
+    this.defensasService.getDefensas(filters).subscribe({
+      next: (response: any) => {
+        console.log('TribunalsComponent: Respuesta completa recibida:', response);
+        console.log('TribunalsComponent: response.success:', response?.success);
+        console.log('TribunalsComponent: response.data:', response?.data);
+        console.log('TribunalsComponent: Tipo de response.data:', typeof response?.data);
+        console.log('TribunalsComponent: Array length:', Array.isArray(response?.data) ? response.data.length : 'No es array');
+        
+        if (response && response.success && response.data && Array.isArray(response.data)) {
+          console.log('TribunalsComponent: Convirtiendo defensas a formato de tabla...');
+          this.data = this.convertDefensasToTableFormat(response.data);
+          console.log('TribunalsComponent: Datos convertidos:', this.data);
+          this.applyFilters();
+          this.snackBar.open(`Cargadas ${this.data.length} defensas`, 'Cerrar', { duration: 2000 });
+        } else {
+          console.warn('TribunalsComponent: Respuesta sin datos válidos:', response);
+          this.data = [];
+          this.applyFilters();
+          this.snackBar.open('No hay defensas registradas', 'Cerrar', { duration: 2000 });
+        }
       },
       error: (error) => {
         console.error('TribunalsComponent: Error cargando defensas:', error);
+        console.error('TribunalsComponent: Error details:', error.message, error.status);
         this.snackBar.open('Error al cargar las defensas', 'Cerrar', { duration: 3000 });
-        // Fallback a datos mock si hay error
-        this.data = this.generateFakeData(10);
+        // Fallback a datos vacíos si hay error
+        this.data = [];
         this.applyFilters();
       }
     });
   }
 
-  convertAlumnosToDefensas(alumnos: any[]): any[] {
-    return alumnos.map((alumno, index) => {
-      // Validar y limpiar datos
-      const nombre = alumno.Nombre || 'Sin nombre';
-      const apellidos = alumno.Apellidos || 'Sin apellidos';
-      const dni = alumno.DNI || 'Sin DNI';
-      const titulacion = alumno.Titulacion || 'Sin titulación';
-      const asignatura = alumno.Asignatura || 'Trabajo Fin de Grado';
-      const creditosSup = alumno.CreditosSup || 0;
-      const mediaExpediente = alumno.MediaExpediente || 0;
-      
-      const day = (index % 28) + 1;
-      const month = ((index % 12) + 1).toString().padStart(2, '0');
-      const dateStr = `2025-${month}-${day.toString().padStart(2,'0')}`;
+  loadAulas(): void {
+    console.log('TribunalsComponent: Cargando aulas...');
+    this.aulasService.getAllAulas().subscribe({
+      next: (response) => {
+        if (response.success && response.dataList) {
+          this.aulas = response.dataList;
+          console.log('TribunalsComponent: Aulas cargadas:', this.aulas.length);
+        } else {
+          console.warn('TribunalsComponent: No se pudieron cargar las aulas');
+          this.aulas = [];
+        }
+      },
+      error: (error) => {
+        console.error('TribunalsComponent: Error cargando aulas:', error);
+        this.aulas = [];
+      }
+    });
+  }
+
+  convertDefensasToTableFormat(defensas: any[]): any[] {
+    return defensas.map((defensa) => {
+      // Mapear datos de la defensa al formato de la tabla
+      const estudiante = defensa.estudiante || {};
+      const director = defensa.directorTribunal || {};
+      const codirector = defensa.codirectorTribunal || {};
+      const vocal = defensa.vocalTribunal || {};
+      const suplente = defensa.suplente || {};
       
       return {
-        student: `${nombre} ${apellidos}`.trim(),
-        dni: dni,
-        title: `Trabajo Fin de Grado - ${asignatura}`,
-        specialty: this.getSpecialtyFromTitulacion(titulacion),
-        director: `Dr. Director ${index + 1}`,
-        codirector: index % 2 === 0 ? `Dra. Codirectora ${index + 1}` : '-',
-        president: `Presidente ${index + 1}`,
-        vocal: `Vocal ${index + 1}`,
-        replacement: `Suplente ${index + 1}`,
-        field: this.getFieldFromTitulacion(titulacion),
-        language: ['ES','EN','EU'][index % 3],
-        date: index % 7 === 0 ? '' : dateStr, // Some records without date
-        time: index % 7 === 0 ? '' : `${(9 + (index % 8)).toString().padStart(2,'0')}:00`,
-        place: index % 7 === 0 ? 'Por asignar' : `Aula ${100 + index}`,
-        status: ['Aprobada', 'Pendiente', 'Rechazada'][index % 3],
-        // Datos adicionales del alumno
-        creditosSup: creditosSup,
-        mediaExpediente: mediaExpediente,
-        titulacion: titulacion
+        id: defensa.id,
+        student: `${estudiante.nombre || ''} ${estudiante.apellidos || ''}`.trim() || 'Sin nombre',
+        dni: estudiante.dni || 'Sin DNI',
+        title: defensa.titulo || 'Sin título',
+        specialty: defensa.especialidad || this.getSpecialtyFromId(defensa.idEspecialidad),
+        director: `${director.nombre || ''} ${director.apellidos || ''}`.trim() || '-',
+        codirector: codirector.nombre ? `${codirector.nombre} ${codirector.apellidos || ''}`.trim() : '-',
+        president: defensa.presidente ? `${defensa.presidente.nombre || ''} ${defensa.presidente.apellidos || ''}`.trim() : '-',
+        vocal: vocal.nombre ? `${vocal.nombre} ${vocal.apellidos || ''}`.trim() : '-',
+        replacement: suplente.nombre ? `${suplente.nombre} ${suplente.apellidos || ''}`.trim() : '-',
+        field: this.getFieldFromEspecialidad(defensa.idEspecialidad),
+        language: this.getLanguageCode(defensa.idioma),
+        date: defensa.fechaDefensa ? this.formatDate(defensa.fechaDefensa) : '',
+        time: defensa.horaDefensa ? this.formatTime(defensa.horaDefensa) : '',
+        place: defensa.lugarDefensa || defensa.lugar || 'Por asignar',
+        status: this.mapStatus(defensa.estado),
+        // Datos adicionales
+        curso: defensa.curso,
+        grado: defensa.grado,
+        especialidad: defensa.especialidad,
+        idioma: defensa.idioma,
+        comentarios: defensa.comentariosDireccion,
+        especialidadesVocal: defensa.especialidadesVocal,
+        especialidadesSuplente: defensa.especialidadesSuplente,
+        created: defensa.created,
+        horariosCount: defensa.horariosCount || 0
       };
     });
   }
 
-  getSpecialtyFromTitulacion(titulacion: string): string {
-    if (titulacion.toLowerCase().includes('inteligencia artificial')) {
-      return 'Ing. Software';
-    } else if (titulacion.toLowerCase().includes('informática')) {
-      return 'Ing. Comp.';
+  getSpecialtyFromId(idEspecialidad: number): string {
+    switch (idEspecialidad) {
+      case 1: return 'Ing. Comp.';
+      case 2: return 'Ing. Software';
+      case 3: return 'Computación';
+      default: return 'Sin especialidad';
     }
-    return 'Computación';
   }
 
-  getFieldFromTitulacion(titulacion: string): string {
-    if (titulacion.toLowerCase().includes('inteligencia artificial')) {
-      return 'IA';
-    } else if (titulacion.toLowerCase().includes('informática')) {
-      return 'Sistemas';
+  getFieldFromEspecialidad(idEspecialidad: number): string {
+    switch (idEspecialidad) {
+      case 1: return 'Sistemas';
+      case 2: return 'Software';
+      case 3: return 'Computación';
+      default: return 'General';
     }
-    return 'Redes';
   }
+
+  getLanguageCode(idioma: string): string {
+    switch (idioma?.toLowerCase()) {
+      case 'es': return 'ES';
+      case 'en': return 'EN';
+      case 'eu': return 'EU';
+      default: return 'ES';
+    }
+  }
+
+  formatDate(fecha: string): string {
+    if (!fecha) return '';
+    const date = new Date(fecha);
+    return date.toISOString().split('T')[0]; // YYYY-MM-DD format
+  }
+
+  formatTime(hora: string): string {
+    if (!hora) return '';
+    // If hora is already in HH:MM format, return as is
+    if (hora.includes(':')) return hora;
+    // If it's a time object or different format, convert
+    return hora;
+  }
+
+  mapStatus(estado: string): string {
+    switch (estado?.toLowerCase()) {
+      case 'aprobada': return 'Aprobada';
+      case 'pendiente': return 'Pendiente';
+      case 'rechazada': return 'Rechazada';
+      case 'en_proceso': return 'En Proceso';
+      default: return 'Pendiente';
+    }
+  }
+
 
   generateFakeData(count: number): any[] {
     const list: any[] = [];
@@ -156,19 +270,41 @@ export class TribunalsComponent implements OnInit {
   }
 
   applyFilters(): void {
-    const inRange = (d: string) => {
-      const date = new Date(d);
-      if (this.fromDate && date < this.fromDate) return false;
-      if (this.toDate && date > this.toDate) return false;
+    console.log('TribunalsComponent: Aplicando filtros...');
+    console.log('TribunalsComponent: fromDate:', this.fromDate);
+    console.log('TribunalsComponent: toDate:', this.toDate);
+    console.log('TribunalsComponent: filterText:', this.filterText);
+    
+    const inRange = (createdDate: string | Date) => {
+      if (!createdDate) return true; // Si no hay fecha de creación, incluir el registro
+      
+      const date = new Date(createdDate);
+      if (isNaN(date.getTime())) return true; // Si la fecha no es válida, incluir el registro
+      
+      // Ajustar las fechas para comparación (solo fecha, sin hora)
+      const fromDate = this.fromDate ? new Date(this.fromDate.getFullYear(), this.fromDate.getMonth(), this.fromDate.getDate()) : null;
+      const toDate = this.toDate ? new Date(this.toDate.getFullYear(), this.toDate.getMonth(), this.toDate.getDate(), 23, 59, 59) : null;
+      const recordDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+      
+      console.log('TribunalsComponent: Comparando fecha:', {
+        createdDate,
+        recordDate: recordDate.toISOString(),
+        fromDate: fromDate?.toISOString(),
+        toDate: toDate?.toISOString()
+      });
+      
+      if (fromDate && recordDate < fromDate) return false;
+      if (toDate && recordDate > toDate) return false;
       return true;
     };
+    
     const text = (this.filterText || '').toLowerCase().trim();
     const textMatch = (r: any) =>
       !text || [r.student, r.dni, r.title, r.specialty, r.director, r.codirector, r.president, r.vocal, r.place, r.status]
         .map((v: any) => String(v ?? '').toLowerCase())
         .some((s: string) => s.includes(text));
 
-    let result = this.data.filter(r => inRange(r.date) && textMatch(r));
+    let result = this.data.filter(r => inRange(r.created) && textMatch(r));
 
     if (this.sortActive && this.sortDirection) {
       const dir = this.sortDirection === 'asc' ? 1 : -1;
@@ -183,6 +319,14 @@ export class TribunalsComponent implements OnInit {
     }
 
     this.filteredData = result;
+    // Forzar la detección de cambios para actualizar la tabla
+    this.cdr.detectChanges();
+    console.log('TribunalsComponent: Filtros aplicados. Resultados:', {
+      totalData: this.data.length,
+      filteredData: this.filteredData.length,
+      fromDate: this.fromDate,
+      toDate: this.toDate
+    });
   }
 
   onPageChange(event: any): void {
@@ -206,17 +350,54 @@ export class TribunalsComponent implements OnInit {
   }
 
   onStatusChange(row: any, newStatus: string): void {
-    // Find the row in the original data array
-    const dataIndex = this.data.findIndex(item => 
-      item.student === row.student && 
-      item.dni === row.dni && 
-      item.date === row.date
-    );
-    
-    if (dataIndex !== -1) {
-      this.data[dataIndex].status = newStatus;
-      this.applyFilters();
-      this.snackBar.open(`Estado cambiado a: ${newStatus}`, 'Cerrar', { duration: 2000 });
+    if (row.id) {
+      console.log('TribunalsComponent: Cambiando estado de defensa:', {
+        id: row.id,
+        newStatus: newStatus
+      });
+      
+      this.defensasService.updateEstado(row.id, newStatus).subscribe({
+        next: (response) => {
+          console.log('TribunalsComponent: Respuesta del servidor:', response);
+          // El backend devuelve { message: "..." } en lugar de { success: true }
+          if (response && (response.success || response.message)) {
+            // Actualizar el estado en los datos locales
+            const dataIndex = this.data.findIndex(item => item.id === row.id);
+            if (dataIndex !== -1) {
+              this.data[dataIndex].status = newStatus;
+              // También actualizar el objeto row directamente para el dropdown
+              row.status = newStatus;
+              this.applyFilters();
+              // Forzar la detección de cambios para actualizar la vista
+              this.cdr.detectChanges();
+            }
+            this.snackBar.open(`Estado cambiado a: ${newStatus}`, 'Cerrar', { duration: 2000 });
+          } else {
+            this.snackBar.open('Error al actualizar el estado', 'Cerrar', { duration: 3000 });
+          }
+        },
+        error: (error) => {
+          console.error('Error actualizando estado:', error);
+          this.snackBar.open('Error al actualizar el estado', 'Cerrar', { duration: 3000 });
+        }
+      });
+    } else {
+      // Fallback para datos sin ID (no debería pasar con datos reales)
+      const dataIndex = this.data.findIndex(item => 
+        item.student === row.student && 
+        item.dni === row.dni && 
+        item.date === row.date
+      );
+      
+      if (dataIndex !== -1) {
+        this.data[dataIndex].status = newStatus;
+        // También actualizar el objeto row directamente para el dropdown
+        row.status = newStatus;
+        this.applyFilters();
+        // Forzar la detección de cambios para actualizar la vista
+        this.cdr.detectChanges();
+        this.snackBar.open(`Estado cambiado a: ${newStatus}`, 'Cerrar', { duration: 2000 });
+      }
     }
     
     // Close the dropdown
@@ -224,7 +405,7 @@ export class TribunalsComponent implements OnInit {
   }
 
   getRowKey(row: any): string {
-    return `${row.student}-${row.dni}-${row.date}`;
+    return row.id ? `id-${row.id}` : `${row.student}-${row.dni}-${row.date}`;
   }
 
   toggleStatusEdit(row: any): void {
@@ -244,6 +425,75 @@ export class TribunalsComponent implements OnInit {
 
   isEditingStatus(row: any): boolean {
     return this.editingStatus[this.getRowKey(row)] || false;
+  }
+
+  onPlaceChange(row: any, newPlace: string): void {
+    if (row.id) {
+      console.log('TribunalsComponent: Cambiando lugar de defensa:', {
+        id: row.id,
+        newPlace: newPlace
+      });
+      
+      this.defensasService.updateLugar(row.id, newPlace).subscribe({
+        next: (response) => {
+          console.log('TribunalsComponent: Respuesta del servidor:', response);
+          if (response && (response.success || response.message)) {
+            // Actualizar el lugar en los datos locales
+            const dataIndex = this.data.findIndex(item => item.id === row.id);
+            if (dataIndex !== -1) {
+              this.data[dataIndex].place = newPlace;
+              row.place = newPlace;
+              this.applyFilters();
+              this.cdr.detectChanges();
+            }
+            this.snackBar.open(`Lugar cambiado a: ${newPlace || 'Sin asignar'}`, 'Cerrar', { duration: 2000 });
+          } else {
+            this.snackBar.open('Error al actualizar el lugar', 'Cerrar', { duration: 3000 });
+          }
+        },
+        error: (error) => {
+          console.error('Error actualizando lugar:', error);
+          this.snackBar.open('Error al actualizar el lugar', 'Cerrar', { duration: 3000 });
+        }
+      });
+    } else {
+      // Fallback para datos sin ID (actualización local)
+      const dataIndex = this.data.findIndex(item => 
+        item.student === row.student && 
+        item.dni === row.dni && 
+        item.date === row.date
+      );
+      
+      if (dataIndex !== -1) {
+        this.data[dataIndex].place = newPlace;
+        row.place = newPlace;
+        this.applyFilters();
+        this.cdr.detectChanges();
+        this.snackBar.open(`Lugar cambiado a: ${newPlace || 'Sin asignar'}`, 'Cerrar', { duration: 2000 });
+      }
+    }
+    
+    // Close the dropdown
+    this.editingPlace[this.getRowKey(row)] = false;
+  }
+
+  togglePlaceEdit(row: any): void {
+    const key = this.getRowKey(row);
+    this.editingPlace[key] = !this.editingPlace[key];
+    
+    // Auto-focus the select when it opens
+    if (this.editingPlace[key]) {
+      setTimeout(() => {
+        const selectElement = document.querySelector(`[data-row-key="${key}"] .mat-mdc-select-trigger`) as HTMLElement;
+        if (selectElement) {
+          selectElement.click();
+        }
+      }, 100);
+    }
+  }
+
+  isEditingPlace(row: any): boolean {
+    return this.editingPlace[this.getRowKey(row)] || false;
   }
 
   hasDate(row: any): boolean {
@@ -286,32 +536,50 @@ export class TribunalsComponent implements OnInit {
     });
 
     dialogRef.afterClosed().subscribe(result => {
-      if (result) {
-        // Eliminar el registro de los datos originales
-        const originalIndex = this.data.findIndex(item => 
-          item.student === row.student && 
-          item.dni === row.dni && 
-          item.title === row.title
-        );
-        
-        if (originalIndex > -1) {
-          this.data.splice(originalIndex, 1);
-          
-          // Reaplicar filtros para actualizar la vista filtrada
-          this.applyFilters();
-          
-          // Ajustar el índice de página si es necesario
-          const totalPages = Math.ceil(this.filteredData.length / this.pageSize);
-          if (this.pageIndex >= totalPages && totalPages > 0) {
-            this.pageIndex = totalPages - 1;
+      if (result && row.id) {
+        // Eliminar la defensa usando el servicio
+        this.defensasService.deleteDefensa(row.id).subscribe({
+          next: (response) => {
+            console.log('TribunalsComponent: Respuesta del servidor:', response);
+            if (response && (response.success || response.message)) {
+              // Eliminar el registro de los datos locales
+              const originalIndex = this.data.findIndex(item => item.id === row.id);
+              
+              if (originalIndex > -1) {
+                this.data.splice(originalIndex, 1);
+                
+                // Reaplicar filtros para actualizar la vista filtrada
+                this.applyFilters();
+                
+                // Ajustar el índice de página si es necesario
+                const totalPages = Math.ceil(this.filteredData.length / this.pageSize);
+                if (this.pageIndex >= totalPages && totalPages > 0) {
+                  this.pageIndex = totalPages - 1;
+                }
+              }
+              
+              this.snackBar.open(
+                `${this.translationService.getTranslation('cases.delete')}: ${row.student}`, 
+                'Cerrar', 
+                { duration: 3000 }
+              );
+            } else {
+              this.snackBar.open(
+                'Error al eliminar la defensa',
+                'Cerrar',
+                { duration: 3000 }
+              );
+            }
+          },
+          error: (error) => {
+            console.error('Error eliminando defensa:', error);
+            this.snackBar.open(
+              'Error al eliminar la defensa',
+              'Cerrar',
+              { duration: 3000 }
+            );
           }
-          
-          this.snackBar.open(
-            `${this.translationService.getTranslation('cases.delete')}: ${row.student}`, 
-            'Cerrar', 
-            { duration: 3000 }
-          );
-        }
+        });
       }
     });
   }
@@ -375,5 +643,113 @@ export class TribunalsComponent implements OnInit {
     } catch (error) {
       this.snackBar.open('Error al exportar el archivo Excel', 'Cerrar', { duration: 3000 });
     }
+  }
+
+  deleteAllDefensas(): void {
+    const dialogRef = this.dialog.open(DeleteConfirmationDialogComponent, {
+      width: '500px',
+      data: {
+        title: this.translationService.getTranslation('tribunals.deleteAllConfirm'),
+        message: this.translationService.getTranslation('tribunals.deleteAllMessage'),
+        details: this.translationService.getTranslation('tribunals.deleteAllDetails'),
+        defenseInfo: `${this.data.length} defensas`
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.defensasService.deleteAllDefensas().subscribe({
+          next: (response) => {
+            if (response.success) {
+              // Limpiar todos los datos locales
+              this.data = [];
+              this.filteredData = [];
+              this.pageIndex = 0;
+              
+              this.snackBar.open(
+                this.translationService.getTranslation('tribunals.deleteAllSuccess'),
+                'Cerrar', 
+                { duration: 3000 }
+              );
+            } else {
+              this.snackBar.open(
+                this.translationService.getTranslation('tribunals.deleteAllError'),
+                'Cerrar',
+                { duration: 3000 }
+              );
+            }
+          },
+          error: (error) => {
+            console.error('Error eliminando todas las defensas:', error);
+            this.snackBar.open(
+              this.translationService.getTranslation('tribunals.deleteAllError'),
+              'Cerrar',
+              { duration: 3000 }
+            );
+          }
+        });
+      }
+    });
+  }
+
+  openHorariosDialog(row: any): void {
+    const dialogRef = this.dialog.open(HorariosDialogComponent, {
+      width: '650px',
+      maxHeight: '80vh',
+      data: {
+        idDefensa: row.id,
+        studentName: row.student,
+        title: row.title
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        // Recargar los datos para actualizar el contador de horarios
+        this.loadDefensas();
+      }
+    });
+  }
+
+  notificarHorarios(row: any): void {
+    console.log('=== NOTIFICAR HORARIOS ===');
+    console.log('Row data:', row);
+    console.log('Horarios count:', row.horariosCount);
+    
+    // Verificar que la defensa tenga horarios configurados
+    if (!row.horariosCount || row.horariosCount === 0) {
+      console.log('No hay horarios configurados, mostrando mensaje de error');
+      this.snackBar.open('Debe configurar horarios antes de enviar la notificación', 'Cerrar', { duration: 3000 });
+      return;
+    }
+
+    // Crear la solicitud de notificación
+    const request: NotificarHorariosRequest = {
+      idDefensa: row.id,
+      tituloDefensa: row.title,
+      nombreEstudiante: row.student,
+      emailCodirector: row.codirectorEmail || '',
+      emailVocal: row.vocalEmail || '',
+      emailReemplazo: row.replacementEmail || ''
+    };
+
+    // Enviar la notificación
+    this.notificacionHorariosService.notificarHorarios(request).subscribe({
+      next: (response) => {
+        if (response.success) {
+          this.snackBar.open(
+            `Notificación enviada a ${response.destinatarios?.length || 0} destinatarios`, 
+            'Cerrar', 
+            { duration: 3000 }
+          );
+        } else {
+          this.snackBar.open('Error al enviar la notificación', 'Cerrar', { duration: 3000 });
+        }
+      },
+      error: (error) => {
+        console.error('Error enviando notificación:', error);
+        this.snackBar.open('Error al enviar la notificación', 'Cerrar', { duration: 3000 });
+      }
+    });
   }
 }

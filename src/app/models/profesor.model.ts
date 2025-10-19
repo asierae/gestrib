@@ -6,6 +6,7 @@ export interface Profesor {
   tipoEspecialidad: TipoEspecialidad;
   especialidadOriginal?: string;
   dni: string;
+  tipoUsuario: number; // 1 = Admin, 2 = Profesor
   activo: boolean;
 }
 

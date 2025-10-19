@@ -31,7 +31,9 @@
     "reports": "Txostenak",
     "administration": "Administrazioa",
     "help": "Laguntza",
-    "defensas": "Defentsak"
+    "defensas": "Defentsak",
+    "formDefensa": "Defentsa Formularioa",
+    "defensasList": "Defentsen Zerrenda"
   },
   "breadcrumbs": {
     "home": "Hasiera",
@@ -98,10 +100,11 @@
     "selectSpecialty": "Espezialitatea hautatu",
     "student": "Ikaslea",
     "selectStudent": "Ikaslea hautatu",
-    "director": "Epaitegiko Zuzendaria",
+    "director": "Zuzendaria",
     "selectDirector": "Zuzendaria hautatu",
-    "vocal": "Epaitegiko Bozkaria",
-    "selectVocal": "Bozkaria hautatu",
+    "codirector": "Kozuzendaria",
+    "vocal": "Bokala",
+    "selectVocal": "Bokala hautatu",
     "supplement": "Ordezkoa",
     "selectSupplement": "Ordezkoa hautatu",
     "vocalSpecialties": "Bozkariaren Espezialitateak",
@@ -130,7 +133,7 @@
     "delete": "Ezabatu",
     "noDefensas": "Ez dago defentsarik eskuragarri",
     "success": {
-      "created": "Defentsa ondo sortu da",
+      "created": "Defentsa ondo erregistratu da",
       "updated": "Defentsa ondo eguneratu da",
       "deleted": "Defentsa ondo ezabatu da",
       "loaded": "Defentsak ondo kargatu dira"
@@ -186,10 +189,24 @@
     "date": "Data",
     "time": "Ordua",
     "place": "Lekua",
+    "notAssigned": "Esleitu gabe",
+    "schedule": "Ordutegia Konf.",
+    "configureSchedule": "Defentsaren ordutegia konfiguratu",
+    "schedules": "ordutegiak",
+    "notifySchedule": "Jakinarazi",
+    "notifyScheduleTooltip": "Ordutegi jakinarazpena bidali email bidez",
     "from": "Noiztik",
     "to": "Noiz arte",
+    "filter": "Iragazi",
+    "clearFilters": "Iragazkiak Garbitu",
     "exportExcel": "Excel-era Esportatu",
-    "status": "Egoera"
+    "status": "Egoera",
+    "deleteAll": "Denak Ezabatu",
+    "deleteAllConfirm": "Ezabaketa Berretsi",
+    "deleteAllMessage": "Ziur zaude DEFENTSEN DENAK ezabatu nahi dituzula?",
+    "deleteAllDetails": "Ekintza hau ezin da desegin. Sistema guztitik defentsak kenduko dira.",
+    "deleteAllSuccess": "Defentsa guztiak ondo ezabatu dira",
+    "deleteAllError": "Errorea defentsa guztiak ezabatzean"
   },
   "cases": {
     "title": "Kasuen Kudeaketa",
@@ -228,7 +245,16 @@
     "systemSettings": "Sistemaren Ezarpenak",
     "userManagement": "Erabiltzaileen Kudeaketa",
     "backup": "Babeskopia",
-    "logs": "Erregistroak"
+    "logs": "Erregistroak",
+    "aulas": {
+      "title": "Gelak Kudeatu",
+      "name": "Izena",
+      "created": "Sortze Data",
+      "addAula": "Gela Berria",
+      "namePlaceholder": "Sartu gelaren izena",
+      "nameRequired": "Gelaren izena beharrezkoa da",
+      "nameMaxLength": "Izenak ezin du 100 karaktere baino gehiago izan"
+    }
   },
   "help": {
     "title": "Laguntza eta Euskarria",
