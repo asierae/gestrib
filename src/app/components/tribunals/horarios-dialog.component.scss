@@ -1,7 +1,13 @@
 .horarios-dialog {
-  min-width: 600px;
-  max-width: 650px;
-  max-height: 70vh;
+  // ensure Angular Material content doesn't add internal scroll
+  ::ng-deep mat-dialog-content.no-scroll {
+    max-height: none !important;
+    overflow: visible !important;
+    padding-bottom: 0;
+  }
+  min-width: 750px;
+  max-width: 800px;
+  max-height: none; /* allow full height content, dialog manages viewport */
   font-family: 'Roboto', sans-serif;
   display: flex;
   flex-direction: column;
@@ -42,7 +48,7 @@
   .horarios-form {
     padding: 16px 0;
     flex: 1;
-    overflow: visible;
+    overflow: visible; /* avoid internal scroll */
 
     .form-section {
       margin-bottom: 20px;
@@ -68,39 +74,53 @@
 
       .form-row {
         display: flex;
+        flex-direction: column;
         gap: 20px;
-        align-items: flex-end;
-        justify-content: space-between;
 
         .input-group {
           display: flex;
-          gap: 16px;
-          flex: 1;
+          gap: 12px;
           align-items: flex-end;
 
           .date-field, .time-field {
-            flex: 1;
-            min-width: 140px;
+            flex: 0 1 auto; /* size controlled per-field below */
+            min-width: 120px;
+          }
+
+          .date-field {
+            flex-basis: 200px;
+            max-width: 200px;
+          }
+
+          .time-field {
+            flex-basis: 140px;
+            max-width: 140px;
           }
         }
 
-        .add-button {
-          height: 48px;
-          min-width: 130px;
-          font-weight: 500;
-          border-radius: 6px;
-          box-shadow: 0 2px 8px rgba(25, 118, 210, 0.3);
-          transition: all 0.3s ease;
-          flex-shrink: 0;
+        .button-container {
+          display: flex;
+          justify-content: flex-end; /* move add button to the right */
+          width: 100%;
 
-          &:hover:not(:disabled) {
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(25, 118, 210, 0.4);
-          }
+          .add-button {
+            height: 52px;
+            min-width: 180px;
+            font-weight: 600;
+            font-size: 16px;
+            border-radius: 8px;
+            box-shadow: 0 3px 12px rgba(25, 118, 210, 0.4);
+            transition: all 0.3s ease;
 
-          mat-icon {
-            margin-right: 6px;
-            font-size: 18px;
+            &:hover:not(:disabled) {
+              transform: translateY(-2px);
+              box-shadow: 0 6px 16px rgba(25, 118, 210, 0.5);
+            }
+
+            mat-icon {
+              margin-right: 8px;
+              font-size: 20px;
+            }
           }
         }
       }
@@ -129,23 +149,23 @@
       }
 
       .dates-list {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 12px;
-        align-items: center;
+        display: grid; /* two-column layout */
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 8px 12px; /* row and column gaps */
+        align-items: start;
 
         .date-chip {
           background: linear-gradient(135deg, #e8f5e8 0%, #d1f2d1 100%);
           color: #2d5a2d;
           border: 1px solid #a8d8a8;
-          border-radius: 24px;
-          padding: 10px 16px;
+          border-radius: 18px; /* smaller radius */
+          padding: 6px 10px; /* more compact */
           font-weight: 500;
-          font-size: 14px;
+          font-size: 12px; /* smaller font */
           transition: all 0.2s ease;
           display: flex;
           align-items: center;
-          box-shadow: 0 2px 4px rgba(40, 167, 69, 0.1);
+          box-shadow: 0 1px 3px rgba(40, 167, 69, 0.12);
 
           &:hover {
             transform: translateY(-2px);
@@ -155,19 +175,19 @@
 
           .chip-icon {
             color: #28a745;
-            font-size: 18px;
-            margin-right: 8px;
+            font-size: 16px; /* smaller icon */
+            margin-right: 6px;
             flex-shrink: 0;
           }
 
           .remove-icon {
             color: #6c757d;
-            font-size: 16px;
-            margin-left: 8px;
+            font-size: 14px; /* smaller */
+            margin-left: 6px;
             cursor: pointer;
             transition: all 0.2s ease;
             flex-shrink: 0;
-            padding: 2px;
+            padding: 1px;
             border-radius: 50%;
 
             &:hover {
@@ -258,7 +278,7 @@
 }
 
 // Responsive
-@media (max-width: 700px) {
+@media (max-width: 850px) {
   .horarios-dialog {
     min-width: 300px;
     max-width: 100%;
@@ -286,8 +306,6 @@
         padding: 16px;
 
         .form-row {
-          flex-direction: column;
-          align-items: stretch;
           gap: 16px;
 
           .input-group {
@@ -295,9 +313,10 @@
             gap: 12px;
           }
 
-          .add-button {
-            align-self: flex-end;
-            min-width: 120px;
+          .button-container {
+            .add-button {
+              min-width: 160px;
+            }
           }
         }
       }
@@ -306,7 +325,8 @@
         padding: 16px;
 
         .dates-list {
-          justify-content: center;
+          display: grid;
+          grid-template-columns: 1fr; /* one column on small screens */
         }
       }
     }

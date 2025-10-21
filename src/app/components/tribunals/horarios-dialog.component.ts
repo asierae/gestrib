@@ -19,6 +19,7 @@ export interface HorariosDialogData {
   idDefensa: number;
   studentName: string;
   title: string;
+  horariosSeleccionados?: string; // Horarios ya cargados desde la tabla principal
 }
 
 @Component({
@@ -83,18 +84,55 @@ export class HorariosDialogComponent implements OnInit {
   }
 
   loadExistingHorarios(): void {
-    this.defensasHorariosService.getHorariosByDefensa(this.data.idDefensa).subscribe({
-      next: (response) => {
-        if (response.success && response.dataList) {
-          this.existingHorarios = response.dataList;
-          this.selectedDates = response.dataList.map(h => new Date(h.fecha));
+    console.log('=== CARGANDO HORARIOS EXISTENTES ===');
+    console.log('HorariosSeleccionados recibidos:', this.data.horariosSeleccionados);
+    
+    // Si tenemos horarios ya cargados, usarlos directamente
+    if (this.data.horariosSeleccionados && this.data.horariosSeleccionados.trim() !== '') {
+      console.log('Usando horarios ya cargados desde la tabla principal');
+      this.parseHorariosFromString(this.data.horariosSeleccionados);
+    } else {
+      console.log('No hay horarios cargados, haciendo llamada a la API');
+      // Fallback: llamar a la API si no tenemos horarios cargados
+      this.defensasHorariosService.getHorariosByDefensa(this.data.idDefensa).subscribe({
+        next: (response) => {
+          if (response.success && response.dataList) {
+            this.existingHorarios = response.dataList;
+            this.selectedDates = response.dataList.map(h => new Date(h.fecha));
+          }
+        },
+        error: (error) => {
+          console.error('Error cargando horarios:', error);
+          this.snackBar.open('Error al cargar los horarios existentes', 'Cerrar', { duration: 3000 });
         }
-      },
-      error: (error) => {
-        console.error('Error cargando horarios:', error);
-        this.snackBar.open('Error al cargar los horarios existentes', 'Cerrar', { duration: 3000 });
+      });
+    }
+  }
+
+  private parseHorariosFromString(horariosString: string): void {
+    console.log('Parseando horarios desde string:', horariosString);
+    
+    try {
+      // Dividir por ';' y convertir cada fecha
+      const horariosArray = horariosString.split(';').filter(h => h.trim() !== '');
+      console.log('Horarios parseados:', horariosArray);
+      
+      this.selectedDates = horariosArray.map(horarioStr => {
+        // Convertir string de fecha a Date
+        const date = new Date(horarioStr.trim());
+        console.log('Convirtiendo horario:', horarioStr, '->', date);
+        return date;
+      }).filter(date => !isNaN(date.getTime())); // Filtrar fechas inválidas
+      
+      console.log('Fechas finales cargadas:', this.selectedDates);
+      
+      if (this.selectedDates.length > 0) {
+        this.snackBar.open(`${this.selectedDates.length} horarios cargados`, 'Cerrar', { duration: 2000 });
       }
-    });
+    } catch (error) {
+      console.error('Error parseando horarios:', error);
+      this.snackBar.open('Error al cargar los horarios', 'Cerrar', { duration: 3000 });
+    }
   }
 
   addDateTime(): void {

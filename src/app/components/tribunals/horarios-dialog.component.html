@@ -7,7 +7,7 @@
     </div>
   </div>
   
-  <mat-dialog-content>
+  <mat-dialog-content class="no-scroll">
     <div class="horarios-form" [formGroup]="horariosForm">
       <div class="form-section">
         <h3 class="section-title">Agregar Nuevo Horario</h3>
@@ -26,15 +26,17 @@
             </mat-form-field>
           </div>
 
-          <button mat-raised-button 
-                  color="primary" 
-                  (click)="addDateTime()" 
-                  [disabled]="!isFormValid"
-                  class="add-button"
-                  type="button">
-            <mat-icon>add</mat-icon>
-            Agregar
-          </button>
+          <div class="button-container">
+            <button mat-raised-button 
+                    color="primary" 
+                    (click)="addDateTime()" 
+                    [disabled]="!isFormValid"
+                    class="add-button"
+                    type="button">
+              <mat-icon>add</mat-icon>
+              Agregar Horario
+            </button>
+          </div>
         </div>
       </div>
 

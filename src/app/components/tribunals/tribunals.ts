@@ -185,7 +185,12 @@ export class TribunalsComponent implements OnInit {
         especialidadesVocal: defensa.especialidadesVocal,
         especialidadesSuplente: defensa.especialidadesSuplente,
         created: defensa.created,
-        horariosCount: defensa.horariosCount || 0
+        horariosCount: defensa.horariosCount || 0,
+        horariosSeleccionados: defensa.horariosSeleccionados || '',
+        // Emails de los profesores para las notificaciones
+        codirectorEmail: codirector.email || '',
+        vocalEmail: vocal.email || '',
+        replacementEmail: suplente.email || ''
       };
     });
   }
@@ -693,13 +698,18 @@ export class TribunalsComponent implements OnInit {
   }
 
   openHorariosDialog(row: any): void {
+    console.log('=== ABRIENDO DIÁLOGO DE HORARIOS ===');
+    console.log('Row data:', row);
+    console.log('Horarios seleccionados:', row.horariosSeleccionados);
+    
     const dialogRef = this.dialog.open(HorariosDialogComponent, {
-      width: '650px',
-      maxHeight: '80vh',
+      width: '800px',
+      maxHeight: 'none',
       data: {
         idDefensa: row.id,
         studentName: row.student,
-        title: row.title
+        title: row.title,
+        horariosSeleccionados: row.horariosSeleccionados || ''
       }
     });
 
@@ -712,14 +722,32 @@ export class TribunalsComponent implements OnInit {
   }
 
   notificarHorarios(row: any): void {
-    console.log('=== NOTIFICAR HORARIOS ===');
+    console.log('=== NOTIFICAR HORARIOS - CLICK DETECTADO ===');
     console.log('Row data:', row);
+    console.log('Row ID:', row.id);
     console.log('Horarios count:', row.horariosCount);
+    console.log('Horarios seleccionados:', row.horariosSeleccionados);
+    console.log('Emails disponibles:', {
+      codirector: row.codirectorEmail,
+      vocal: row.vocalEmail,
+      replacement: row.replacementEmail
+    });
+    
+    // Verificar que el servicio esté disponible
+    console.log('NotificacionHorariosService disponible:', !!this.notificacionHorariosService);
     
     // Verificar que la defensa tenga horarios configurados
     if (!row.horariosCount || row.horariosCount === 0) {
       console.log('No hay horarios configurados, mostrando mensaje de error');
       this.snackBar.open('Debe configurar horarios antes de enviar la notificación', 'Cerrar', { duration: 3000 });
+      return;
+    }
+
+    // Verificar que haya al menos un email disponible
+    const emailsDisponibles = [row.codirectorEmail, row.vocalEmail, row.replacementEmail].filter(email => email && email.trim() !== '');
+    if (emailsDisponibles.length === 0) {
+      console.log('No hay emails disponibles para enviar notificación');
+      this.snackBar.open('No hay emails de profesores disponibles para enviar la notificación', 'Cerrar', { duration: 3000 });
       return;
     }
 
@@ -733,22 +761,29 @@ export class TribunalsComponent implements OnInit {
       emailReemplazo: row.replacementEmail || ''
     };
 
+    console.log('Enviando solicitud de notificación:', request);
+
+    // Mostrar mensaje de carga
+    this.snackBar.open('Enviando notificación...', 'Cerrar', { duration: 2000 });
+
     // Enviar la notificación
     this.notificacionHorariosService.notificarHorarios(request).subscribe({
       next: (response) => {
+        console.log('Respuesta de notificación:', response);
         if (response.success) {
+          const destinatarios = response.destinatarios?.length || emailsDisponibles.length;
           this.snackBar.open(
-            `Notificación enviada a ${response.destinatarios?.length || 0} destinatarios`, 
+            `Notificación enviada correctamente a ${destinatarios} destinatarios`, 
             'Cerrar', 
-            { duration: 3000 }
+            { duration: 4000 }
           );
         } else {
-          this.snackBar.open('Error al enviar la notificación', 'Cerrar', { duration: 3000 });
+          this.snackBar.open(`Error al enviar la notificación: ${response.message || 'Error desconocido'}`, 'Cerrar', { duration: 4000 });
         }
       },
       error: (error) => {
         console.error('Error enviando notificación:', error);
-        this.snackBar.open('Error al enviar la notificación', 'Cerrar', { duration: 3000 });
+        this.snackBar.open(`Error al enviar la notificación: ${error.message || 'Error de conexión'}`, 'Cerrar', { duration: 4000 });
       }
     });
   }

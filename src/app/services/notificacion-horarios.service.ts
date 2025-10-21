@@ -23,7 +23,7 @@ export interface NotificarHorariosResponse {
   providedIn: 'root'
 })
 export class NotificacionHorariosService {
-  private baseUrl = `${environment.apiUrl}/defensas`;
+  private baseUrl = `${environment.apiUrl}/api/defensas`;
 
   constructor(private http: HttpClient) { }
 
