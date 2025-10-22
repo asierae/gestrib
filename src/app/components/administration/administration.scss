@@ -110,7 +110,7 @@
       
       .profesores-table-header {
         display: grid;
-        grid-template-columns: 1fr 1.5fr 2fr 1.5fr;
+        grid-template-columns: 1fr 1.5fr 2fr 1.5fr 1fr;
         gap: 12px;
         padding: 12px 16px;
         background: #f3f4f6;
@@ -125,7 +125,7 @@
       .profesores-table-body {
         .profesor-row {
           display: grid;
-          grid-template-columns: 1fr 1.5fr 2fr 1.5fr;
+          grid-template-columns: 1fr 1.5fr 2fr 1.5fr 1fr;
           gap: 12px;
           padding: 12px 16px;
           border-bottom: 1px solid #f3f4f6;
@@ -142,7 +142,8 @@
           .col-nombre,
           .col-apellidos,
           .col-email,
-          .col-especialidad {
+          .col-especialidad,
+          .col-cargo {
             font-size: 14px;
             color: #1f2937;
             display: flex;
@@ -154,7 +155,6 @@
             font-size: 13px;
           }
           
-          
           .especialidad-original {
             display: inline-block;
             padding: 4px 8px;
@@ -164,6 +164,21 @@
             background: #f3f4f6;
             color: #374151;
             border: 1px solid #d1d5db;
+            max-width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+          }
+          
+          .cargo-value {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 500;
+            background: #e0f2fe;
+            color: #0277bd;
+            border: 1px solid #b3e5fc;
             max-width: 100%;
             overflow: hidden;
             text-overflow: ellipsis;

@@ -215,6 +215,46 @@ export class DefensasService {
       );
   }
 
+  updatePresidente(id: number, idPresidente: number): Observable<DefensaResponse> {
+    const updateRequest = { IdPresidente: idPresidente };
+    return this.http.patch<DefensaResponse>(`${this.baseUrl}/${id}/presidente`, updateRequest)
+      .pipe(
+        timeout<DefensaResponse>(environment.timeout),
+        catchError(this.handleError)
+      );
+  }
+
+  updateVocal(id: number, idVocal: number): Observable<DefensaResponse> {
+    const updateRequest = { IdVocal: idVocal };
+    return this.http.patch<DefensaResponse>(`${this.baseUrl}/${id}/vocal`, updateRequest)
+      .pipe(
+        timeout<DefensaResponse>(environment.timeout),
+        catchError(this.handleError)
+      );
+  }
+
+  updateProgramacion(id: number, fecha?: Date | null, hora?: string | null, lugar?: string | null): Observable<DefensaResponse> {
+    const updateRequest: any = {};
+    
+    if (fecha) {
+      updateRequest.FechaDefensa = fecha.toISOString();
+    }
+    
+    if (hora) {
+      updateRequest.HoraDefensa = hora; // Enviar directamente el string HH:MM
+    }
+    
+    if (lugar !== undefined) {
+      updateRequest.LugarDefensa = lugar;
+    }
+    
+    return this.http.patch<DefensaResponse>(`${this.baseUrl}/${id}/programacion`, updateRequest)
+      .pipe(
+        timeout<DefensaResponse>(environment.timeout),
+        catchError(this.handleError)
+      );
+  }
+
   /**
    * Elimina una defensa (soft delete)
    */

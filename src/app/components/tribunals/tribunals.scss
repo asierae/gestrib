@@ -613,3 +613,129 @@
     cursor: not-allowed;
   }
 }
+
+// Estilos para dropdowns de presidente y vocal
+.president-cell, .vocal-cell {
+  position: relative;
+  min-width: 200px;
+  
+  .president-display, .vocal-display {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 12px;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    background: #f8fafc;
+    
+    &:hover {
+      background: #e2e8f0;
+      border-color: #cbd5e1;
+      
+      .edit-icon {
+        opacity: 1;
+      }
+    }
+    
+    .edit-icon {
+      opacity: 0;
+      transition: opacity 0.2s ease;
+      font-size: 16px;
+      color: #64748b;
+    }
+  }
+  
+  .president-edit, .vocal-edit {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    
+    .president-select, .vocal-select {
+      flex: 1;
+      min-width: 180px;
+      
+      ::ng-deep .mat-mdc-form-field {
+        width: 100%;
+      }
+      
+      ::ng-deep .mat-mdc-select {
+        font-size: 14px;
+      }
+    }
+    
+    .cancel-button {
+      color: #64748b;
+      transition: all 0.2s ease;
+      
+      &:hover {
+        color: #ef4444;
+        background: rgba(239, 68, 68, 0.1);
+      }
+    }
+  }
+}
+
+// Estilos para dropdowns de fecha y hora
+.date-cell, .time-cell {
+  position: relative;
+  min-width: 150px;
+  
+  .date-display, .time-display {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 12px;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    background: #f8fafc;
+    
+    &:hover {
+      background: #e2e8f0;
+      border-color: #cbd5e1;
+      
+      .edit-icon {
+        opacity: 1;
+      }
+    }
+    
+    .edit-icon {
+      opacity: 0;
+      transition: opacity 0.2s ease;
+      font-size: 16px;
+      color: #64748b;
+    }
+  }
+  
+  .date-edit, .time-edit {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    
+    .date-picker, .time-picker {
+      flex: 1;
+      min-width: 150px;
+      
+      ::ng-deep .mat-mdc-form-field {
+        width: 100%;
+      }
+      
+      ::ng-deep .mat-mdc-input {
+        font-size: 14px;
+      }
+    }
+    
+    .cancel-button {
+      color: #64748b;
+      transition: all 0.2s ease;
+      
+      &:hover {
+        color: #ef4444;
+        background: rgba(239, 68, 68, 0.1);
+      }
+    }
+  }
+}

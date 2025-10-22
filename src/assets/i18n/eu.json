@@ -45,6 +45,7 @@
     "administration": " enpresak",
     "help": "Laguntza",
     "defensas": "Defentsak",
+    "defensa-horarios": "Defentsa Orduak",
     "login": "Saioa hasi",
     "profile": "Profila",
     "settings": "Ezarpenak"
@@ -193,6 +194,8 @@
     "schedule": "Ordutegia Konf.",
     "configureSchedule": "Defentsaren ordutegia konfiguratu",
     "schedules": "ordutegiak",
+    "selectSchedule": "Ordutegia Hautatu",
+    "selectScheduleTooltip": "Defentsarako ordutegi eskuragarria hautatu",
     "notifySchedule": "Jakinarazi",
     "notifyScheduleTooltip": "Ordutegi jakinarazpena bidali email bidez",
     "from": "Noiztik",
@@ -255,6 +258,22 @@
       "nameRequired": "Gelaren izena beharrezkoa da",
       "nameMaxLength": "Izenak ezin du 100 karaktere baino gehiago izan"
     }
+  },
+  "defensaHorarios": {
+    "title": "Ordutegi Hautaketa",
+    "defenseInfo": "Defentsa",
+    "loading": "Ordutegiak kargatzen...",
+    "instructions": "Argibideak",
+    "instructionsText": "Hautatu zure eskuragarritasunari gehien egokitzen zaion ordutegia:",
+    "instruction1": "Urdin koloreko ordutegiak hautatzeko eskuragarri daude",
+    "instruction2": "Egin klik ordutegi eskuragarri batean hautatzeko",
+    "instruction3": "Zure hautaketa edozein unetan aldatu dezakezu",
+    "scheduleSelection": "Ordutegi Hautaketa",
+    "professorSelections": "Irakasleen Hautaketak",
+    "legend": "Legenda",
+    "availableSchedule": "Ordutegi Eskuragarria",
+    "yourSelection": "Zure Hautaketa",
+    "otherSelection": "Beste Irakasleen Hautaketa"
   },
   "help": {
     "title": "Laguntza eta Euskarria",

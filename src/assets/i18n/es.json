@@ -45,6 +45,7 @@
     "administration": "Administración",
     "help": "Ayuda",
     "defensas": "Defensas",
+    "defensa-horarios": "Horarios de Defensa",
     "login": "Iniciar Sesión",
     "profile": "Perfil",
     "settings": "Configuración"
@@ -215,6 +216,8 @@
     "schedule": "Conf. Horarios",
     "configureSchedule": "Configurar horarios de la defensa",
     "schedules": "horarios",
+    "selectSchedule": "Seleccion Horarios",
+    "selectScheduleTooltip": "Seleccionar horario disponible para la defensa",
     "notifySchedule": "Notificar",
     "notifyScheduleTooltip": "Enviar notificación de horarios por email",
     "from": "Desde",
@@ -277,6 +280,22 @@
       "nameRequired": "El nombre del aula es requerido",
       "nameMaxLength": "El nombre no puede exceder 100 caracteres"
     }
+  },
+  "defensaHorarios": {
+    "title": "Selección de Horarios",
+    "defenseInfo": "Defensa",
+    "loading": "Cargando horarios...",
+    "instructions": "Instrucciones",
+    "instructionsText": "Selecciona el horario que mejor se adapte a tu disponibilidad:",
+    "instruction1": "Los horarios en azul están disponibles para seleccionar",
+    "instruction2": "Haz clic en un horario disponible para seleccionarlo",
+    "instruction3": "Puedes modificar tu selección en cualquier momento",
+    "scheduleSelection": "Selección de Horarios",
+    "professorSelections": "Selecciones de Profesores",
+    "legend": "Leyenda",
+    "availableSchedule": "Horario Disponible",
+    "yourSelection": "Tu Selección",
+    "otherSelection": "Selección de Otros Profesores"
   },
   "help": {
     "title": "Ayuda y Soporte",

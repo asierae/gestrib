@@ -79,6 +79,18 @@ export class BreadcrumbService implements OnDestroy {
       const translateKey = this.getTranslateKeyForSegment(segment);
       const translatedLabel = this.translationService.getTranslation(translateKey);
       
+      // Special handling for defensa-horarios route
+      if (segment === 'defensa-horarios' && index === 0) {
+        // Add defensas breadcrumb before defensa-horarios
+        const defensasKey = 'breadcrumbs.defensas';
+        const defensasTranslation = this.translationService.getTranslation(defensasKey);
+        breadcrumbItems.push({
+          label: defensasTranslation !== defensasKey ? defensasTranslation : 'Defensas',
+          route: '/tribunals', // Link to tribunals page where defensas are listed
+          translateKey: defensasKey
+        });
+      }
+      
       breadcrumbItems.push({
         label: translatedLabel !== translateKey ? translatedLabel : this.getLabelForSegment(segment),
         route: route,
@@ -99,6 +111,7 @@ export class BreadcrumbService implements OnDestroy {
       'administration': 'breadcrumbs.administration',
       'help': 'breadcrumbs.help',
       'defensas': 'breadcrumbs.defensas',
+      'defensa-horarios': 'breadcrumbs.defensa-horarios',
       'login': 'breadcrumbs.login',
       'profile': 'breadcrumbs.profile',
       'settings': 'breadcrumbs.settings'
@@ -117,6 +130,7 @@ export class BreadcrumbService implements OnDestroy {
       'administration': 'Administración',
       'help': 'Ayuda',
       'defensas': 'Defensas',
+      'defensa-horarios': 'Horarios de Defensa',
       'login': 'Iniciar Sesión',
       'profile': 'Perfil',
       'settings': 'Configuración'

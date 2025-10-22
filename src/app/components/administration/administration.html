@@ -65,6 +65,7 @@
                   <div class="col-apellidos">Apellidos</div>
                   <div class="col-email">Direc. Mail UPV</div>
                   <div class="col-especialidad">Nombre unidad org.</div>
+                  <div class="col-cargo">Cargo</div>
                 </div>
                 
                 <div class="profesores-table-body">
@@ -75,6 +76,11 @@
                     <div class="col-especialidad">
                       <span class="especialidad-original">
                         {{ profesor.especialidadOriginal || 'Sin especificar' }}
+                      </span>
+                    </div>
+                    <div class="col-cargo">
+                      <span class="cargo-value">
+                        {{ profesor.cargo || 'Sin especificar' }}
                       </span>
                     </div>
                   </div>

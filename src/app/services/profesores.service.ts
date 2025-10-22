@@ -205,11 +205,12 @@ export class ProfesoresService {
     excelData.forEach((row, index) => {
       try {
         // Mapear las columnas del Excel a los campos del profesor
-        // Solo usar los 4 campos exactos del Excel de profesores
+        // Incluir el nuevo campo Cargo
         const nombre = this.getFieldValue(row, ['Nombre']);
         const apellidos = this.getFieldValue(row, ['Apellidos']);
         const email = this.getFieldValue(row, ['Direc. Mail UPV']);
         const especialidad = this.getFieldValue(row, ['Nombre unidad org.']);
+        const cargo = this.getFieldValue(row, ['Cargo']);
 
         const profesor: ProfesorRequest = {
           nombre: nombre,
@@ -217,7 +218,8 @@ export class ProfesoresService {
           email: email,
           dni: this.generateDniFromEmail(email), // Siempre generar DNI automáticamente
           tipoEspecialidad: this.mapTipoEspecialidadFromExcel(especialidad),
-          especialidadOriginal: especialidad // Guardar el valor original del Excel
+          especialidadOriginal: especialidad, // Guardar el valor original del Excel
+          cargo: cargo // Nuevo campo Cargo
         };
 
         // Validar que los campos obligatorios estén presentes
@@ -417,4 +419,5 @@ export interface ProfesorRequest {
   dni: string;
   tipoEspecialidad: TipoEspecialidad;
   especialidadOriginal?: string; // Campo original del Excel "Nombre unidad org."
+  cargo?: string; // Campo Cargo del Excel
 }

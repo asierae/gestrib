@@ -52,6 +52,10 @@ export const routes: Routes = [
         loadComponent: () => import('./components/defensas/defensas').then(m => m.DefensasComponent)
       },
       {
+        path: 'defensa-horarios/:id',
+        loadComponent: () => import('./components/defensa-horarios/defensa-horarios').then(m => m.DefensaHorariosComponent)
+      },
+      {
         path: 'profile',
         loadComponent: () => import('./components/user-profile/user-profile').then(m => m.UserProfileComponent)
       }

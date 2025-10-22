@@ -45,6 +45,7 @@
     "administration": "Administration",
     "help": "Help",
     "defensas": "Defenses",
+    "defensa-horarios": "Defense Schedules",
     "login": "Login",
     "profile": "Profile",
     "settings": "Settings"
@@ -215,6 +216,8 @@
     "schedule": "Schedule Config",
     "configureSchedule": "Configure defense schedule",
     "schedules": "schedules",
+    "selectSchedule": "Select Schedule",
+    "selectScheduleTooltip": "Select available schedule for the defense",
     "notifySchedule": "Notify",
     "notifyScheduleTooltip": "Send schedule notification by email",
     "from": "From",
@@ -277,6 +280,22 @@
       "nameRequired": "Classroom name is required",
       "nameMaxLength": "Name cannot exceed 100 characters"
     }
+  },
+  "defensaHorarios": {
+    "title": "Schedule Selection",
+    "defenseInfo": "Defense",
+    "loading": "Loading schedules...",
+    "instructions": "Instructions",
+    "instructionsText": "Select the schedule that best fits your availability:",
+    "instruction1": "Blue schedules are available for selection",
+    "instruction2": "Click on an available schedule to select it",
+    "instruction3": "You can modify your selection at any time",
+    "scheduleSelection": "Schedule Selection",
+    "professorSelections": "Professor Selections",
+    "legend": "Legend",
+    "availableSchedule": "Available Schedule",
+    "yourSelection": "Your Selection",
+    "otherSelection": "Other Professors' Selection"
   },
   "help": {
     "title": "Help and Support",

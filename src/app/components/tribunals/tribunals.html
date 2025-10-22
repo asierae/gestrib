@@ -80,12 +80,48 @@
 
     <ng-container matColumnDef="president">
       <th mat-header-cell *matHeaderCellDef mat-sort-header="president">{{ 'tribunals.president' | translate }}</th>
-      <td mat-cell *matCellDef="let row">{{ row.president }}</td>
+      <td mat-cell *matCellDef="let row" class="president-cell" [attr.data-row-key]="getRowKey(row)">
+        <div *ngIf="!isEditingPresident(row)" class="president-display" (click)="togglePresidentEdit(row)">
+          {{ row.president }}
+          <mat-icon class="edit-icon">edit</mat-icon>
+        </div>
+        <div *ngIf="isEditingPresident(row)" class="president-edit">
+          <mat-form-field appearance="outline" class="president-select">
+            <mat-label>Seleccionar Presidente</mat-label>
+            <mat-select (selectionChange)="onPresidentChange(row, $event.value)" [value]="null">
+              <mat-option *ngFor="let president of presidents" [value]="president.id">
+                {{ president.fullName }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+          <button mat-icon-button class="cancel-button" (click)="togglePresidentEdit(row)" title="Cancelar">
+            <mat-icon>close</mat-icon>
+          </button>
+        </div>
+      </td>
     </ng-container>
 
     <ng-container matColumnDef="vocal">
       <th mat-header-cell *matHeaderCellDef mat-sort-header="vocal">{{ 'tribunals.vocal' | translate }}</th>
-      <td mat-cell *matCellDef="let row">{{ row.vocal }}</td>
+      <td mat-cell *matCellDef="let row" class="vocal-cell" [attr.data-row-key]="getRowKey(row)">
+        <div *ngIf="!isEditingVocal(row)" class="vocal-display" (click)="toggleVocalEdit(row)">
+          {{ row.vocal }}
+          <mat-icon class="edit-icon">edit</mat-icon>
+        </div>
+        <div *ngIf="isEditingVocal(row)" class="vocal-edit">
+          <mat-form-field appearance="outline" class="vocal-select">
+            <mat-label>Seleccionar Vocal</mat-label>
+            <mat-select (selectionChange)="onVocalChange(row, $event.value)" [value]="null">
+              <mat-option *ngFor="let vocal of vocals" [value]="vocal.id">
+                {{ vocal.fullName }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+          <button mat-icon-button class="cancel-button" (click)="toggleVocalEdit(row)" title="Cancelar">
+            <mat-icon>close</mat-icon>
+          </button>
+        </div>
+      </td>
     </ng-container>
 
     <ng-container matColumnDef="replacement">
@@ -105,22 +141,49 @@
 
     <ng-container matColumnDef="date">
       <th mat-header-cell *matHeaderCellDef mat-sort-header="date">{{ 'tribunals.date' | translate }}</th>
-      <td mat-cell *matCellDef="let row" class="date-cell">
-        <span *ngIf="hasDate(row)">{{ row.date }}</span>
-        <button 
-          *ngIf="!hasDate(row)" 
-          mat-icon-button 
-          (click)="goToSchedule(row)"
-          class="schedule-button"
-          matTooltip="Planificar defensa">
-          <mat-icon>schedule</mat-icon>
-        </button>
+      <td mat-cell *matCellDef="let row" class="date-cell" [attr.data-row-key]="getRowKey(row)">
+        <div *ngIf="!isEditingDate(row)" class="date-display" (click)="toggleDateEdit(row)">
+          {{ row.date || 'Sin fecha' }}
+          <mat-icon class="edit-icon">edit</mat-icon>
+        </div>
+        <div *ngIf="isEditingDate(row)" class="date-edit">
+          <mat-form-field appearance="outline" class="date-picker">
+            <mat-label>Seleccionar Fecha</mat-label>
+            <input matInput [matDatepicker]="datePicker" 
+                   (dateChange)="onDateChange(row, $event.value)" 
+                   [value]="getDateValue(row.date)"
+                   placeholder="dd/mm/yyyy">
+            <mat-datepicker-toggle matSuffix [for]="datePicker"></mat-datepicker-toggle>
+            <mat-datepicker #datePicker></mat-datepicker>
+          </mat-form-field>
+          <button mat-icon-button class="cancel-button" (click)="toggleDateEdit(row)" title="Cancelar">
+            <mat-icon>close</mat-icon>
+          </button>
+        </div>
       </td>
     </ng-container>
 
     <ng-container matColumnDef="time">
       <th mat-header-cell *matHeaderCellDef mat-sort-header="time">{{ 'tribunals.time' | translate }}</th>
-      <td mat-cell *matCellDef="let row">{{ row.time }}</td>
+      <td mat-cell *matCellDef="let row" class="time-cell" [attr.data-row-key]="getRowKey(row)">
+        <div *ngIf="!isEditingTime(row)" class="time-display" (click)="toggleTimeEdit(row)">
+          {{ row.time || 'Sin hora' }}
+          <mat-icon class="edit-icon">edit</mat-icon>
+        </div>
+        <div *ngIf="isEditingTime(row)" class="time-edit">
+          <mat-form-field appearance="outline" class="time-picker">
+            <mat-label>Seleccionar Hora</mat-label>
+            <input matInput 
+                   type="time"
+                   (change)="onTimeChange(row, $event.target.value)" 
+                   [value]="getTimeValue(row.time)"
+                   placeholder="HH:MM">
+          </mat-form-field>
+          <button mat-icon-button class="cancel-button" (click)="toggleTimeEdit(row)" title="Cancelar">
+            <mat-icon>close</mat-icon>
+          </button>
+        </div>
+      </td>
     </ng-container>
 
     <ng-container matColumnDef="place">
@@ -155,6 +218,19 @@
           <span class="horarios-count" *ngIf="row.horariosCount > 0">
             {{ row.horariosCount }} {{ 'tribunals.schedules' | translate }}
           </span>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="seleccionHorarios">
+        <th mat-header-cell *matHeaderCellDef>{{ 'tribunals.selectSchedule' | translate }}</th>
+        <td mat-cell *matCellDef="let row" class="seleccion-horarios-cell">
+          <button mat-icon-button 
+                  color="accent" 
+                  (click)="goToSeleccionHorarios(row)"
+                  matTooltip="{{ 'tribunals.selectScheduleTooltip' | translate }}"
+                  *ngIf="canSelectHorarios(row)">
+            <mat-icon>event</mat-icon>
+          </button>
         </td>
       </ng-container>
 

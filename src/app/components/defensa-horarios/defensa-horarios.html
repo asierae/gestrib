@@ -1,0 +1,114 @@
+<div class="defensa-horarios-container">
+  <!-- Header -->
+  <div class="header">
+    <div class="header-content">
+      <button mat-icon-button (click)="goBack()" class="back-button">
+        <mat-icon>arrow_back</mat-icon>
+      </button>
+      <div class="title-section">
+        <h1>{{ 'defensaHorarios.title' | translate }}</h1>
+        <p *ngIf="defensa" class="defensa-info">
+          {{ 'defensaHorarios.defenseInfo' | translate }}: <strong>{{ defensa.titulo }}</strong>
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="loading-container">
+    <mat-spinner diameter="50"></mat-spinner>
+    <p>{{ 'defensaHorarios.loading' | translate }}</p>
+  </div>
+
+  <!-- Content -->
+  <div *ngIf="!loading" class="content">
+    <!-- Instructions -->
+    <mat-card class="instructions-card">
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon>info</mat-icon>
+          {{ 'defensaHorarios.instructions' | translate }}
+        </mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <p>{{ 'defensaHorarios.instructionsText' | translate }}</p>
+        <ul>
+          <li>{{ 'defensaHorarios.instruction1' | translate }}</li>
+          <li>{{ 'defensaHorarios.instruction2' | translate }}</li>
+          <li>{{ 'defensaHorarios.instruction3' | translate }}</li>
+        </ul>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Calendar -->
+    <mat-card class="calendar-card">
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon>event</mat-icon>
+          {{ 'defensaHorarios.scheduleSelection' | translate }}
+        </mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <full-calendar [options]="calendarOptions"></full-calendar>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Professor Selections -->
+    <mat-card class="selections-card" *ngIf="seleccionesProfesores.length > 0">
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon>people</mat-icon>
+          {{ 'defensaHorarios.professorSelections' | translate }}
+        </mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="selections-grid">
+          <div *ngFor="let seleccion of seleccionesProfesores" 
+               class="selection-item"
+               [class.own-selection]="seleccion.idUsuario === getCurrentUser()?.id">
+            <div class="professor-info">
+              <mat-icon class="professor-icon">person</mat-icon>
+              <div class="professor-details">
+                <span class="professor-name">{{ seleccion.nombreProfesor }}</span>
+                <span class="professor-role">{{ seleccion.puesto }}</span>
+              </div>
+            </div>
+            <div class="selection-details">
+              <mat-chip class="selection-chip">
+                <mat-icon>schedule</mat-icon>
+                {{ seleccion.fechaHora | date:'dd/MM/yyyy HH:mm' }}
+              </mat-chip>
+            </div>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Legend -->
+    <mat-card class="legend-card">
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon>help</mat-icon>
+          {{ 'defensaHorarios.legend' | translate }}
+        </mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="legend-items">
+          <div class="legend-item">
+            <div class="legend-color disponible"></div>
+            <span>{{ 'defensaHorarios.availableSchedule' | translate }}</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-color own-selection"></div>
+            <span>{{ 'defensaHorarios.yourSelection' | translate }}</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-color other-selection"></div>
+            <span>{{ 'defensaHorarios.otherSelection' | translate }}</span>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>
+
