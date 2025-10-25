@@ -256,10 +256,10 @@ export class DefensasComponent implements OnInit, OnDestroy {
   private initializeForm(): void {
     this.defensaForm = this.fb.group({
       curso: [`${this.currentYear}-${this.nextYear}`, Validators.required],
-      grado: [TipoGrado.INGENIERIA_INFORMATICA, Validators.required],
-      especialidad: [TipoEspecialidad.INGENIERIA_COMPUTACION], // Sin validador required aquí
+      grado: ['', Validators.required], // Sin valor por defecto
+      especialidad: ['', Validators.required], // Ahora obligatorio y sin valor por defecto
       titulo: ['', Validators.required],
-      idioma: ['es', Validators.required], // Idioma por defecto español
+      idioma: ['', Validators.required], // Sin valor por defecto
       estudiante: [null, Validators.required], // Cambiar a null para objetos
       directorTribunal: ['', Validators.required],
       codirectorTribunal: [''], // Opcional

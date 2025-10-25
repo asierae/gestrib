@@ -35,7 +35,7 @@ export class LayoutComponent implements OnInit {
     
     { code: Language.ES, name: 'Español', flag: '🇪🇸' },
     { code: Language.EN, name: 'English', flag: '🇬🇧' },
-    { code: Language.EU, name: 'Euskera', flag: 'EU' }
+    { code: Language.EU, name: 'Euskera', flag: '🏴󠁥󠁳󠁰󠁶󠁿' }
   ];
 
   menuItems = signal([

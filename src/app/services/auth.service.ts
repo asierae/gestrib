@@ -429,23 +429,32 @@ export class AuthService {
     }
 
     const request = {
-      Id: user.id,
-      idDb: user.idDb,
-      Nombre: profileData.firstName,
-      Apellidos: profileData.lastName,
-      Email: profileData.email,
-      Telefono: profileData.phone,
-      Entidad: profileData.company,
-      Puesto: profileData.position,
-      Descripcion: profileData.description
+      id: user.id,
+      nombre: profileData.nombre,
+      apellidos: profileData.apellidos,
+      email: profileData.email,
+      telefono: profileData.telefono,
+      empresa: profileData.empresa,
+      puesto: profileData.puesto,
+      descripcion: profileData.descripcion
     };
 
-    return this.http.post(buildApiUrl('/Usuarios/updateProfile'), request, {
+    return this.http.post(buildApiUrl('/Usuario/updateProfileApp'), request, {
       headers: this.getAuthHeaders()
     }).pipe(
-      tap((response) => {
+      tap((response: any) => {
         // Actualizar el usuario local con los nuevos datos
-        const updatedUser = { ...user, ...request };
+        const updatedUser = { 
+          ...user, 
+          nombre: profileData.nombre,
+          apellidos: profileData.apellidos,
+          email: profileData.email,
+          telefono: profileData.telefono,
+          entidad: profileData.empresa,
+          puesto: profileData.puesto,
+          descripcion: profileData.descripcion,
+          urlAvatar: response.urlAvatar || user.urlAvatar
+        };
         this._currentUser.set(updatedUser);
         this.userSubject.next(updatedUser);
         this.setStoredUser(updatedUser);
