@@ -9,7 +9,7 @@
       <div class="tab-content">
         <mat-card class="upload-card">
           <mat-card-header>
-            <mat-card-title>Alumnos</mat-card-title>
+            <mat-card-title>Alumnado</mat-card-title>
           </mat-card-header>
           <mat-card-content>
             <div class="droparea" [class.over]="isDragOverAlumnos()" (dragover)="onDragOver('alumnos', $event)" (dragleave)="onDragLeave('alumnos', $event)" (drop)="onDrop('alumnos', $event)" (click)="openPicker('alumnos', alumnosInput)">
@@ -33,7 +33,7 @@
 
         <mat-card class="upload-card">
           <mat-card-header>
-            <mat-card-title>Profesores</mat-card-title>
+            <mat-card-title>Docentes</mat-card-title>
           </mat-card-header>
           <mat-card-content>
             <!-- Área de drag & drop (solo visible cuando no hay preview) -->

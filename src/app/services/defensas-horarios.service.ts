@@ -9,12 +9,15 @@ import { DefensaHorario, DefensaHorarioRequest, DefensaHorarioResponse } from '.
 })
 export class DefensasHorariosService {
   private http = inject(HttpClient);
-  private baseUrl = `${environment.apiUrl}/api/defensas-horarios`;
+  private baseUrl = `${environment.apiUrl}/api/defensashorarios`;
 
   /**
    * Obtiene los horarios de una defensa específica
    */
   getHorariosByDefensa(idDefensa: number): Observable<DefensaHorarioResponse> {
+    console.log(`DefensasHorariosService: Obteniendo horarios para defensa ID: ${idDefensa}`);
+    console.log(`DefensasHorariosService: URL: ${this.baseUrl}/defensa/${idDefensa}`);
+    
     return this.http.get<DefensaHorarioResponse>(`${this.baseUrl}/defensa/${idDefensa}`);
   }
 

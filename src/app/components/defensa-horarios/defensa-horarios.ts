@@ -15,11 +15,7 @@ import { DefensasHorariosService } from '../../services/defensas-horarios.servic
 import { DefensasHorariosSeleccionadosService } from '../../services/defensas-horarios-seleccionados.service';
 import { AuthService } from '../../services/auth.service';
 import { TranslatePipe } from '../../pipes/translate.pipe';
-import { Calendar, CalendarOptions } from '@fullcalendar/core';
-import { FullCalendarModule } from '@fullcalendar/angular';
-import dayGridPlugin from '@fullcalendar/daygrid';
-import timeGridPlugin from '@fullcalendar/timegrid';
-import interactionPlugin from '@fullcalendar/interaction';
+import { SchedulerComponent } from '../scheduler/scheduler';
 
 @Component({
   selector: 'app-defensa-horarios',
@@ -34,7 +30,7 @@ import interactionPlugin from '@fullcalendar/interaction';
     MatProgressSpinnerModule,
     MatChipsModule,
     MatTooltipModule,
-    FullCalendarModule,
+    SchedulerComponent,
     TranslatePipe
   ],
   templateUrl: './defensa-horarios.html',
@@ -56,25 +52,6 @@ export class DefensaHorariosComponent implements OnInit {
   horariosDisponibles: any[] = [];
   seleccionesProfesores: any[] = [];
   loading = true;
-  calendar: Calendar | null = null;
-  calendarOptions: CalendarOptions = {
-    plugins: [dayGridPlugin, timeGridPlugin, interactionPlugin],
-    initialView: 'timeGridWeek',
-    headerToolbar: {
-      left: 'prev,next today',
-      center: 'title',
-      right: 'dayGridMonth,timeGridWeek,timeGridDay'
-    },
-    height: 'auto',
-    selectable: true,
-    selectMirror: true,
-    dayMaxEvents: true,
-    weekends: true,
-    locale: 'es',
-    events: [],
-    select: (selectInfo) => this.onDateSelect(selectInfo),
-    eventClick: (clickInfo) => this.onEventClick(clickInfo)
-  };
 
   ngOnInit(): void {
     this.route.params.subscribe(params => {
@@ -89,17 +66,35 @@ export class DefensaHorariosComponent implements OnInit {
     this.loading = true;
     this.cdr.detectChanges();
     
+    console.log(`DefensaHorariosComponent: Cargando defensa con ID: ${this.defensaId}`);
+    
     // Cargar datos de la defensa
     this.defensasService.getDefensaById(this.defensaId).subscribe({
       next: (defensa) => {
+        console.log('DefensaHorariosComponent: Defensa cargada exitosamente:', defensa);
         this.defensa = defensa;
         this.loadHorariosDisponibles();
       },
       error: (error) => {
-        console.error('Error cargando defensa:', error);
-        this.snackBar.open('Error al cargar los datos de la defensa', 'Cerrar', { duration: 3000 });
-        this.loading = false;
-        this.cdr.detectChanges();
+        console.error('DefensaHorariosComponent: Error cargando defensa:', error);
+        
+        // Mostrar advertencia pero continuar con la carga de horarios
+        if (error.status === 400) {
+          this.snackBar.open('Advertencia: No se pudieron cargar los datos completos de la defensa, pero se cargarán los horarios disponibles', 'Cerrar', { duration: 5000 });
+        } else if (error.status === 404) {
+          this.snackBar.open('Defensa no encontrada', 'Cerrar', { duration: 3000 });
+          this.loading = false;
+          this.cdr.detectChanges();
+          return;
+        } else if (error.status === 401) {
+          this.snackBar.open('Sesión expirada. Por favor, inicie sesión nuevamente', 'Cerrar', { duration: 3000 });
+          this.loading = false;
+          this.cdr.detectChanges();
+          return;
+        }
+        
+        // Continuar con la carga de horarios incluso si falla la carga de datos de la defensa
+        this.loadHorariosDisponibles();
       }
     });
   }
@@ -110,7 +105,6 @@ export class DefensaHorariosComponent implements OnInit {
       next: (response) => {
         this.horariosDisponibles = response.dataList || [];
         this.loadSeleccionesProfesores();
-        this.updateCalendarEvents();
       },
       error: (error) => {
         console.error('Error cargando horarios:', error);
@@ -121,12 +115,12 @@ export class DefensaHorariosComponent implements OnInit {
     });
   }
 
+
   loadSeleccionesProfesores(): void {
     // Cargar selecciones de profesores
     this.defensasHorariosSeleccionadosService.getSeleccionesByDefensaId(this.defensaId).subscribe({
       next: (selecciones) => {
         this.seleccionesProfesores = selecciones;
-        this.updateCalendarEvents();
         this.loading = false;
         this.cdr.detectChanges();
       },
@@ -139,82 +133,44 @@ export class DefensaHorariosComponent implements OnInit {
     });
   }
 
-  updateCalendarEvents(): void {
-    const events: any[] = [];
-    
-    // Agregar horarios disponibles
-    this.horariosDisponibles.forEach(horario => {
-      events.push({
-        id: `disponible-${horario.id}`,
-        title: 'Horario Disponible',
-        start: horario.fecha,
-        backgroundColor: '#e3f2fd',
-        borderColor: '#2196f3',
-        textColor: '#1976d2',
-        classNames: ['horario-disponible']
-      });
-    });
-
-    // Agregar selecciones de profesores
-    this.seleccionesProfesores.forEach(seleccion => {
-      events.push({
-        id: `seleccion-${seleccion.id}`,
-        title: `${seleccion.nombreProfesor} - ${seleccion.puesto}`,
-        start: seleccion.fechaHora,
-        backgroundColor: seleccion.idUsuario === this.authService.currentUser()?.id ? '#c8e6c9' : '#fff3e0',
-        borderColor: seleccion.idUsuario === this.authService.currentUser()?.id ? '#4caf50' : '#ff9800',
-        textColor: seleccion.idUsuario === this.authService.currentUser()?.id ? '#2e7d32' : '#f57c00',
-        classNames: ['horario-seleccionado']
-      });
-    });
-
-    this.calendarOptions.events = events;
-  }
-
-  onDateSelect(selectInfo: any): void {
-    const fechaHora = selectInfo.startStr;
-    
-    // Verificar si es un horario disponible
-    const horarioDisponible = this.horariosDisponibles.find(h => 
-      h.fecha === fechaHora
-    );
-
-    if (!horarioDisponible) {
-      this.snackBar.open('Este horario no está disponible para seleccionar', 'Cerrar', { duration: 2000 });
+  /**
+   * Maneja la disponibilidad enviada desde el scheduler
+   */
+  onAvailabilitySubmitted(selectedDate: string): void {
+    const currentUser = this.authService.currentUser();
+    if (!currentUser) {
+      this.snackBar.open('Debe estar autenticado para enviar disponibilidad', 'Cerrar', { duration: 3000 });
       return;
     }
 
+    console.log('DefensaHorariosComponent: Fecha seleccionada:', selectedDate);
+
     // Verificar si ya tiene una selección
     const seleccionExistente = this.seleccionesProfesores.find(s => 
-      s.idUsuario === this.authService.currentUser()?.id
+      s.idUsuario === currentUser.id
     );
 
     if (seleccionExistente) {
       // Actualizar selección existente
-      this.updateSeleccion(seleccionExistente.id, fechaHora);
+      this.updateSeleccion(seleccionExistente.id, selectedDate);
     } else {
       // Crear nueva selección
-      this.createSeleccion(fechaHora);
-    }
-  }
-
-  onEventClick(clickInfo: any): void {
-    const eventId = clickInfo.event.id;
-    
-    if (eventId.startsWith('seleccion-')) {
-      const seleccionId = eventId.replace('seleccion-', '');
-      const seleccion = this.seleccionesProfesores.find(s => s.id == seleccionId);
-      
-      if (seleccion && seleccion.idUsuario === this.authService.currentUser()?.id) {
-        // Permitir modificar solo la propia selección
-        this.modifySeleccion(seleccion);
-      }
+      this.createSeleccion(selectedDate);
     }
   }
 
   createSeleccion(fechaHora: string): void {
     const currentUser = this.authService.currentUser();
-    if (!currentUser) return;
+    if (!currentUser) {
+      this.snackBar.open('Debe estar autenticado para enviar la votación', 'Cerrar', { duration: 3000 });
+      return;
+    }
+
+    console.log('DefensaHorariosComponent: Creando selección con datos:', {
+      idDefensa: this.defensaId,
+      idUsuario: currentUser.id,
+      fechaHora: fechaHora
+    });
 
     this.defensasHorariosSeleccionadosService.createSeleccion({
       idDefensa: this.defensaId,
@@ -222,12 +178,24 @@ export class DefensaHorariosComponent implements OnInit {
       fechaHora: fechaHora
     }).subscribe({
       next: (response) => {
-        this.snackBar.open('Horario seleccionado correctamente', 'Cerrar', { duration: 2000 });
+        console.log('DefensaHorariosComponent: Selección creada exitosamente:', response);
+        this.snackBar.open('Votación enviada correctamente', 'Cerrar', { duration: 2000 });
         this.loadSeleccionesProfesores();
       },
       error: (error) => {
-        console.error('Error creando selección:', error);
-        this.snackBar.open('Error al seleccionar el horario', 'Cerrar', { duration: 3000 });
+        console.error('DefensaHorariosComponent: Error creando selección:', error);
+        
+        let errorMessage = 'Error al enviar la votación';
+        
+        if (error.status === 500) {
+          errorMessage = 'Error del servidor: Contacte al administrador';
+        } else if (error.status === 400) {
+          errorMessage = 'Datos incorrectos: Verifique la información enviada';
+        } else if (error.status === 401) {
+          errorMessage = 'Sesión expirada: Por favor, inicie sesión nuevamente';
+        }
+        
+        this.snackBar.open(errorMessage, 'Cerrar', { duration: 5000 });
       }
     });
   }
@@ -237,19 +205,14 @@ export class DefensaHorariosComponent implements OnInit {
       fechaHora: fechaHora
     }).subscribe({
       next: (response) => {
-        this.snackBar.open('Horario actualizado correctamente', 'Cerrar', { duration: 2000 });
+        this.snackBar.open('Disponibilidad actualizada correctamente', 'Cerrar', { duration: 2000 });
         this.loadSeleccionesProfesores();
       },
       error: (error) => {
         console.error('Error actualizando selección:', error);
-        this.snackBar.open('Error al actualizar el horario', 'Cerrar', { duration: 3000 });
+        this.snackBar.open('Error al actualizar la disponibilidad', 'Cerrar', { duration: 3000 });
       }
     });
-  }
-
-  modifySeleccion(seleccion: any): void {
-    // Implementar lógica para modificar selección
-    console.log('Modificar selección:', seleccion);
   }
 
   goBack(): void {
@@ -259,4 +222,5 @@ export class DefensaHorariosComponent implements OnInit {
   getCurrentUser(): any {
     return this.authService.currentUser();
   }
+
 }

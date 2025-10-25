@@ -147,8 +147,14 @@ export class TribunalsComponent implements OnInit {
           console.log('TribunalsComponent: Convirtiendo defensas a formato de tabla...');
           console.log('TribunalsComponent: Primer elemento de response.data:', response.data[0]);
           console.log('TribunalsComponent: Estructura del primer elemento:', JSON.stringify(response.data[0], null, 2));
-          this.data = this.convertDefensasToTableFormat(response.data);
-          console.log('TribunalsComponent: Datos convertidos:', this.data);
+          
+          // Convertir todas las defensas a formato de tabla
+          let allDefensas = this.convertDefensasToTableFormat(response.data);
+          
+          // Filtrar defensas según el tipo de usuario
+          this.data = this.filterDefensasByUser(allDefensas);
+          
+          console.log('TribunalsComponent: Datos convertidos y filtrados:', this.data);
           console.log('TribunalsComponent: Primer elemento convertido:', this.data[0]);
           this.applyFilters();
           this.snackBar.open(`Cargadas ${this.data.length} defensas`, 'Cerrar', { duration: 2000 });
@@ -168,6 +174,66 @@ export class TribunalsComponent implements OnInit {
         this.applyFilters();
       }
     });
+  }
+
+  /**
+   * Filtra las defensas según el tipo de usuario
+   * - Admin: ve todas las defensas
+   * - Profesor: solo ve las defensas en las que está involucrado
+   */
+  filterDefensasByUser(allDefensas: any[]): any[] {
+    const currentUser = this.authService.currentUser();
+    
+    // Si no hay usuario autenticado, no mostrar nada
+    if (!currentUser) {
+      console.log('TribunalsComponent: No hay usuario autenticado, no se muestran defensas');
+      return [];
+    }
+    
+    // Si es admin, mostrar todas las defensas
+    if (this.isAdmin) {
+      console.log('TribunalsComponent: Usuario es admin, mostrando todas las defensas:', allDefensas.length);
+      return allDefensas;
+    }
+    
+    // Si es profesor, filtrar solo las defensas donde está involucrado
+    console.log('TribunalsComponent: Usuario es profesor, filtrando defensas...');
+    console.log('TribunalsComponent: Usuario actual:', currentUser.nombre, currentUser.apellidos);
+    
+    const userFullName = `${currentUser.nombre} ${currentUser.apellidos}`.trim();
+    console.log('TribunalsComponent: Nombre completo del usuario:', userFullName);
+    
+    const filteredDefensas = allDefensas.filter(defensa => {
+      const isDirector = defensa.director && defensa.director.includes(userFullName);
+      const isCodirector = defensa.codirector && defensa.codirector.includes(userFullName);
+      const isPresident = defensa.president && defensa.president.includes(userFullName);
+      const isVocal = defensa.vocal && defensa.vocal.includes(userFullName);
+      const isReplacement = defensa.replacement && defensa.replacement.includes(userFullName);
+      
+      const isInvolved = isDirector || isCodirector || isPresident || isVocal || isReplacement;
+      
+      if (isInvolved) {
+        console.log('TribunalsComponent: Defensa encontrada para el usuario:', {
+          id: defensa.id,
+          student: defensa.student,
+          director: defensa.director,
+          codirector: defensa.codirector,
+          president: defensa.president,
+          vocal: defensa.vocal,
+          replacement: defensa.replacement,
+          isDirector,
+          isCodirector,
+          isPresident,
+          isVocal,
+          isReplacement
+        });
+      }
+      
+      return isInvolved;
+    });
+    
+    console.log('TribunalsComponent: Defensas filtradas para el profesor:', filteredDefensas.length);
+    return filteredDefensas;
   }
 
   loadAulas(): void {
@@ -190,28 +256,28 @@ export class TribunalsComponent implements OnInit {
   }
 
   loadProfessors(): void {
-    console.log('TribunalsComponent: Cargando profesores por posición...');
+    console.log('TribunalsComponent: Cargando todos los profesores...');
     
-    // Cargar presidentes
-    this.professorsByPositionService.getPresidents().subscribe({
-      next: (presidents) => {
-        this.presidents = presidents;
-        console.log('TribunalsComponent: Presidentes cargados:', this.presidents.length);
+    // Cargar todos los profesores para presidentes
+    this.professorsByPositionService.getProfessorsByPosition('').subscribe({
+      next: (allProfessors) => {
+        this.presidents = allProfessors;
+        console.log('TribunalsComponent: Todos los profesores cargados para presidentes:', this.presidents.length);
       },
       error: (error) => {
-        console.error('TribunalsComponent: Error cargando presidentes:', error);
+        console.error('TribunalsComponent: Error cargando profesores para presidentes:', error);
         this.presidents = [];
       }
     });
 
-    // Cargar vocales
-    this.professorsByPositionService.getVocals().subscribe({
-      next: (vocals) => {
-        this.vocals = vocals;
-        console.log('TribunalsComponent: Vocales cargados:', this.vocals.length);
+    // Cargar todos los profesores para vocales
+    this.professorsByPositionService.getProfessorsByPosition('').subscribe({
+      next: (allProfessors) => {
+        this.vocals = allProfessors;
+        console.log('TribunalsComponent: Todos los profesores cargados para vocales:', this.vocals.length);
       },
       error: (error) => {
-        console.error('TribunalsComponent: Error cargando vocales:', error);
+        console.error('TribunalsComponent: Error cargando profesores para vocales:', error);
         this.vocals = [];
       }
     });

@@ -40,6 +40,9 @@ export class DefensasService {
    * Obtiene una defensa por ID
    */
   getDefensaById(id: number): Observable<DefensaResponse> {
+    console.log(`DefensasService: Obteniendo defensa con ID: ${id}`);
+    console.log(`DefensasService: URL: ${this.baseUrl}/${id}`);
+    
     return this.http.get<DefensaResponse>(`${this.baseUrl}/${id}`)
       .pipe(
         timeout<DefensaResponse>(environment.timeout),

@@ -56,7 +56,11 @@ export class DefensasHorariosSeleccionadosService {
    * Crea una nueva selección de horario
    */
   createSeleccion(request: CreateSeleccionRequest): Observable<any> {
-    return this.http.post<any>(this.baseUrl, request)
+    const endpoint = `${this.baseUrl}/crear_seleccion_horario`;
+    console.log('DefensasHorariosSeleccionadosService: Creando selección:', request);
+    console.log('DefensasHorariosSeleccionadosService: URL:', endpoint);
+    
+    return this.http.post<any>(endpoint, request)
       .pipe(
         timeout(environment.timeout),
         catchError(this.handleError)
@@ -84,6 +88,7 @@ export class DefensasHorariosSeleccionadosService {
         catchError(this.handleError)
       );
   }
+
 
   /**
    * Maneja errores de la API

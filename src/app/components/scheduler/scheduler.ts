@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, OnChanges, inject, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
@@ -15,13 +15,17 @@ import { TranslatePipe } from '../../pipes/translate.pipe';
   templateUrl: './scheduler.html',
   styleUrl: './scheduler.scss'
 })
-export class SchedulerComponent implements OnInit {
+export class SchedulerComponent implements OnInit, OnChanges {
   private snackBar = inject(MatSnackBar);
   private route = inject(ActivatedRoute);
   
-  selectedDays: Set<string> = new Set();
+  @Input() defenseData: any = null;
+  @Input() availableSchedules: any[] = [];
+  @Input() professorSelections: any[] = [];
+  @Output() availabilitySubmitted = new EventEmitter<string>();
+  
+  selectedSchedule: any = null;
   currentMonth: Date = new Date();
-  defenseData: any = null;
   monthNames = [
     'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
     'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
@@ -29,18 +33,21 @@ export class SchedulerComponent implements OnInit {
   weekDays = ['L', 'M', 'X', 'J', 'V', 'S', 'D'];
   
   ngOnInit(): void {
-    this.generateCalendar();
-    
-    // Obtener datos de la defensa desde localStorage
-    const defenseDataStr = localStorage.getItem('currentDefense');
-    if (defenseDataStr) {
-      try {
-        this.defenseData = JSON.parse(defenseDataStr);
-        // Limpiar localStorage después de obtener los datos
-        localStorage.removeItem('currentDefense');
-      } catch (e) {
-        console.error('Error parsing defense data:', e);
-      }
+    this.configureCalendarMonth();
+  }
+
+  ngOnChanges(): void {
+    if (this.availableSchedules && this.availableSchedules.length > 0) {
+      this.configureCalendarMonth();
+    }
+  }
+
+  configureCalendarMonth(): void {
+    if (this.availableSchedules && this.availableSchedules.length > 0) {
+      // Configurar el mes basado en la primera fecha disponible
+      const firstSchedule = this.availableSchedules[0];
+      const firstDate = new Date(firstSchedule.fecha);
+      this.currentMonth = new Date(firstDate.getFullYear(), firstDate.getMonth());
     }
   }
   
@@ -77,17 +84,27 @@ export class SchedulerComponent implements OnInit {
   }
   
   isSelected(date: Date): boolean {
-    return this.selectedDays.has(this.getDayKey(date));
+    if (!this.selectedSchedule) return false;
+    return this.getDayKey(date) === this.getDayKey(new Date(this.selectedSchedule.fecha));
+  }
+  
+  isAvailable(date: Date): boolean {
+    const dayKey = this.getDayKey(date);
+    return this.availableSchedules.some(schedule => 
+      this.getDayKey(new Date(schedule.fecha)) === dayKey
+    );
   }
   
   toggleDay(date: Date): void {
-    if (!this.isCurrentMonth(date)) return;
+    if (!this.isCurrentMonth(date) || !this.isAvailable(date)) return;
     
     const dayKey = this.getDayKey(date);
-    if (this.selectedDays.has(dayKey)) {
-      this.selectedDays.delete(dayKey);
-    } else {
-      this.selectedDays.add(dayKey);
+    const schedule = this.availableSchedules.find(s => 
+      this.getDayKey(new Date(s.fecha)) === dayKey
+    );
+    
+    if (schedule) {
+      this.selectedSchedule = schedule;
     }
   }
   
@@ -100,34 +117,40 @@ export class SchedulerComponent implements OnInit {
   }
   
   sendAvailability(): void {
-    const selectedDates = Array.from(this.selectedDays).sort();
-    console.log('Días seleccionados para reunión:', selectedDates);
+    if (!this.selectedSchedule) {
+      this.snackBar.open('Debe seleccionar un horario', 'Cerrar', { duration: 2000 });
+      return;
+    }
+    
+    console.log('Horario seleccionado:', this.selectedSchedule);
+    
+    // Emitir el evento con el horario seleccionado
+    this.availabilitySubmitted.emit(this.selectedSchedule.fecha);
     
     this.snackBar.open(
-      `Disponibilidad enviada: ${selectedDates.length} días seleccionados`, 
+      `Votación enviada: ${this.formatScheduleDate(this.selectedSchedule)}`, 
       'Cerrar', 
       { duration: 3000 }
     );
   }
   
-  getSelectedDaysCount(): number {
-    return this.selectedDays.size;
+  selectSchedule(schedule: any): void {
+    this.selectedSchedule = schedule;
   }
-  
-  getSelectedDaysArray(): string[] {
-    return Array.from(this.selectedDays).sort();
-  }
-  
-  formatSelectedDay(dayKey: string): string {
-    const date = new Date(dayKey);
+
+  formatScheduleDate(schedule: any): string {
+    const date = new Date(schedule.fecha);
     const day = date.getDate();
     const month = this.monthNames[date.getMonth()];
     const year = date.getFullYear();
+    const time = date.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
     const weekDay = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'][date.getDay()];
-    return `${weekDay}, ${day} de ${month} ${year}`;
+    return `${weekDay}, ${day} de ${month} ${year} a las ${time}`;
   }
-  
-  removeSelectedDay(dayKey: string): void {
-    this.selectedDays.delete(dayKey);
+
+  getProfessorSelectionForSchedule(schedule: any): any[] {
+    return this.professorSelections.filter(selection => 
+      this.getDayKey(new Date(selection.fechaHora)) === this.getDayKey(new Date(schedule.fecha))
+    );
   }
 }

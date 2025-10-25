@@ -299,3 +299,93 @@
                  [pageSizeOptions]="[5,10,20]">
   </mat-paginator>
 </div>
+
+<style>
+/* Estilos para headers de tabla */
+::ng-deep .mat-header-cell {
+  background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%) !important;
+  color: #ffffff !important;
+  font-weight: 700 !important;
+  font-size: 0.9rem !important;
+  letter-spacing: 0.05em !important;
+  border-bottom: 3px solid #1d4ed8 !important;
+  padding: 1.5rem 1rem !important;
+  text-transform: uppercase !important;
+  text-align: center !important;
+  box-shadow: 0 2px 4px rgba(30, 64, 175, 0.2) !important;
+  position: relative !important;
+}
+
+::ng-deep .mat-header-cell:first-child {
+  border-top-left-radius: 12px !important;
+}
+
+::ng-deep .mat-header-cell:last-child {
+  border-top-right-radius: 12px !important;
+}
+
+::ng-deep .mat-header-cell:hover {
+  background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 100%) !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(30, 64, 175, 0.3) !important;
+}
+
+::ng-deep .mat-header-cell .mat-sort-header-arrow {
+  color: #ffffff !important;
+  opacity: 0.8;
+}
+
+::ng-deep .mat-header-cell .mat-sort-header-content {
+  color: #ffffff !important;
+  font-weight: 700 !important;
+}
+
+::ng-deep .mat-header-row {
+  background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%) !important;
+  box-shadow: 0 4px 8px rgba(30, 64, 175, 0.2) !important;
+}
+
+/* Estilos para la tabla */
+::ng-deep .mat-table {
+  box-shadow: 0 8px 25px -5px rgba(0, 0, 0, 0.1), 0 4px 6px -1px rgba(0, 0, 0, 0.05) !important;
+  border-radius: 16px !important;
+  overflow: hidden !important;
+}
+
+/* Estilos para la primera fila de datos */
+::ng-deep .mat-row:first-of-type {
+  border-top: 2px solid #1d4ed8 !important;
+}
+
+/* Estilos para celdas de datos */
+::ng-deep .mat-cell {
+  color: #334155 !important;
+  border-bottom: 1px solid #f1f5f9 !important;
+  padding: 1.25rem 1rem !important;
+  font-size: 0.875rem !important;
+  font-weight: 500 !important;
+  vertical-align: middle !important;
+}
+
+/* Estilos para filas de datos */
+::ng-deep .mat-row {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  background: white !important;
+  border-top: 1px solid #f1f5f9 !important;
+}
+
+::ng-deep .mat-row:hover {
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%) !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 12px rgba(148, 163, 184, 0.15) !important;
+  border-left: 4px solid #94a3b8 !important;
+}
+
+::ng-deep .mat-row:nth-child(even) {
+  background: linear-gradient(135deg, #fefefe 0%, #f8fafc 100%) !important;
+}
+
+::ng-deep .mat-row:last-child .mat-cell {
+  border-bottom: none !important;
+}
+</style>

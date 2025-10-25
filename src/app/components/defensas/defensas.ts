@@ -636,7 +636,36 @@ export class DefensasComponent implements OnInit, OnDestroy {
     }
   }
   
-  
+  /**
+   * Valida que se hayan seleccionado áreas de conocimiento cuando sea necesario
+   * @returns true si la validación es correcta, false si hay errores
+   */
+  private validateAreasConocimiento(): boolean {
+    const vocal = this.defensaForm.get('vocalTribunal')?.value;
+    const suplente = this.defensaForm.get('suplente')?.value;
+    
+    // Si hay vocal y se muestran áreas de conocimiento, debe seleccionar al menos una
+    if (vocal && this.especialidadesVocal.length > 0 && this.selectedVocalEspecialidades.length === 0) {
+      this.snackBar.open(
+        'Debe seleccionar al menos un área de conocimiento para el vocal',
+        'Cerrar',
+        { duration: 4000 }
+      );
+      return false;
+    }
+    
+    // Si hay suplente y se muestran áreas de conocimiento, debe seleccionar al menos una
+    if (suplente && this.especialidadesSuplente.length > 0 && this.selectedSuplenteEspecialidades.length === 0) {
+      this.snackBar.open(
+        'Debe seleccionar al menos un área de conocimiento para el suplente',
+        'Cerrar',
+        { duration: 4000 }
+      );
+      return false;
+    }
+    
+    return true;
+  }
   
   createDefensa(): void {
     // Validación especial para especialidad solo si es GII
@@ -645,6 +674,11 @@ export class DefensasComponent implements OnInit, OnDestroy {
     
     if (grado === TipoGrado.INGENIERIA_INFORMATICA && !especialidad) {
       this.defensaForm.get('especialidad')?.setErrors({ required: true });
+    }
+    
+    // Validar áreas de conocimiento
+    if (!this.validateAreasConocimiento()) {
+      return;
     }
     
     if (this.defensaForm.invalid) {
@@ -759,6 +793,12 @@ export class DefensasComponent implements OnInit, OnDestroy {
     this.isExporting.set(true);
     
     try {
+      // Validar áreas de conocimiento
+      if (!this.validateAreasConocimiento()) {
+        this.isExporting.set(false);
+        return;
+      }
+      
       if (this.defensaForm.invalid) {
         this.defensaForm.markAllAsTouched();
         this.snackBar.open(

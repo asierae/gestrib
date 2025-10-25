@@ -242,6 +242,153 @@
   }
 }
 
+// Layout principal
+.main-layout {
+  display: grid;
+  grid-template-columns: 3fr 1fr;
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+// Sección de horarios disponibles
+.schedules-section {
+  .schedules-card {
+    height: fit-content;
+    min-width: 0; // Permite que el contenido se ajuste
+  }
+}
+
+// Sección de votaciones de profesores
+.votes-section {
+  .votes-card {
+    height: fit-content;
+    min-width: 0; // Permite que el contenido se ajuste
+  }
+}
+
+// Contenedor principal de las secciones
+.main-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  min-width: 0; // Permite que el contenido se ajuste
+}
+
+.schedules-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.schedule-card {
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+  
+  &.available {
+    border-color: #e0e0e0;
+    background: #fafafa;
+    
+    &:hover {
+      border-color: #2196f3;
+      background: #e3f2fd;
+    }
+  }
+  
+  &.selected {
+    border-color: #4caf50;
+    background: #e8f5e8;
+    box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
+  }
+}
+
+.schedule-info {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  
+  .schedule-icon {
+    color: #2196f3;
+    font-size: 1.5rem;
+  }
+  
+  .schedule-details {
+    display: flex;
+    flex-direction: column;
+    
+    .schedule-date {
+      font-weight: 600;
+      font-size: 1.1rem;
+      color: #333;
+    }
+    
+    .schedule-time {
+      font-size: 0.9rem;
+      color: #666;
+      margin-top: 0.25rem;
+    }
+  }
+}
+
+.schedule-status {
+  margin-left: auto;
+  
+  .selected-icon {
+    color: #4caf50;
+    font-size: 1.5rem;
+  }
+  
+  .available-icon {
+    color: #ccc;
+    font-size: 1.5rem;
+  }
+}
+
+.no-schedules {
+  text-align: center;
+  padding: 2rem;
+  color: #666;
+  
+  mat-icon {
+    font-size: 3rem;
+    color: #ccc;
+    margin-bottom: 1rem;
+  }
+}
+
+// Sección de instrucciones
+.instructions-section {
+  .instructions-card {
+    height: fit-content;
+    position: sticky;
+    top: 2rem;
+    max-width: 300px; // Limita el ancho máximo
+    margin-left: auto; // Empuja hacia la derecha
+  }
+  
+  // Hacer las instrucciones más compactas
+  mat-card-content {
+    padding: 16px !important;
+    
+    ul {
+      margin: 12px 0;
+      padding-left: 16px;
+      
+      li {
+        margin-bottom: 6px;
+        font-size: 14px;
+        line-height: 1.4;
+      }
+    }
+  }
+}
+
 // Responsive design
 @media (max-width: 768px) {
   .defensa-horarios-container {
@@ -261,6 +408,19 @@
         }
       }
     }
+  }
+
+  .main-layout {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  .schedules-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .instructions-section .instructions-card {
+    position: static;
   }
 }
 

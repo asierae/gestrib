@@ -20,10 +20,10 @@ export class ProfessorsByPositionService {
   private apiUrl = `${environment.apiUrl}/usuarios`;
 
   /**
-   * Obtiene profesores por posición (Presidente, Vocal, etc.)
+   * Obtiene profesores por posición (Presidente, Vocal, etc.) o todos los profesores si position está vacío
    */
   getProfessorsByPosition(position: string): Observable<ProfessorByPosition[]> {
-    console.log(`ProfessorsByPositionService: Obteniendo profesores con puesto: ${position}`);
+    console.log(`ProfessorsByPositionService: Obteniendo profesores con puesto: ${position || 'TODOS'}`);
     
     return this.http.get<any[]>(`${this.apiUrl}/getAllUsuariosData`).pipe(
       map((response: any) => {
@@ -35,14 +35,10 @@ export class ProfessorsByPositionService {
           return [];
         }
         
-        // Filtrar profesores por posición (case insensitive)
-        const positionLower = position.toLowerCase();
-        const professors = data
-          .filter((usuario: any) => {
-            const puesto = usuario.puesto || usuario.Puesto || '';
-            return puesto.toLowerCase().includes(positionLower);
-          })
-          .map((usuario: any) => {
+        // Si position está vacío, devolver todos los profesores
+        let professors;
+        if (!position || position.trim() === '') {
+          professors = data.map((usuario: any) => {
             const nombre = usuario.Nombre || usuario.nombre || '';
             const apellidos = usuario.Apellidos || usuario.apellidos || '';
             
@@ -55,8 +51,31 @@ export class ProfessorsByPositionService {
               fullName: `${nombre} ${apellidos}`.trim()
             };
           });
+          console.log(`ProfessorsByPositionService: Encontrados ${professors.length} profesores (TODOS)`);
+        } else {
+          // Filtrar profesores por posición (case insensitive)
+          const positionLower = position.toLowerCase();
+          professors = data
+            .filter((usuario: any) => {
+              const puesto = usuario.puesto || usuario.Puesto || '';
+              return puesto.toLowerCase().includes(positionLower);
+            })
+            .map((usuario: any) => {
+              const nombre = usuario.Nombre || usuario.nombre || '';
+              const apellidos = usuario.Apellidos || usuario.apellidos || '';
+              
+              return {
+                id: usuario.Id || usuario.id,
+                nombre: nombre,
+                apellidos: apellidos,
+                email: usuario.Email || usuario.email || '',
+                puesto: usuario.puesto || usuario.Puesto || '',
+                fullName: `${nombre} ${apellidos}`.trim()
+              };
+            });
+          console.log(`ProfessorsByPositionService: Encontrados ${professors.length} profesores con puesto que contiene "${position}"`);
+        }
         
-        console.log(`ProfessorsByPositionService: Encontrados ${professors.length} profesores con puesto que contiene "${position}"`);
         return professors;
       }),
       catchError(error => {

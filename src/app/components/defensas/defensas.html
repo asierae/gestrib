@@ -16,7 +16,7 @@
       <form [formGroup]="defensaForm" (ngSubmit)="createDefensa()">
         <div class="form-row">
           <mat-form-field appearance="outline" class="form-field">
-            <mat-label>Grado *</mat-label>
+            <mat-label>Grado</mat-label>
             <mat-select 
               formControlName="grado"
               (selectionChange)="onGradoChange()">
@@ -30,7 +30,7 @@
           </mat-form-field>
           
           <mat-form-field appearance="outline" class="form-field" *ngIf="mostrarEspecialidades">
-            <mat-label>{{ 'defensas.specialty' | translate }} *</mat-label>
+            <mat-label>{{ 'defensas.specialty' | translate }}</mat-label>
             <mat-select 
               formControlName="especialidad"
               (selectionChange)="onEspecialidadChange()">
@@ -64,7 +64,7 @@
         
         <div class="form-row">
           <mat-form-field appearance="outline" class="form-field">
-            <mat-label>{{ 'defensas.language' | translate }} *</mat-label>
+            <mat-label>{{ 'defensas.language' | translate }}</mat-label>
             <mat-select formControlName="idioma">
               <mat-option *ngFor="let idioma of idiomas" [value]="idioma.value">
                 {{ idioma.label }}

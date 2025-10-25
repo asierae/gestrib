@@ -22,36 +22,38 @@
 
   <!-- Content -->
   <div *ngIf="!loading" class="content">
-    <!-- Instructions -->
-    <mat-card class="instructions-card">
-      <mat-card-header>
-        <mat-card-title>
-          <mat-icon>info</mat-icon>
-          {{ 'defensaHorarios.instructions' | translate }}
-        </mat-card-title>
-      </mat-card-header>
-      <mat-card-content>
-        <p>{{ 'defensaHorarios.instructionsText' | translate }}</p>
-        <ul>
-          <li>{{ 'defensaHorarios.instruction1' | translate }}</li>
-          <li>{{ 'defensaHorarios.instruction2' | translate }}</li>
-          <li>{{ 'defensaHorarios.instruction3' | translate }}</li>
-        </ul>
-      </mat-card-content>
-    </mat-card>
+    <div class="main-layout">
+      <!-- Scheduler Section -->
+      <div class="scheduler-section">
+        <app-scheduler 
+          [defenseData]="defensa"
+          [availableSchedules]="horariosDisponibles"
+          [professorSelections]="seleccionesProfesores"
+          (availabilitySubmitted)="onAvailabilitySubmitted($event)">
+        </app-scheduler>
+      </div>
 
-    <!-- Calendar -->
-    <mat-card class="calendar-card">
-      <mat-card-header>
-        <mat-card-title>
-          <mat-icon>event</mat-icon>
-          {{ 'defensaHorarios.scheduleSelection' | translate }}
-        </mat-card-title>
-      </mat-card-header>
-      <mat-card-content>
-        <full-calendar [options]="calendarOptions"></full-calendar>
-      </mat-card-content>
-    </mat-card>
+      <!-- Instructions -->
+      <div class="instructions-section">
+        <mat-card class="instructions-card">
+          <mat-card-header>
+            <mat-card-title>
+              <mat-icon>info</mat-icon>
+              {{ 'defensaHorarios.instructions' | translate }}
+            </mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <p>{{ 'defensaHorarios.instructionsText' | translate }}</p>
+            <ul>
+              <li>{{ 'defensaHorarios.instruction1' | translate }}</li>
+              <li>{{ 'defensaHorarios.instruction2' | translate }}</li>
+              <li>{{ 'defensaHorarios.instruction3' | translate }}</li>
+            </ul>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </div>
+
 
     <!-- Professor Selections -->
     <mat-card class="selections-card" *ngIf="seleccionesProfesores.length > 0">

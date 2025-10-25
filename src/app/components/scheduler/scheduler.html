@@ -3,29 +3,21 @@
   
   <mat-card class="doodle-card">
     <mat-card-header>
-      <mat-card-title *ngIf="!defenseData">Calendario de Disponibilidad</mat-card-title>
-      <mat-card-title *ngIf="defenseData">{{ defenseData.title }}</mat-card-title>
-      <mat-card-subtitle *ngIf="!defenseData">Haz clic en los días que estés disponible</mat-card-subtitle>
-      <mat-card-subtitle *ngIf="defenseData">Defensa de: {{ defenseData.student }} - {{ defenseData.specialty }}</mat-card-subtitle>
+      <mat-card-title *ngIf="!defenseData">Selección de Horario</mat-card-title>
+      <mat-card-title *ngIf="defenseData">{{ defenseData.titulo }}</mat-card-title>
+      <mat-card-subtitle *ngIf="!defenseData">Selecciona un horario disponible</mat-card-subtitle>
+      <mat-card-subtitle *ngIf="defenseData">Defensa de: {{ defenseData.estudiante }}</mat-card-subtitle>
     </mat-card-header>
     
     <mat-card-content>
-      <div class="calendar-container">
+      <div class="scheduler-layout">
         <!-- Calendar Section -->
         <div class="calendar-section">
           <!-- Month Navigation -->
           <div class="calendar-header">
-            <button mat-icon-button (click)="previousMonth()" class="nav-button">
-              <mat-icon>chevron_left</mat-icon>
-            </button>
-            
             <h2 class="month-title">
               {{ monthNames[currentMonth.getMonth()] }} {{ currentMonth.getFullYear() }}
             </h2>
-            
-            <button mat-icon-button (click)="nextMonth()" class="nav-button">
-              <mat-icon>chevron_right</mat-icon>
-            </button>
           </div>
           
           <!-- Calendar Grid -->
@@ -40,6 +32,7 @@
               *ngFor="let date of generateCalendar()" 
               class="calendar-day"
               [class.current-month]="isCurrentMonth(date)"
+              [class.available]="isAvailable(date)"
               [class.selected]="isSelected(date)"
               [class.other-month]="!isCurrentMonth(date)"
               (click)="toggleDay(date)">
@@ -48,35 +41,64 @@
           </div>
         </div>
         
-        <!-- Selected Days List -->
-        <div class="selected-days-section">
-          <h3 class="selected-days-title">
-            <mat-icon>event_available</mat-icon>
-            Días Seleccionados
+        <!-- Available Schedules List -->
+        <div class="schedules-section">
+          <h3 class="schedules-title">
+            <mat-icon>schedule</mat-icon>
+            Horarios Disponibles
           </h3>
           
-          <div class="selected-days-list" *ngIf="getSelectedDaysCount() > 0; else noSelection">
+          <div class="schedules-list" *ngIf="availableSchedules.length > 0; else noSchedules">
             <div 
-              *ngFor="let dayKey of getSelectedDaysArray()" 
-              class="selected-day-item">
-              <mat-icon>event</mat-icon>
-              <span class="day-text">{{ formatSelectedDay(dayKey) }}</span>
-              <button 
-                mat-icon-button 
-                (click)="removeSelectedDay(dayKey)"
-                class="remove-button">
-                <mat-icon>close</mat-icon>
-              </button>
+              *ngFor="let schedule of availableSchedules" 
+              class="schedule-item"
+              [class.selected]="selectedSchedule && selectedSchedule.id === schedule.id"
+              (click)="selectSchedule(schedule)">
+              <div class="schedule-info">
+                <mat-icon>event</mat-icon>
+                <div class="schedule-details">
+                  <span class="schedule-date">{{ formatScheduleDate(schedule) }}</span>
+                </div>
+              </div>
+              <div class="schedule-status">
+                <mat-icon *ngIf="selectedSchedule && selectedSchedule.id === schedule.id" class="selected-icon">check_circle</mat-icon>
+                <mat-icon *ngIf="!selectedSchedule || selectedSchedule.id !== schedule.id" class="available-icon">radio_button_unchecked</mat-icon>
+              </div>
             </div>
           </div>
           
-          <ng-template #noSelection>
-            <div class="no-selection">
-              <mat-icon>event_busy</mat-icon>
-              <p>No hay días seleccionados</p>
-              <small>Haz clic en el calendario para seleccionar días</small>
+          <ng-template #noSchedules>
+            <div class="no-schedules">
+              <mat-icon>schedule</mat-icon>
+              <p>No hay horarios disponibles</p>
             </div>
           </ng-template>
+        </div>
+        
+        <!-- Professor Votes -->
+        <div class="votes-section" *ngIf="professorSelections.length > 0">
+          <h3 class="votes-title">
+            <mat-icon>people</mat-icon>
+            Votaciones de Profesores
+          </h3>
+          
+          <div class="votes-list">
+            <div 
+              *ngFor="let schedule of availableSchedules" 
+              class="vote-group">
+              <div class="vote-schedule">
+                <strong>{{ formatScheduleDate(schedule) }}</strong>
+              </div>
+              <div class="vote-professors" *ngIf="getProfessorSelectionForSchedule(schedule).length > 0">
+                <div 
+                  *ngFor="let selection of getProfessorSelectionForSchedule(schedule)" 
+                  class="professor-vote">
+                  <mat-icon>person</mat-icon>
+                  <span>{{ selection.nombreProfesor }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </mat-card-content>
@@ -86,10 +108,10 @@
         mat-raised-button 
         color="primary" 
         (click)="sendAvailability()"
-        [disabled]="getSelectedDaysCount() === 0"
+        [disabled]="!selectedSchedule"
         class="send-button">
-        <mat-icon>send</mat-icon>
-        Enviar Disponibilidad
+        <mat-icon>how_to_vote</mat-icon>
+        Enviar Votación
       </button>
     </mat-card-actions>
   </mat-card>
