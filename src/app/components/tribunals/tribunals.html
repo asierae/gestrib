@@ -76,7 +76,7 @@
     <ng-container matColumnDef="codirector">
       <th mat-header-cell *matHeaderCellDef mat-sort-header="codirector">{{ 'tribunals.codirector' | translate }}</th>
       <td mat-cell *matCellDef="let row" class="codirector-cell" [attr.data-row-key]="getRowKey(row)">
-        <div *ngIf="!isEditingCodirector(row)" class="codirector-display" (click)="toggleCodirectorEdit(row)">
+        <div *ngIf="!isEditingCodirector(row)" class="codirector-display clickable" (click)="toggleCodirectorEdit(row)">
           {{ row.codirector }}
           <mat-icon class="edit-icon">edit</mat-icon>
         </div>
@@ -104,7 +104,7 @@
     <ng-container matColumnDef="president">
       <th mat-header-cell *matHeaderCellDef mat-sort-header="president">{{ 'tribunals.president' | translate }}</th>
       <td mat-cell *matCellDef="let row" class="president-cell" [attr.data-row-key]="getRowKey(row)">
-        <div *ngIf="!isEditingPresident(row)" class="president-display" (click)="togglePresidentEdit(row)">
+        <div *ngIf="!isEditingPresident(row)" class="president-display clickable" (click)="togglePresidentEdit(row)">
           {{ row.president }}
           <mat-icon class="edit-icon">edit</mat-icon>
         </div>
@@ -132,7 +132,7 @@
     <ng-container matColumnDef="vocal">
       <th mat-header-cell *matHeaderCellDef mat-sort-header="vocal">{{ 'tribunals.vocal' | translate }}</th>
       <td mat-cell *matCellDef="let row" class="vocal-cell" [attr.data-row-key]="getRowKey(row)">
-        <div *ngIf="!isEditingVocal(row)" class="vocal-display" (click)="toggleVocalEdit(row)">
+        <div *ngIf="!isEditingVocal(row)" class="vocal-display clickable" (click)="toggleVocalEdit(row)">
           {{ row.vocal }}
           <mat-icon class="edit-icon">edit</mat-icon>
         </div>
@@ -160,7 +160,7 @@
     <ng-container matColumnDef="replacement">
       <th mat-header-cell *matHeaderCellDef mat-sort-header="replacement">{{ 'tribunals.replacement' | translate }}</th>
       <td mat-cell *matCellDef="let row" class="reemplazo-cell" [attr.data-row-key]="getRowKey(row)">
-        <div *ngIf="!isEditingReemplazo(row)" class="reemplazo-display" (click)="toggleReemplazoEdit(row)">
+        <div *ngIf="!isEditingReemplazo(row)" class="reemplazo-display clickable" (click)="toggleReemplazoEdit(row)">
           {{ row.replacement }}
           <mat-icon class="edit-icon">edit</mat-icon>
         </div>

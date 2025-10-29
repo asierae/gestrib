@@ -66,12 +66,9 @@ export class DefensaHorariosComponent implements OnInit {
     this.loading = true;
     this.cdr.detectChanges();
     
-    console.log(`DefensaHorariosComponent: Cargando defensa con ID: ${this.defensaId}`);
-    
     // Cargar datos de la defensa
     this.defensasService.getDefensaById(this.defensaId).subscribe({
       next: (defensa) => {
-        console.log('DefensaHorariosComponent: Defensa cargada exitosamente:', defensa);
         this.defensa = defensa;
         setTimeout(() => {
           this.cdr.detectChanges();
@@ -79,7 +76,7 @@ export class DefensaHorariosComponent implements OnInit {
         }, 0);
       },
       error: (error) => {
-        console.error('DefensaHorariosComponent: Error cargando defensa:', error);
+        console.error('Error cargando defensa:', error);
         
         // Mostrar advertencia pero continuar con la carga de horarios
         if (error.status === 400) {
@@ -153,8 +150,6 @@ export class DefensaHorariosComponent implements OnInit {
       return;
     }
 
-    console.log('DefensaHorariosComponent: Fecha seleccionada:', selectedDate);
-
     // Verificar si ya tiene una selección
     const seleccionExistente = this.seleccionesProfesores.find(s => 
       s.idUsuario === currentUser.id
@@ -176,24 +171,17 @@ export class DefensaHorariosComponent implements OnInit {
       return;
     }
 
-    console.log('DefensaHorariosComponent: Creando selección con datos:', {
-      idDefensa: this.defensaId,
-      idUsuario: currentUser.id,
-      fechaHora: fechaHora
-    });
-
     this.defensasHorariosSeleccionadosService.createSeleccion({
       idDefensa: this.defensaId,
       idUsuario: currentUser.id,
       fechaHora: fechaHora
     }).subscribe({
       next: (response) => {
-        console.log('DefensaHorariosComponent: Selección creada exitosamente:', response);
         this.snackBar.open('Votación enviada correctamente', 'Cerrar', { duration: 2000 });
         this.loadSeleccionesProfesores();
       },
       error: (error) => {
-        console.error('DefensaHorariosComponent: Error creando selección:', error);
+        console.error('Error creando selección:', error);
         
         let errorMessage = 'Error al enviar la votación';
         

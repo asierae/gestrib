@@ -70,7 +70,6 @@ export class HorariosDialogComponent implements OnInit {
     
     // Detectar cambios en el formulario y actualizar el estado de validación
     this.horariosForm.valueChanges.subscribe(value => {
-      console.log('Form value changed:', value);
       // Usar setTimeout para evitar el error de change detection
       setTimeout(() => {
         this.updateFormValidation();
@@ -84,15 +83,10 @@ export class HorariosDialogComponent implements OnInit {
   }
 
   loadExistingHorarios(): void {
-    console.log('=== CARGANDO HORARIOS EXISTENTES ===');
-    console.log('HorariosSeleccionados recibidos:', this.data.horariosSeleccionados);
-    
     // Si tenemos horarios ya cargados, usarlos directamente
     if (this.data.horariosSeleccionados && this.data.horariosSeleccionados.trim() !== '') {
-      console.log('Usando horarios ya cargados desde la tabla principal');
       this.parseHorariosFromString(this.data.horariosSeleccionados);
     } else {
-      console.log('No hay horarios cargados, haciendo llamada a la API');
       // Fallback: llamar a la API si no tenemos horarios cargados
       this.defensasHorariosService.getHorariosByDefensa(this.data.idDefensa).subscribe({
         next: (response) => {
@@ -110,21 +104,15 @@ export class HorariosDialogComponent implements OnInit {
   }
 
   private parseHorariosFromString(horariosString: string): void {
-    console.log('Parseando horarios desde string:', horariosString);
-    
     try {
       // Dividir por ';' y convertir cada fecha
       const horariosArray = horariosString.split(';').filter(h => h.trim() !== '');
-      console.log('Horarios parseados:', horariosArray);
       
       this.selectedDates = horariosArray.map(horarioStr => {
         // Convertir string de fecha a Date
         const date = new Date(horarioStr.trim());
-        console.log('Convirtiendo horario:', horarioStr, '->', date);
         return date;
       }).filter(date => !isNaN(date.getTime())); // Filtrar fechas inválidas
-      
-      console.log('Fechas finales cargadas:', this.selectedDates);
       
       if (this.selectedDates.length > 0) {
         this.snackBar.open(`${this.selectedDates.length} horarios cargados`, 'Cerrar', { duration: 2000 });
@@ -144,10 +132,6 @@ export class HorariosDialogComponent implements OnInit {
     const selectedDate = this.horariosForm.get('selectedDate')?.value;
     const selectedTime = this.horariosForm.get('selectedTime')?.value;
 
-    console.log('Selected date:', selectedDate);
-    console.log('Selected time:', selectedTime);
-    console.log('Form valid:', this.isFormValid);
-
     try {
       // Crear la fecha correctamente preservando la hora local
       const dateObj = new Date(selectedDate);
@@ -163,10 +147,6 @@ export class HorariosDialogComponent implements OnInit {
         0,
         0
       );
-
-      console.log('DateTime created:', dateTime);
-      console.log('DateTime ISO:', dateTime.toISOString());
-      console.log('DateTime local:', dateTime.toLocaleString());
 
       // Verificar si ya existe
       const exists = this.selectedDates.some(d => 
@@ -195,13 +175,10 @@ export class HorariosDialogComponent implements OnInit {
     const selectedDate = this.horariosForm.get('selectedDate')?.value;
     const selectedTime = this.horariosForm.get('selectedTime')?.value;
     
-    console.log('Updating form validation:', { selectedDate, selectedTime });
-    
     const newFormValid = !!(selectedDate && selectedTime);
     
     if (this.isFormValid !== newFormValid) {
       this.isFormValid = newFormValid;
-      console.log('Form is valid:', this.isFormValid);
     }
   }
 
@@ -226,25 +203,18 @@ export class HorariosDialogComponent implements OnInit {
     }
 
     this.isSubmitting = true;
-    console.log('=== INICIANDO GUARDADO DE HORARIOS ===');
-    console.log('Guardando horarios:', this.selectedDates.length, 'horarios para defensa', this.data.idDefensa);
 
     // Primero eliminar todos los horarios existentes (si los hay)
-    console.log('PASO 1: Eliminando horarios existentes...');
     this.defensasHorariosService.deleteHorariosByDefensa(this.data.idDefensa).subscribe({
       next: (response) => {
-        console.log('PASO 1 COMPLETADO: Horarios existentes eliminados:', response);
-        console.log('PASO 2: Iniciando creación de nuevos horarios...');
         // Luego crear los nuevos horarios
         this.createNewHorarios();
       },
       error: (error) => {
-        console.error('PASO 1 ERROR: Error eliminando horarios existentes:', error);
         // Si no hay horarios existentes, el error es normal, continuar
         if (error.status === 404) {
-          console.log('PASO 1 INFO: No había horarios existentes, continuando con la creación');
+          // Continuar con la creación
         }
-        console.log('PASO 2: Iniciando creación de nuevos horarios...');
         this.createNewHorarios();
       }
     });
@@ -254,14 +224,10 @@ export class HorariosDialogComponent implements OnInit {
     const total = this.selectedDates.length;
 
     if (total === 0) {
-      console.log('PASO 2 COMPLETADO: No hay horarios para crear');
       this.isSubmitting = false;
       this.dialogRef.close(true);
       return;
     }
-
-    console.log('PASO 2: Creando', total, 'nuevos horarios con INSERT');
-    console.log('Fechas a crear:', this.selectedDates);
 
     // Crear todos los horarios de forma secuencial para evitar problemas de concurrencia
     this.createHorariosSequentially(0);
@@ -270,7 +236,6 @@ export class HorariosDialogComponent implements OnInit {
   private createHorariosSequentially(index: number): void {
     if (index >= this.selectedDates.length) {
       // Todos los horarios creados
-      console.log('PASO 2 COMPLETADO: Todos los horarios creados con INSERT');
       this.isSubmitting = false;
       this.snackBar.open(`${this.selectedDates.length} horarios guardados correctamente`, 'Cerrar', { duration: 3000 });
       this.dialogRef.close(true);
@@ -297,19 +262,13 @@ export class HorariosDialogComponent implements OnInit {
       fecha: fechaToSend
     };
 
-    console.log(`PASO 2.${index + 1}: Llamando a createHorario (INSERT) para horario ${index + 1}/${this.selectedDates.length}`);
-    console.log('Fecha original (local):', dateTime.toLocaleString());
-    console.log('Fecha a enviar (UTC preservando hora local):', fechaToSend.toISOString());
-    console.log('Request:', request);
-
     this.defensasHorariosService.createHorario(request).subscribe({
       next: (response) => {
-        console.log(`PASO 2.${index + 1} COMPLETADO: Horario ${index + 1} creado con INSERT:`, response);
         // Crear el siguiente horario
         this.createHorariosSequentially(index + 1);
       },
       error: (error) => {
-        console.error(`PASO 2.${index + 1} ERROR: Error creando horario ${index + 1} con INSERT:`, error);
+        console.error(`Error creando horario ${index + 1}:`, error);
         this.snackBar.open(`Error al crear horario ${index + 1}`, 'Cerrar', { duration: 2000 });
         // Continuar con el siguiente horario
         this.createHorariosSequentially(index + 1);

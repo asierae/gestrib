@@ -23,15 +23,12 @@ export class ProfessorsByPositionService {
    * Obtiene profesores por posición (Presidente, Vocal, etc.) o todos los profesores si position está vacío
    */
   getProfessorsByPosition(position: string): Observable<ProfessorByPosition[]> {
-    console.log(`ProfessorsByPositionService: Obteniendo profesores con puesto: ${position || 'TODOS'}`);
-    
     return this.http.get<any[]>(`${this.apiUrl}/getAllUsuariosData`).pipe(
       map((response: any) => {
         // Si la respuesta es un string JSON, parsearlo
         const data = typeof response === 'string' ? JSON.parse(response) : response;
         
         if (!data || data.length === 0) {
-          console.log('ProfessorsByPositionService: No hay datos de usuarios');
           return [];
         }
         
@@ -51,7 +48,6 @@ export class ProfessorsByPositionService {
               fullName: `${nombre} ${apellidos}`.trim()
             };
           });
-          console.log(`ProfessorsByPositionService: Encontrados ${professors.length} profesores (TODOS)`);
         } else {
           // Filtrar profesores por posición (case insensitive)
           const positionLower = position.toLowerCase();
@@ -73,7 +69,6 @@ export class ProfessorsByPositionService {
                 fullName: `${nombre} ${apellidos}`.trim()
               };
             });
-          console.log(`ProfessorsByPositionService: Encontrados ${professors.length} profesores con puesto que contiene "${position}"`);
         }
         
         return professors;

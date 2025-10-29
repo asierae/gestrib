@@ -23,8 +23,6 @@ export class DefensasService {
    * Obtiene todas las defensas con filtros opcionales - Entry Point: get_defensas
    */
   getDefensas(filters?: DefensaFilters): Observable<DefensaResponse> {
-    console.log('Entry Point: get_defensas - Frontend sending filters:', filters);
-    
     // Preparar el cuerpo de la petición POST con solo los filtros
     const requestBody = filters || {};
 
@@ -40,9 +38,6 @@ export class DefensasService {
    * Obtiene una defensa por ID
    */
   getDefensaById(id: number): Observable<DefensaResponse> {
-    console.log(`DefensasService: Obteniendo defensa con ID: ${id}`);
-    console.log(`DefensasService: URL: ${this.baseUrl}/${id}`);
-    
     return this.http.get<DefensaResponse>(`${this.baseUrl}/${id}`)
       .pipe(
         timeout<DefensaResponse>(environment.timeout),
@@ -56,16 +51,8 @@ export class DefensasService {
    */
   createDefensa(defensa: CreateDefensaRequest): Observable<DefensaResponse> {
     // Mapear los datos del frontend al formato del backend
-    console.log('DefensasService - especialidadesVocal recibidas:', defensa.especialidadesVocal);
-    console.log('DefensasService - especialidadesSuplente recibidas:', defensa.especialidadesSuplente);
-    console.log('DefensasService - estudiante recibido:', defensa.estudiante);
-    console.log('DefensasService - estudiante.id:', defensa.estudiante?.id);
-    
     const especialidadesVocalSerialized = this.serializeSpecialtyArray(defensa.especialidadesVocal);
     const especialidadesSupleteSerialized = this.serializeSpecialtyArray(defensa.especialidadesSuplente);
-    
-    console.log('DefensasService - especialidadesVocal serializadas:', especialidadesVocalSerialized);
-    console.log('DefensasService - especialidadesSuplente serializadas:', especialidadesSupleteSerialized);
     
     const backendRequest = {
       IdCurso: this.mapCursoToId(defensa.curso),
@@ -92,8 +79,6 @@ export class DefensasService {
       UpdatedBy: null,
       IsActive: true
     };
-
-    console.log('Entry Point: generar_defensa - Frontend sending data:', backendRequest);
 
     return this.http.post<DefensaResponse>(this.baseUrl, backendRequest)
       .pipe(

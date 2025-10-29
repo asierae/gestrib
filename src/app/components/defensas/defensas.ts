@@ -133,23 +133,18 @@ export class DefensasComponent implements OnInit, OnDestroy {
   
   
   ngOnInit(): void {
-    console.log('DefensasComponent ngOnInit - Current language:', this.translationService.getCurrentLanguage());
-    
     // Suscribirse a cambios de traducciones
     this.translationsSubscription = this.translationService.getTranslations().subscribe((translations) => {
-      console.log('DefensasComponent - Translations loaded:', translations);
       this.cdr.markForCheck();
     });
     
     // Suscribirse a cambios de idioma
     this.languageSubscription = this.translationService.getLanguageChanges().subscribe(() => {
-      console.log('DefensasComponent - Language changed');
       this.cdr.markForCheck();
     });
     
     // Asegurar que las traducciones estén cargadas
     if (!this.translationService.areTranslationsLoaded()) {
-      console.log('DefensasComponent - Forcing translation load');
       this.translationService.setLanguage(this.translationService.getCurrentLanguage());
     }
     
@@ -177,7 +172,6 @@ export class DefensasComponent implements OnInit, OnDestroy {
       startWith(''),
       map(value => this.filterEstudiantes(value))
     ).subscribe(filtered => {
-      console.log('DefensasComponent: Autocomplete - filteredEstudiantes actualizado:', filtered);
       this.filteredEstudiantes = filtered;
     });
     
@@ -569,21 +563,17 @@ export class DefensasComponent implements OnInit, OnDestroy {
   
   detectarIdioma(): void {
     const titulo = this.defensaForm.get('titulo')?.value || '';
-    console.log('Detectando idioma para título:', titulo);
     
     if (titulo.trim().length < 3) {
-      console.log('Título muy corto, no detectando idioma');
       return; // No detectar idioma si el título es muy corto
     }
     
     // Usar Google Translate API para detectar el idioma
     this.googleTranslateService.detectLanguage(titulo).subscribe({
       next: (idiomaDetectado) => {
-        console.log('Idioma detectado por Google Translate:', idiomaDetectado);
         this.actualizarIdioma(idiomaDetectado);
       },
       error: (error) => {
-        console.warn('Error detectando idioma con Google Translate:', error);
         // Fallback a detección por palabras clave
         const idiomaFallback = this.detectarIdiomaPorPalabras(titulo);
         this.actualizarIdioma(idiomaFallback);
@@ -652,8 +642,6 @@ export class DefensasComponent implements OnInit, OnDestroy {
     const contadorEspanol = palabrasEspanol.filter(palabra => texto.includes(palabra)).length;
     const contadorEuskera = palabrasEuskera.filter(palabra => texto.includes(palabra)).length;
     
-    console.log('Conteo de palabras - Inglés:', contadorIngles, 'Español:', contadorEspanol, 'Euskera:', contadorEuskera);
-    
     // Si hay al menos 2 palabras de un idioma, considerarlo detectado
     if (contadorIngles >= 2) return 'en';
     if (contadorEspanol >= 2) return 'es';
@@ -666,13 +654,10 @@ export class DefensasComponent implements OnInit, OnDestroy {
   private actualizarIdioma(idiomaDetectado: string): void {
     const idiomaActual = this.defensaForm.get('idioma')?.value;
     if (idiomaDetectado && idiomaDetectado !== idiomaActual) {
-      console.log('Actualizando idioma de', idiomaActual, 'a', idiomaDetectado);
       this.defensaForm.patchValue({
         idioma: idiomaDetectado
       });
       this.cdr.detectChanges(); // Forzar detección de cambios
-    } else {
-      console.log('No se actualiza el idioma. Detectado:', idiomaDetectado, 'Actual:', idiomaActual);
     }
   }
   
@@ -780,11 +765,6 @@ export class DefensasComponent implements OnInit, OnDestroy {
       especialidadesSuplente: formValue.especialidadesSuplente
     };
     
-    console.log('DefensasComponent - Datos del formulario:');
-    console.log('  especialidadesVocal:', formValue.especialidadesVocal);
-    console.log('  especialidadesSuplente:', formValue.especialidadesSuplente);
-    console.log('DefensasComponent - CreateRequest completo:', createRequest);
-    
     this.defensasService.createDefensa(createRequest).subscribe({
       next: (response) => {
         this.isLoading.set(false);
@@ -881,7 +861,6 @@ export class DefensasComponent implements OnInit, OnDestroy {
       }
       
       const formValue = this.defensaForm.value;
-      console.log('Form values for PDF:', formValue);
       
       const pdf = new jsPDF({ unit: 'pt', format: 'a4' });
       

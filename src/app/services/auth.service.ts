@@ -134,7 +134,6 @@ export class AuthService {
    */
   private setUserLanguage(idIdioma: number): void {
     const language = this.idIdiomaToLanguage(idIdioma);
-    console.log(`Setting user language: idIdioma=${idIdioma}, language=${language}`);
     this.translationService.setLanguage(language);
   }
 
@@ -236,8 +235,6 @@ export class AuthService {
 
     // Configurar el idioma del usuario
     this.setUserLanguage(user.idIdioma);
-
-    console.log('Login successful:', user);
   }
 
   /**
@@ -292,8 +289,6 @@ export class AuthService {
 
     // Redirigir al login
     this.router.navigate(['/login']);
-    
-    console.log('Logout successful');
   }
 
   /**
@@ -305,7 +300,6 @@ export class AuthService {
     }).pipe(
       tap(response => {
         this.setToken(response.jwtToken);
-        console.log('Token refreshed successfully');
       }),
       catchError(error => {
         console.error('Token refresh failed:', error);

@@ -40,7 +40,6 @@ export class SchedulerComponent implements OnInit, OnChanges {
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['availableSchedules'] && this.availableSchedules && this.availableSchedules.length > 0) {
       this.configureCalendarMonth();
-      console.log('SchedulerComponent: Horarios disponibles actualizados:', this.availableSchedules.length);
       setTimeout(() => {
         this.cdr.detectChanges();
       }, 0);
@@ -159,8 +158,6 @@ export class SchedulerComponent implements OnInit, OnChanges {
       this.snackBar.open('Debe seleccionar un horario', 'Cerrar', { duration: 2000 });
       return;
     }
-    
-    console.log('Horario seleccionado:', this.selectedSchedule);
     
     // Emitir el evento con el horario seleccionado
     this.availabilitySubmitted.emit(this.selectedSchedule.fecha);

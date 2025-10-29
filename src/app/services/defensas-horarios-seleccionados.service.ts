@@ -57,9 +57,6 @@ export class DefensasHorariosSeleccionadosService {
    */
   createSeleccion(request: CreateSeleccionRequest): Observable<any> {
     const endpoint = `${this.baseUrl}/crear_seleccion_horario`;
-    console.log('DefensasHorariosSeleccionadosService: Creando selección:', request);
-    console.log('DefensasHorariosSeleccionadosService: URL:', endpoint);
-    
     return this.http.post<any>(endpoint, request)
       .pipe(
         timeout(environment.timeout),

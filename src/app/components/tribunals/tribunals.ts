@@ -139,7 +139,6 @@ export class TribunalsComponent implements OnInit {
     this.toDate = undefined;
     this.filterText = '';
     this.applyFilters();
-    console.log('TribunalsComponent: Filtros limpiados');
   }
 
   ngOnInit(): void {
@@ -159,9 +158,6 @@ export class TribunalsComponent implements OnInit {
   }
 
   loadDefensas(): void {
-    console.log('TribunalsComponent: Cargando defensas desde la API...');
-    console.log('TribunalsComponent: DefensasService disponible:', !!this.defensasService);
-    
     // Preparar filtros por defecto para obtener todas las defensas
     const filters = {
       page: 1,
@@ -170,37 +166,24 @@ export class TribunalsComponent implements OnInit {
     
     this.defensasService.getDefensas(filters).subscribe({
       next: (response: any) => {
-        console.log('TribunalsComponent: Respuesta completa recibida:', response);
-        console.log('TribunalsComponent: response.success:', response?.success);
-        console.log('TribunalsComponent: response.data:', response?.data);
-        console.log('TribunalsComponent: Tipo de response.data:', typeof response?.data);
-        console.log('TribunalsComponent: Array length:', Array.isArray(response?.data) ? response.data.length : 'No es array');
-        
         if (response && response.success && response.data && Array.isArray(response.data)) {
-          console.log('TribunalsComponent: Convirtiendo defensas a formato de tabla...');
-          console.log('TribunalsComponent: Primer elemento de response.data:', response.data[0]);
-          console.log('TribunalsComponent: Estructura del primer elemento:', JSON.stringify(response.data[0], null, 2));
-          
           // Convertir todas las defensas a formato de tabla
           let allDefensas = this.convertDefensasToTableFormat(response.data);
           
           // Filtrar defensas según el tipo de usuario
           this.data = this.filterDefensasByUser(allDefensas);
           
-          console.log('TribunalsComponent: Datos convertidos y filtrados:', this.data);
-          console.log('TribunalsComponent: Primer elemento convertido:', this.data[0]);
           this.applyFilters();
           this.snackBar.open(`Cargadas ${this.data.length} defensas`, 'Cerrar', { duration: 2000 });
         } else {
-          console.warn('TribunalsComponent: Respuesta sin datos válidos:', response);
+          console.warn('Respuesta sin datos válidos:', response);
           this.data = [];
           this.applyFilters();
           this.snackBar.open('No hay defensas registradas', 'Cerrar', { duration: 2000 });
         }
       },
       error: (error) => {
-        console.error('TribunalsComponent: Error cargando defensas:', error);
-        console.error('TribunalsComponent: Error details:', error.message, error.status);
+        console.error('Error cargando defensas:', error);
         this.snackBar.open('Error al cargar las defensas', 'Cerrar', { duration: 3000 });
         // Fallback a datos vacíos si hay error
         this.data = [];
@@ -219,22 +202,16 @@ export class TribunalsComponent implements OnInit {
     
     // Si no hay usuario autenticado, no mostrar nada
     if (!currentUser) {
-      console.log('TribunalsComponent: No hay usuario autenticado, no se muestran defensas');
       return [];
     }
     
     // Si es admin, mostrar todas las defensas
     if (this.isAdmin) {
-      console.log('TribunalsComponent: Usuario es admin, mostrando todas las defensas:', allDefensas.length);
       return allDefensas;
     }
     
     // Si es profesor, filtrar solo las defensas donde está involucrado
-    console.log('TribunalsComponent: Usuario es profesor, filtrando defensas...');
-    console.log('TribunalsComponent: Usuario actual:', currentUser.nombre, currentUser.apellidos);
-    
     const userFullName = `${currentUser.nombre} ${currentUser.apellidos}`.trim();
-    console.log('TribunalsComponent: Nombre completo del usuario:', userFullName);
     
     const filteredDefensas = allDefensas.filter(defensa => {
       const isDirector = defensa.director && defensa.director.includes(userFullName);
@@ -243,29 +220,9 @@ export class TribunalsComponent implements OnInit {
       const isVocal = defensa.vocal && defensa.vocal.includes(userFullName);
       const isReplacement = defensa.replacement && defensa.replacement.includes(userFullName);
       
-      const isInvolved = isDirector || isCodirector || isPresident || isVocal || isReplacement;
-      
-      if (isInvolved) {
-        console.log('TribunalsComponent: Defensa encontrada para el usuario:', {
-          id: defensa.id,
-          student: defensa.student,
-          director: defensa.director,
-          codirector: defensa.codirector,
-          president: defensa.president,
-          vocal: defensa.vocal,
-          replacement: defensa.replacement,
-          isDirector,
-          isCodirector,
-          isPresident,
-          isVocal,
-          isReplacement
-        });
-      }
-      
-      return isInvolved;
+      return isDirector || isCodirector || isPresident || isVocal || isReplacement;
     });
     
-    console.log('TribunalsComponent: Defensas filtradas para el profesor:', filteredDefensas.length);
     return filteredDefensas;
   }
 
@@ -286,16 +243,13 @@ export class TribunalsComponent implements OnInit {
   }
 
   loadProfessors(): void {
-    console.log('TribunalsComponent: Cargando todos los profesores...');
-    
     // Cargar todos los profesores para presidentes
     this.professorsByPositionService.getProfessorsByPosition('').subscribe({
       next: (allProfessors) => {
         this.presidents = allProfessors;
-        console.log('TribunalsComponent: Todos los profesores cargados para presidentes:', this.presidents.length);
       },
       error: (error) => {
-        console.error('TribunalsComponent: Error cargando profesores para presidentes:', error);
+        console.error('Error cargando profesores para presidentes:', error);
         this.presidents = [];
       }
     });
@@ -304,22 +258,16 @@ export class TribunalsComponent implements OnInit {
     this.professorsByPositionService.getProfessorsByPosition('').subscribe({
       next: (allProfessors) => {
         this.vocals = allProfessors;
-        console.log('TribunalsComponent: Todos los profesores cargados para vocales:', this.vocals.length);
       },
       error: (error) => {
-        console.error('TribunalsComponent: Error cargando profesores para vocales:', error);
+        console.error('Error cargando profesores para vocales:', error);
         this.vocals = [];
       }
     });
   }
 
   convertDefensasToTableFormat(defensas: any[]): any[] {
-    return defensas.map((defensa, index) => {
-      console.log(`TribunalsComponent: Procesando defensa ${index}:`, defensa);
-      console.log(`TribunalsComponent: Estudiante:`, defensa.Estudiante);
-      console.log(`TribunalsComponent: DirectorTribunal:`, defensa.DirectorTribunal);
-      console.log(`TribunalsComponent: Titulo:`, defensa.titulo);
-      
+    return defensas.map((defensa) => {
       // Mapear datos de la defensa al formato de la tabla
       const estudiante = defensa.estudiante || {};
       const director = defensa.directorTribunal || {};
@@ -327,50 +275,6 @@ export class TribunalsComponent implements OnInit {
       const vocal = defensa.vocalTribunal || {};
       const suplente = defensa.suplente || {};
       const presidente = defensa.presidente || {};
-      
-      return {
-        id: defensa.id,
-        student: `${estudiante.nombre || ''} ${estudiante.apellidos || ''}`.trim() || 'Sin nombre',
-        dni: estudiante.dni || 'Sin DNI',
-        title: defensa.titulo || 'Sin título',
-        specialty: defensa.especialidad || this.getSpecialtyFromId(defensa.idEspecialidad),
-        director: `${director.nombre || ''} ${director.apellidos || ''}`.trim() || '-',
-        codirector: codirector.nombre ? `${codirector.nombre} ${codirector.apellidos || ''}`.trim() : '-',
-        president: presidente.nombre ? `${presidente.nombre} ${presidente.apellidos || ''}`.trim() : '-',
-        vocal: vocal.nombre ? `${vocal.nombre} ${vocal.apellidos || ''}`.trim() : '-',
-        replacement: suplente.nombre ? `${suplente.nombre} ${suplente.apellidos || ''}`.trim() : '-',
-        field: this.getFieldFromEspecialidad(defensa.idEspecialidad),
-        language: this.getLanguageCode(defensa.idioma),
-        date: defensa.fechaDefensa ? this.formatDate(defensa.fechaDefensa) : '',
-        time: defensa.horaDefensa ? this.formatTime(defensa.horaDefensa) : '',
-        place: defensa.lugarDefensa || defensa.lugar || 'Por asignar',
-        status: this.mapStatus(defensa.estado),
-        // Datos adicionales
-        curso: defensa.curso,
-        grado: defensa.grado,
-        especialidad: defensa.especialidad,
-        idioma: defensa.idioma,
-        comentarios: defensa.comentariosDireccion,
-        especialidadesVocal: defensa.especialidadesVocal,
-        especialidadesSuplente: defensa.especialidadesSuplente,
-        created: defensa.created,
-        horariosCount: defensa.horariosCount || 0,
-        horariosSeleccionados: defensa.horariosSeleccionados || '',
-        seleccionHorarios: defensa.horariosSeleccionados || '', // Columna para la tabla
-        // Emails de los profesores para las notificaciones
-        codirectorEmail: codirector.email || '',
-        vocalEmail: vocal.email || '',
-        replacementEmail: suplente.email || '',
-        presidenteEmail: presidente.email || '',
-        directorEmail: director.email || ''
-      };
-      
-      console.log(`TribunalsComponent: Resultado mapeado para defensa ${index}:`, {
-        id: defensa.id,
-        student: `${estudiante.nombre || ''} ${estudiante.apellidos || ''}`.trim() || 'Sin nombre',
-        title: defensa.titulo || 'Sin título',
-        director: `${director.nombre || ''} ${director.apellidos || ''}`.trim() || '-'
-      });
       
       return {
         id: defensa.id,
@@ -491,11 +395,6 @@ export class TribunalsComponent implements OnInit {
   }
 
   applyFilters(): void {
-    console.log('TribunalsComponent: Aplicando filtros...');
-    console.log('TribunalsComponent: fromDate:', this.fromDate);
-    console.log('TribunalsComponent: toDate:', this.toDate);
-    console.log('TribunalsComponent: filterText:', this.filterText);
-    
     const inRange = (createdDate: string | Date) => {
       if (!createdDate) return true; // Si no hay fecha de creación, incluir el registro
       
@@ -506,13 +405,6 @@ export class TribunalsComponent implements OnInit {
       const fromDate = this.fromDate ? new Date(this.fromDate.getFullYear(), this.fromDate.getMonth(), this.fromDate.getDate()) : null;
       const toDate = this.toDate ? new Date(this.toDate.getFullYear(), this.toDate.getMonth(), this.toDate.getDate(), 23, 59, 59) : null;
       const recordDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
-      
-      console.log('TribunalsComponent: Comparando fecha:', {
-        createdDate,
-        recordDate: recordDate.toISOString(),
-        fromDate: fromDate?.toISOString(),
-        toDate: toDate?.toISOString()
-      });
       
       if (fromDate && recordDate < fromDate) return false;
       if (toDate && recordDate > toDate) return false;
@@ -542,12 +434,6 @@ export class TribunalsComponent implements OnInit {
     this.filteredData = result;
     // Forzar la detección de cambios para actualizar la tabla
     this.cdr.detectChanges();
-    console.log('TribunalsComponent: Filtros aplicados. Resultados:', {
-      totalData: this.data.length,
-      filteredData: this.filteredData.length,
-      fromDate: this.fromDate,
-      toDate: this.toDate
-    });
   }
 
   onPageChange(event: any): void {
@@ -572,14 +458,8 @@ export class TribunalsComponent implements OnInit {
 
   onStatusChange(row: any, newStatus: string): void {
     if (row.id) {
-      console.log('TribunalsComponent: Cambiando estado de defensa:', {
-        id: row.id,
-        newStatus: newStatus
-      });
-      
       this.defensasService.updateEstado(row.id, newStatus).subscribe({
         next: (response) => {
-          console.log('TribunalsComponent: Respuesta del servidor:', response);
           // El backend devuelve { message: "..." } en lugar de { success: true }
           if (response && (response.success || response.message)) {
             // Actualizar el estado en los datos locales
@@ -747,14 +627,8 @@ export class TribunalsComponent implements OnInit {
 
   onPlaceChange(row: any, newPlace: string): void {
     if (row.id) {
-      console.log('TribunalsComponent: Cambiando lugar de defensa:', {
-        id: row.id,
-        newPlace: newPlace
-      });
-      
       this.defensasService.updateLugar(row.id, newPlace).subscribe({
         next: (response) => {
-          console.log('TribunalsComponent: Respuesta del servidor:', response);
           if (response && (response.success || response.message)) {
             // Actualizar el lugar en los datos locales
             const dataIndex = this.data.findIndex(item => item.id === row.id);
@@ -889,7 +763,6 @@ export class TribunalsComponent implements OnInit {
         // Eliminar la defensa usando el servicio
         this.defensasService.deleteDefensa(row.id).subscribe({
           next: (response) => {
-            console.log('TribunalsComponent: Respuesta del servidor:', response);
             if (response && (response.success || response.message)) {
               // Eliminar el registro de los datos locales
               const originalIndex = this.data.findIndex(item => item.id === row.id);
@@ -1042,10 +915,6 @@ export class TribunalsComponent implements OnInit {
   }
 
   openHorariosDialog(row: any): void {
-    console.log('=== ABRIENDO DIÁLOGO DE HORARIOS ===');
-    console.log('Row data:', row);
-    console.log('Horarios seleccionados:', row.horariosSeleccionados);
-    
     const dialogRef = this.dialog.open(HorariosDialogComponent, {
       width: 'auto',
       maxWidth: '90vw',
@@ -1067,23 +936,8 @@ export class TribunalsComponent implements OnInit {
   }
 
   notificarHorarios(row: any): void {
-    console.log('=== NOTIFICAR HORARIOS - CLICK DETECTADO ===');
-    console.log('Row data:', row);
-    console.log('Row ID:', row.id);
-    console.log('Horarios count:', row.horariosCount);
-    console.log('Horarios seleccionados:', row.horariosSeleccionados);
-    console.log('Emails disponibles:', {
-      director: row.directorEmail,
-      presidente: row.presidenteEmail,
-      vocal: row.vocalEmail
-    });
-    
-    // Verificar que el servicio esté disponible
-    console.log('NotificacionHorariosService disponible:', !!this.notificacionHorariosService);
-    
     // Verificar que la defensa tenga horarios configurados
     if (!row.horariosCount || row.horariosCount === 0) {
-      console.log('No hay horarios configurados, mostrando mensaje de error');
       this.snackBar.open('Debe configurar horarios antes de enviar la notificación', 'Cerrar', { duration: 3000 });
       return;
     }
@@ -1091,7 +945,6 @@ export class TribunalsComponent implements OnInit {
     // Verificar que haya al menos un email disponible (presidente, director, vocal)
     const emailsDisponibles = [row.directorEmail, row.presidenteEmail, row.vocalEmail].filter(email => email && email.trim() !== '');
     if (emailsDisponibles.length === 0) {
-      console.log('No hay emails disponibles para enviar notificación');
       this.snackBar.open('No hay emails de presidente, director o vocal disponibles para enviar la notificación', 'Cerrar', { duration: 3000 });
       return;
     }
@@ -1106,15 +959,12 @@ export class TribunalsComponent implements OnInit {
       emailReemplazo: row.presidenteEmail || '' // Presidente en lugar de reemplazo
     };
 
-    console.log('Enviando solicitud de notificación:', request);
-
     // Mostrar mensaje de carga
     this.snackBar.open('Enviando notificación...', 'Cerrar', { duration: 2000 });
 
     // Enviar la notificación
     this.notificacionHorariosService.notificarHorarios(request).subscribe({
       next: (response) => {
-        console.log('Respuesta de notificación:', response);
         if (response.success) {
           const destinatarios = response.destinatarios?.length || emailsDisponibles.length;
           this.snackBar.open(
@@ -1172,17 +1022,11 @@ export class TribunalsComponent implements OnInit {
 
   onPresidentChange(row: any, presidentId: number): void {
     if (row.id) {
-      console.log('TribunalsComponent: Cambiando presidente de defensa:', {
-        id: row.id,
-        newPresidentId: presidentId
-      });
-      
       const president = this.presidents.find(p => p.id === presidentId);
       if (president) {
         // Llamar al servicio para actualizar en la base de datos
         this.defensasService.updatePresidente(row.id, presidentId).subscribe({
           next: (response) => {
-            console.log('TribunalsComponent: Presidente actualizado en BD:', response);
             // Actualizar localmente
             row.president = president.fullName;
             // Forzar detección de cambios
@@ -1190,7 +1034,7 @@ export class TribunalsComponent implements OnInit {
             this.snackBar.open(`Presidente cambiado a: ${president.fullName}`, 'Cerrar', { duration: 2000 });
           },
           error: (error) => {
-            console.error('TribunalsComponent: Error actualizando presidente:', error);
+            console.error('Error actualizando presidente:', error);
             this.snackBar.open('Error al actualizar el presidente', 'Cerrar', { duration: 3000 });
           }
         });
@@ -1239,17 +1083,11 @@ export class TribunalsComponent implements OnInit {
 
   onVocalChange(row: any, vocalId: number): void {
     if (row.id) {
-      console.log('TribunalsComponent: Cambiando vocal de defensa:', {
-        id: row.id,
-        newVocalId: vocalId
-      });
-      
       const vocal = this.vocals.find(v => v.id === vocalId);
       if (vocal) {
         // Llamar al servicio para actualizar en la base de datos
         this.defensasService.updateVocal(row.id, vocalId).subscribe({
           next: (response) => {
-            console.log('TribunalsComponent: Vocal actualizado en BD:', response);
             // Actualizar localmente
             row.vocal = vocal.fullName;
             // Forzar detección de cambios
@@ -1257,7 +1095,7 @@ export class TribunalsComponent implements OnInit {
             this.snackBar.open(`Vocal cambiado a: ${vocal.fullName}`, 'Cerrar', { duration: 2000 });
           },
           error: (error) => {
-            console.error('TribunalsComponent: Error actualizando vocal:', error);
+            console.error('Error actualizando vocal:', error);
             this.snackBar.open('Error al actualizar el vocal', 'Cerrar', { duration: 3000 });
           }
         });
@@ -1313,17 +1151,11 @@ export class TribunalsComponent implements OnInit {
 
   onCodirectorChange(row: any, codirectorId: number): void {
     if (row.id) {
-      console.log('TribunalsComponent: Cambiando codirector de defensa:', {
-        id: row.id,
-        newCodirectorId: codirectorId
-      });
-      
       const codirector = this.presidents.find((c: any) => c.id === codirectorId);
       if (codirector) {
         // Llamar al servicio para actualizar en la base de datos
         this.defensasService.updateCodirector(row.id, codirectorId).subscribe({
           next: (response) => {
-            console.log('TribunalsComponent: Codirector actualizado en BD:', response);
             // Actualizar localmente
             row.codirector = codirector.fullName;
             // Forzar detección de cambios
@@ -1331,7 +1163,7 @@ export class TribunalsComponent implements OnInit {
             this.snackBar.open(`Codirector cambiado a: ${codirector.fullName}`, 'Cerrar', { duration: 2000 });
           },
           error: (error) => {
-            console.error('TribunalsComponent: Error actualizando codirector:', error);
+            console.error('Error actualizando codirector:', error);
             this.snackBar.open('Error al actualizar el codirector', 'Cerrar', { duration: 3000 });
           }
         });
@@ -1381,17 +1213,11 @@ export class TribunalsComponent implements OnInit {
 
   onReemplazoChange(row: any, reemplazoId: number): void {
     if (row.id) {
-      console.log('TribunalsComponent: Cambiando reemplazo de defensa:', {
-        id: row.id,
-        newReemplazoId: reemplazoId
-      });
-      
       const reemplazo = this.presidents.find((r: any) => r.id === reemplazoId);
       if (reemplazo) {
         // Llamar al servicio para actualizar en la base de datos
         this.defensasService.updateReemplazo(row.id, reemplazoId).subscribe({
           next: (response) => {
-            console.log('TribunalsComponent: Reemplazo actualizado en BD:', response);
             // Actualizar localmente
             row.replacement = reemplazo.fullName;
             // Forzar detección de cambios
@@ -1399,7 +1225,7 @@ export class TribunalsComponent implements OnInit {
             this.snackBar.open(`Reemplazo cambiado a: ${reemplazo.fullName}`, 'Cerrar', { duration: 2000 });
           },
           error: (error) => {
-            console.error('TribunalsComponent: Error actualizando reemplazo:', error);
+            console.error('Error actualizando reemplazo:', error);
             this.snackBar.open('Error al actualizar el reemplazo', 'Cerrar', { duration: 3000 });
           }
         });
@@ -1512,19 +1338,12 @@ export class TribunalsComponent implements OnInit {
 
   onDateChange(row: any, date: Date | null): void {
     if (row.id && date) {
-      console.log('TribunalsComponent: Cambiando fecha de defensa:', {
-        id: row.id,
-        newDate: date,
-        currentTime: row.time
-      });
-      
       // Preservar la hora actual al actualizar la fecha
       const currentTime = row.time || null;
       
       // Llamar al servicio para actualizar en la base de datos
       this.defensasService.updateProgramacion(row.id, date, currentTime, null).subscribe({
         next: (response) => {
-          console.log('TribunalsComponent: Fecha actualizada en BD:', response);
           // Actualizar localmente
           row.date = this.formatDate(date.toISOString());
           // Mantener la hora actual
@@ -1536,7 +1355,7 @@ export class TribunalsComponent implements OnInit {
           this.snackBar.open(`Fecha cambiada a: ${this.formatDate(date.toISOString())}`, 'Cerrar', { duration: 2000 });
         },
         error: (error) => {
-          console.error('TribunalsComponent: Error actualizando fecha:', error);
+          console.error('Error actualizando fecha:', error);
           this.snackBar.open('Error al actualizar la fecha', 'Cerrar', { duration: 3000 });
         }
       });
@@ -1548,19 +1367,12 @@ export class TribunalsComponent implements OnInit {
 
   onTimeChange(row: any, timeString: string): void {
     if (row.id && timeString) {
-      console.log('TribunalsComponent: Cambiando hora de defensa:', {
-        id: row.id,
-        newTime: timeString,
-        currentDate: row.date
-      });
-      
       // Preservar la fecha actual al actualizar la hora
       const currentDate = row.date ? new Date(row.date) : null;
       
       // Llamar al servicio para actualizar en la base de datos
       this.defensasService.updateProgramacion(row.id, currentDate, timeString, null).subscribe({
         next: (response) => {
-          console.log('TribunalsComponent: Hora actualizada en BD:', response);
           // Actualizar localmente
           row.time = this.formatTime(timeString);
           // Mantener la fecha actual
@@ -1572,7 +1384,7 @@ export class TribunalsComponent implements OnInit {
           this.snackBar.open(`Hora cambiada a: ${this.formatTime(timeString)}`, 'Cerrar', { duration: 2000 });
         },
         error: (error) => {
-          console.error('TribunalsComponent: Error actualizando hora:', error);
+          console.error('Error actualizando hora:', error);
           this.snackBar.open('Error al actualizar la hora', 'Cerrar', { duration: 3000 });
         }
       });
@@ -1584,15 +1396,10 @@ export class TribunalsComponent implements OnInit {
 
   // Navegar al componente de selección de horarios
   goToSeleccionHorarios(row: any): void {
-    console.log('TribunalsComponent: goToSeleccionHorarios called with row:', row);
-    console.log('TribunalsComponent: Row ID:', row.id);
-    console.log('TribunalsComponent: Can select horarios:', this.canSelectHorarios(row));
-    
     if (row.id) {
-      console.log('TribunalsComponent: Navigating to /defensa-horarios/' + row.id);
       this.router.navigate(['/defensa-horarios', row.id]);
     } else {
-      console.error('TribunalsComponent: No row ID provided');
+      console.error('No row ID provided');
       this.snackBar.open('Error: No se pudo obtener el ID de la defensa', 'Cerrar', { duration: 3000 });
     }
   }
