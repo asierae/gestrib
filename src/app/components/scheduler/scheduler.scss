@@ -45,15 +45,30 @@
   justify-content: space-between;
   margin-bottom: 2rem;
   padding: 0 1rem;
+  gap: 1rem;
   
   .nav-button {
     background: var(--neutral-100);
     color: var(--neutral-600);
     transition: all 0.2s ease;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    
+    mat-icon {
+      font-size: 24px;
+      width: 24px;
+      height: 24px;
+    }
     
     &:hover {
-      background: var(--neutral-200);
+      background: var(--primary-100);
       color: var(--primary-700);
+      transform: scale(1.1);
+    }
+    
+    &:active {
+      transform: scale(0.95);
     }
   }
   
@@ -62,6 +77,8 @@
     font-weight: 600;
     color: var(--text-primary);
     margin: 0;
+    flex: 1;
+    text-align: center;
   }
 }
 
@@ -340,14 +357,22 @@
 
 .calendar-day {
   &.available {
-    background: #e8f5e8 !important;
+    background: linear-gradient(135deg, #e8f5e8 0%, #c8e6c9 100%) !important;
     color: #2e7d32 !important;
     font-weight: 600;
     border: 2px solid #4caf50 !important;
+    box-shadow: 0 2px 6px rgba(76, 175, 80, 0.3);
 
     &:hover {
-      background: #c8e6c9 !important;
+      background: linear-gradient(135deg, #c8e6c9 0%, #a5d6a7 100%) !important;
       transform: scale(1.05);
+      box-shadow: 0 4px 12px rgba(76, 175, 80, 0.4);
+    }
+    
+    // Asegurar que el estilo disponible tenga prioridad
+    &.current-month {
+      background: linear-gradient(135deg, #e8f5e8 0%, #c8e6c9 100%) !important;
+      color: #2e7d32 !important;
     }
   }
 }

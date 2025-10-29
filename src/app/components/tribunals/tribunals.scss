@@ -468,6 +468,7 @@
       user-select: none;
       text-transform: uppercase;
       letter-spacing: 0.5px;
+      cursor: pointer;
       
       &:hover {
         transform: translateY(-2px) scale(1.05);
@@ -508,6 +509,15 @@
       transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       text-transform: none;
       letter-spacing: 0.025em;
+      
+      &.status-chip-clickable {
+        cursor: pointer;
+        
+        &:hover {
+          transform: translateY(-1px) scale(1.05);
+          box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+      }
       
       // Override Material Design colors with softer tones
       &.mat-accent {
@@ -660,26 +670,41 @@
     padding: 8px 12px;
     border: 1px solid transparent;
     border-radius: 6px;
-    cursor: pointer;
     transition: all 0.2s ease;
     background: #f8fafc;
     min-height: 40px;
     width: 100%;
     
-    &:hover {
-      background: #e2e8f0;
-      border-color: #cbd5e1;
-      transform: translateY(-1px);
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    &.clickable {
+      cursor: pointer;
       
-      .edit-icon {
-        opacity: 1;
+      &:hover {
+        background: #e2e8f0;
+        border-color: #cbd5e1;
+        transform: translateY(-1px);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        
+        .edit-icon {
+          opacity: 1;
+        }
+      }
+      
+      &:active {
+        transform: translateY(0);
+        box-shadow: 0 1px 4px rgba(0,0,0,0.1);
       }
     }
     
-    &:active {
-      transform: translateY(0);
-      box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+    &.not-editable {
+      cursor: default;
+      opacity: 0.7;
+      
+      &:hover {
+        background: #f8fafc;
+        border-color: transparent;
+        transform: none;
+        box-shadow: none;
+      }
     }
     
     .edit-icon {
@@ -733,16 +758,38 @@
     padding: 8px 12px;
     border: 1px solid transparent;
     border-radius: 6px;
-    cursor: pointer;
     transition: all 0.2s ease;
     background: #f8fafc;
     
-    &:hover {
-      background: #e2e8f0;
-      border-color: #cbd5e1;
+    &.clickable {
+      cursor: pointer;
       
-      .edit-icon {
-        opacity: 1;
+      &:hover {
+        background: #e2e8f0;
+        border-color: #cbd5e1;
+        transform: translateY(-1px);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        
+        .edit-icon {
+          opacity: 1;
+        }
+      }
+      
+      &:active {
+        transform: translateY(0);
+        box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+      }
+    }
+    
+    &.not-editable {
+      cursor: default;
+      opacity: 0.7;
+      
+      &:hover {
+        background: #f8fafc;
+        border-color: transparent;
+        transform: none;
+        box-shadow: none;
       }
     }
     

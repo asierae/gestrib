@@ -40,6 +40,7 @@ export class SchedulerComponent implements OnInit, OnChanges {
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['availableSchedules'] && this.availableSchedules && this.availableSchedules.length > 0) {
       this.configureCalendarMonth();
+      console.log('SchedulerComponent: Horarios disponibles actualizados:', this.availableSchedules.length);
       setTimeout(() => {
         this.cdr.detectChanges();
       }, 0);
@@ -91,7 +92,12 @@ export class SchedulerComponent implements OnInit, OnChanges {
   }
   
   getDayKey(date: Date): string {
-    return date.toISOString().split('T')[0];
+    // Normalizar la fecha a medianoche en hora local para evitar problemas de zona horaria
+    const normalizedDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+    const year = normalizedDate.getFullYear();
+    const month = String(normalizedDate.getMonth() + 1).padStart(2, '0');
+    const day = String(normalizedDate.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
   }
   
   isCurrentMonth(date: Date): boolean {
@@ -105,10 +111,24 @@ export class SchedulerComponent implements OnInit, OnChanges {
   }
   
   isAvailable(date: Date): boolean {
+    if (!this.availableSchedules || this.availableSchedules.length === 0) {
+      return false;
+    }
+    
+    if (!this.isCurrentMonth(date)) {
+      return false;
+    }
+    
     const dayKey = this.getDayKey(date);
-    return this.availableSchedules.some(schedule => 
-      this.getDayKey(new Date(schedule.fecha)) === dayKey
-    );
+    
+    return this.availableSchedules.some(schedule => {
+      if (!schedule || !schedule.fecha) {
+        return false;
+      }
+      const scheduleDate = new Date(schedule.fecha);
+      const scheduleDayKey = this.getDayKey(scheduleDate);
+      return scheduleDayKey === dayKey;
+    });
   }
   
   toggleDay(date: Date): void {
@@ -126,10 +146,12 @@ export class SchedulerComponent implements OnInit, OnChanges {
   
   previousMonth(): void {
     this.currentMonth = new Date(this.currentMonth.getFullYear(), this.currentMonth.getMonth() - 1);
+    this.cdr.detectChanges();
   }
   
   nextMonth(): void {
     this.currentMonth = new Date(this.currentMonth.getFullYear(), this.currentMonth.getMonth() + 1);
+    this.cdr.detectChanges();
   }
   
   sendAvailability(): void {

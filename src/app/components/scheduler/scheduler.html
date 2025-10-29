@@ -15,9 +15,15 @@
         <div class="calendar-section">
           <!-- Month Navigation -->
           <div class="calendar-header">
+            <button mat-icon-button class="nav-button" (click)="previousMonth()" title="Mes anterior">
+              <mat-icon>chevron_left</mat-icon>
+            </button>
             <h2 class="month-title">
               {{ monthNames[currentMonth.getMonth()] }} {{ currentMonth.getFullYear() }}
             </h2>
+            <button mat-icon-button class="nav-button" (click)="nextMonth()" title="Mes siguiente">
+              <mat-icon>chevron_right</mat-icon>
+            </button>
           </div>
           
           <!-- Calendar Grid -->

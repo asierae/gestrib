@@ -198,9 +198,13 @@
     <ng-container matColumnDef="date">
       <th mat-header-cell *matHeaderCellDef mat-sort-header="date">{{ 'tribunals.date' | translate }}</th>
       <td mat-cell *matCellDef="let row" class="date-cell" [attr.data-row-key]="getRowKey(row)">
-        <div *ngIf="!isEditingDate(row)" class="date-display" (click)="toggleDateEdit(row)">
+        <div *ngIf="!isEditingDate(row)" 
+             class="date-display" 
+             [class.clickable]="canEditScheduleDetails(row)"
+             [class.not-editable]="!canEditScheduleDetails(row)"
+             (click)="canEditScheduleDetails(row) && toggleDateEdit(row)">
           {{ row.date || 'Sin fecha' }}
-          <mat-icon class="edit-icon">edit</mat-icon>
+          <mat-icon *ngIf="canEditScheduleDetails(row)" class="edit-icon">edit</mat-icon>
         </div>
         <div *ngIf="isEditingDate(row)" class="date-edit">
           <mat-form-field appearance="outline" class="date-picker">
@@ -222,9 +226,13 @@
     <ng-container matColumnDef="time">
       <th mat-header-cell *matHeaderCellDef mat-sort-header="time">{{ 'tribunals.time' | translate }}</th>
       <td mat-cell *matCellDef="let row" class="time-cell" [attr.data-row-key]="getRowKey(row)">
-        <div *ngIf="!isEditingTime(row)" class="time-display" (click)="toggleTimeEdit(row)">
+        <div *ngIf="!isEditingTime(row)" 
+             class="time-display" 
+             [class.clickable]="canEditScheduleDetails(row)"
+             [class.not-editable]="!canEditScheduleDetails(row)"
+             (click)="canEditScheduleDetails(row) && toggleTimeEdit(row)">
           {{ row.time || 'Sin hora' }}
-          <mat-icon class="edit-icon">edit</mat-icon>
+          <mat-icon *ngIf="canEditScheduleDetails(row)" class="edit-icon">edit</mat-icon>
         </div>
         <div *ngIf="isEditingTime(row)" class="time-edit">
           <mat-form-field appearance="outline" class="time-picker">
@@ -245,9 +253,13 @@
     <ng-container matColumnDef="place">
       <th mat-header-cell *matHeaderCellDef mat-sort-header="place">{{ 'tribunals.place' | translate }}</th>
       <td mat-cell *matCellDef="let row" class="place-cell" [attr.data-row-key]="getRowKey(row)">
-        <div *ngIf="!isEditingPlace(row)" class="place-display" (click)="togglePlaceEdit(row)">
+        <div *ngIf="!isEditingPlace(row)" 
+             class="place-display" 
+             [class.clickable]="canEditScheduleDetails(row)"
+             [class.not-editable]="!canEditScheduleDetails(row)"
+             (click)="canEditScheduleDetails(row) && togglePlaceEdit(row)">
           {{ row.place || ('tribunals.notAssigned' | translate) }}
-          <mat-icon class="edit-icon">edit</mat-icon>
+          <mat-icon *ngIf="canEditScheduleDetails(row)" class="edit-icon">edit</mat-icon>
         </div>
         <div *ngIf="isEditingPlace(row)" class="place-edit">
           <mat-form-field appearance="outline" class="place-input">
@@ -316,23 +328,24 @@
       <th mat-header-cell *matHeaderCellDef mat-sort-header="status">{{ 'tribunals.status' | translate }}</th>
       <td mat-cell *matCellDef="let row" class="status-cell">
         <!-- Show chip by default -->
-        <div *ngIf="!isEditingStatus(row)" class="status-chip-container">
+        <div *ngIf="!isEditingStatus(row)" class="status-chip-container" (click)="toggleStatusEdit(row, $event)">
           <mat-chip 
             [color]="getStatusColor(row.status)" 
             selected 
-            class="status-chip-clickable"
-            (click)="toggleStatusEdit(row)">
+            class="status-chip-clickable">
             {{ row.status }}
           </mat-chip>
         </div>
         
         <!-- Show dropdown when editing -->
-        <div *ngIf="isEditingStatus(row)" class="status-dropdown-container" [attr.data-row-key]="getRowKey(row)">
+        <div *ngIf="isEditingStatus(row)" class="status-dropdown-container" [attr.data-row-key]="getRowKey(row)" (click)="$event.stopPropagation()">
           <mat-form-field appearance="outline" class="status-select">
             <mat-select 
               [value]="row.status" 
               (selectionChange)="onStatusChange(row, $event.value)"
-              class="status-dropdown">
+              (openedChange)="onStatusSelectOpened($event, row)"
+              class="status-dropdown"
+              #statusSelect>
               <mat-option *ngFor="let status of statusOptions" [value]="status">
                 <mat-chip [color]="getStatusColor(status)" selected class="status-chip-option">
                   {{ status }}

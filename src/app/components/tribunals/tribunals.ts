@@ -106,6 +106,28 @@ export class TribunalsComponent implements OnInit {
     return isDirector || isVocal || isPresident;
   }
 
+  // Verificar si el usuario puede editar fecha, hora y lugar (solo presidente o admin)
+  canEditScheduleDetails(row: any): boolean {
+    // Si es admin, puede editar
+    if (this.isAdmin) {
+      return true;
+    }
+    
+    const currentUser = this.authService.currentUser();
+    if (!currentUser || !row.president) return false;
+    
+    // Verificar si es presidente de la defensa
+    // Usar comparación flexible con includes para manejar variaciones en formato
+    const userFullName = `${currentUser.nombre} ${currentUser.apellidos}`.trim();
+    const presidentName = row.president.trim();
+    
+    // Comparación directa o usando includes (más flexible)
+    const isPresident = presidentName === userFullName || 
+                        presidentName.includes(currentUser.nombre);
+    
+    return isPresident;
+  }
+
   // Verificar si hay filtros activos
   hasActiveFilters(): boolean {
     return !!(this.fromDate || this.toDate || (this.filterText && this.filterText.trim() !== ''));
@@ -607,19 +629,116 @@ export class TribunalsComponent implements OnInit {
     return row.id ? `id-${row.id}` : `${row.student}-${row.dni}-${row.date}`;
   }
 
-  toggleStatusEdit(row: any): void {
+  toggleStatusEdit(row: any, event?: Event): void {
+    if (event) {
+      event.stopPropagation();
+      event.preventDefault();
+    }
+    
     const key = this.getRowKey(row);
     this.editingStatus[key] = !this.editingStatus[key];
     
-    // Auto-focus the select when it opens
+    // Auto-open the select when it becomes visible
     if (this.editingStatus[key]) {
+      this.cdr.detectChanges();
+      
+      // Use multiple attempts with increasing delay to ensure the DOM is ready
+      // First attempt: quick trigger
       setTimeout(() => {
-        const selectElement = document.querySelector(`[data-row-key="${key}"] .mat-mdc-select-trigger`) as HTMLElement;
-        if (selectElement) {
-          selectElement.click();
+        this.openStatusSelect(key);
+      }, 50);
+      
+      // Second attempt: after DOM should be fully rendered
+      setTimeout(() => {
+        if (!this.isStatusSelectOpen(key)) {
+          this.openStatusSelect(key);
         }
-      }, 100);
+      }, 200);
+      
+      // Third attempt: last resort
+      setTimeout(() => {
+        if (!this.isStatusSelectOpen(key)) {
+          this.openStatusSelect(key);
+        }
+      }, 400);
     }
+  }
+  
+  onStatusSelectOpened(opened: boolean, row: any): void {
+    // This callback confirms the select was opened/closed
+    if (!opened) {
+      // If closed, also close the editing mode
+      const key = this.getRowKey(row);
+      if (this.editingStatus[key]) {
+        this.editingStatus[key] = false;
+        this.cdr.detectChanges();
+      }
+    }
+  }
+  
+  private openStatusSelect(key: string): void {
+    // Try different selectors to find the mat-select trigger
+    const selectors = [
+      `[data-row-key="${key}"] .mat-mdc-select-trigger`,
+      `[data-row-key="${key}"] .status-select .mat-mdc-select-trigger`,
+      `[data-row-key="${key}"] .status-dropdown .mat-mdc-select-trigger`,
+      `[data-row-key="${key}"] mat-select .mat-mdc-select-trigger`,
+      `[data-row-key="${key}"] .mat-select-trigger`,
+      `[data-row-key="${key}"] mat-select .mat-select-trigger`
+    ];
+    
+    for (const selector of selectors) {
+      const element = document.querySelector(selector) as HTMLElement;
+      if (element && element.offsetParent !== null) { // Check if element is visible
+        // Create and dispatch click event
+        const clickEvent = new MouseEvent('mousedown', {
+          bubbles: true,
+          cancelable: true,
+          view: window,
+          button: 0
+        });
+        element.dispatchEvent(clickEvent);
+        
+        // Also try click event
+        setTimeout(() => {
+          element.click();
+        }, 10);
+        
+        // And try focus
+        element.focus();
+        return;
+      }
+    }
+    
+    // Fallback: try to find mat-select and trigger programmatically
+    const matSelectElements = document.querySelectorAll(`[data-row-key="${key}"] mat-select`);
+    for (let i = 0; i < matSelectElements.length; i++) {
+      const matSelect = matSelectElements[i] as any;
+      if (matSelect && typeof matSelect.open === 'function') {
+        try {
+          matSelect.open();
+        } catch (e) {
+          console.error('Error opening select programmatically:', e);
+        }
+        return;
+      }
+    }
+  }
+  
+  private isStatusSelectOpen(key: string): boolean {
+    // Check if the select panel is visible
+    const panels = document.querySelectorAll('.mat-mdc-select-panel, .mat-select-panel, .cdk-overlay-pane');
+    for (let i = 0; i < panels.length; i++) {
+      const panel = panels[i] as HTMLElement;
+      if (panel && (panel.classList.contains('mat-mdc-select-panel') || 
+                    panel.classList.contains('mat-select-panel'))) {
+        const style = window.getComputedStyle(panel);
+        if (style.display !== 'none' && style.visibility !== 'hidden') {
+          return true;
+        }
+      }
+    }
+    return false;
   }
 
   isEditingStatus(row: any): boolean {
@@ -677,6 +796,12 @@ export class TribunalsComponent implements OnInit {
   }
 
   togglePlaceEdit(row: any): void {
+    // Verificar permisos antes de permitir edición
+    if (!this.canEditScheduleDetails(row)) {
+      this.snackBar.open('Solo el presidente de la defensa o un administrador puede editar el lugar', 'Cerrar', { duration: 3000 });
+      return;
+    }
+    
     const key = this.getRowKey(row);
     
     // Si no hay aulas, mostrar mensaje y recargar
@@ -1302,13 +1427,13 @@ export class TribunalsComponent implements OnInit {
     const target = event.target as HTMLElement;
     
     // Verificar si el click fue fuera de cualquier dropdown o botón de cancelar
-    const isInsideDropdown = target.closest('.president-edit, .vocal-edit, .codirector-edit, .reemplazo-edit, .place-edit, .date-edit, .time-edit, .mat-mdc-select-panel, .mat-mdc-option, .mat-autocomplete-panel, .cancel-button, .mat-datepicker-popup');
+    const isInsideDropdown = target.closest('.president-edit, .vocal-edit, .codirector-edit, .reemplazo-edit, .place-edit, .date-edit, .time-edit, .status-dropdown-container, .status-select, .status-dropdown, .mat-mdc-select-panel, .mat-mdc-select-trigger, .mat-mdc-option, .mat-autocomplete-panel, .cancel-button, .mat-datepicker-popup, .cdk-overlay-pane');
     
     // También verificar si es un click en el icono de editar (para no cerrar inmediatamente)
     const isEditIcon = target.closest('.edit-icon');
     
     // Verificar si es un click en el área de display (para permitir toggle)
-    const isDisplayArea = target.closest('.president-display, .vocal-display, .codirector-display, .reemplazo-display, .place-display');
+    const isDisplayArea = target.closest('.president-display, .vocal-display, .codirector-display, .reemplazo-display, .place-display, .status-chip-container');
     
     if (!isInsideDropdown && !isEditIcon && !isDisplayArea) {
       this.closeAllDropdowns();
@@ -1324,6 +1449,12 @@ export class TribunalsComponent implements OnInit {
 
   // Métodos para manejar fecha y hora
   toggleDateEdit(row: any): void {
+    // Verificar permisos antes de permitir edición
+    if (!this.canEditScheduleDetails(row)) {
+      this.snackBar.open('Solo el presidente de la defensa o un administrador puede editar la fecha', 'Cerrar', { duration: 3000 });
+      return;
+    }
+    
     const key = this.getRowKey(row);
     this.editingDate[key] = !this.editingDate[key];
     
@@ -1343,6 +1474,12 @@ export class TribunalsComponent implements OnInit {
   }
 
   toggleTimeEdit(row: any): void {
+    // Verificar permisos antes de permitir edición
+    if (!this.canEditScheduleDetails(row)) {
+      this.snackBar.open('Solo el presidente de la defensa o un administrador puede editar la hora', 'Cerrar', { duration: 3000 });
+      return;
+    }
+    
     const key = this.getRowKey(row);
     this.editingTime[key] = !this.editingTime[key];
     
