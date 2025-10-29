@@ -73,7 +73,10 @@ export class DefensaHorariosComponent implements OnInit {
       next: (defensa) => {
         console.log('DefensaHorariosComponent: Defensa cargada exitosamente:', defensa);
         this.defensa = defensa;
-        this.loadHorariosDisponibles();
+        setTimeout(() => {
+          this.cdr.detectChanges();
+          this.loadHorariosDisponibles();
+        }, 0);
       },
       error: (error) => {
         console.error('DefensaHorariosComponent: Error cargando defensa:', error);
@@ -104,7 +107,11 @@ export class DefensaHorariosComponent implements OnInit {
     this.defensasHorariosService.getHorariosByDefensa(this.defensaId).subscribe({
       next: (response) => {
         this.horariosDisponibles = response.dataList || [];
-        this.loadSeleccionesProfesores();
+        // Forzar detección de cambios después de un breve delay para asegurar que Angular procese los cambios
+        setTimeout(() => {
+          this.cdr.detectChanges();
+          this.loadSeleccionesProfesores();
+        }, 0);
       },
       error: (error) => {
         console.error('Error cargando horarios:', error);
@@ -122,7 +129,10 @@ export class DefensaHorariosComponent implements OnInit {
       next: (selecciones) => {
         this.seleccionesProfesores = selecciones;
         this.loading = false;
-        this.cdr.detectChanges();
+        // Forzar detección de cambios después de un breve delay
+        setTimeout(() => {
+          this.cdr.detectChanges();
+        }, 0);
       },
       error: (error) => {
         console.error('Error cargando selecciones:', error);

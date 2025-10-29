@@ -1,4 +1,4 @@
-import { Component, OnInit, OnChanges, inject, Input, Output, EventEmitter } from '@angular/core';
+import { Component, OnInit, OnChanges, inject, Input, Output, EventEmitter, ChangeDetectorRef, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
@@ -18,6 +18,7 @@ import { TranslatePipe } from '../../pipes/translate.pipe';
 export class SchedulerComponent implements OnInit, OnChanges {
   private snackBar = inject(MatSnackBar);
   private route = inject(ActivatedRoute);
+  private cdr = inject(ChangeDetectorRef);
   
   @Input() defenseData: any = null;
   @Input() availableSchedules: any[] = [];
@@ -36,9 +37,24 @@ export class SchedulerComponent implements OnInit, OnChanges {
     this.configureCalendarMonth();
   }
 
-  ngOnChanges(): void {
-    if (this.availableSchedules && this.availableSchedules.length > 0) {
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['availableSchedules'] && this.availableSchedules && this.availableSchedules.length > 0) {
       this.configureCalendarMonth();
+      setTimeout(() => {
+        this.cdr.detectChanges();
+      }, 0);
+    }
+    
+    if (changes['professorSelections']) {
+      setTimeout(() => {
+        this.cdr.detectChanges();
+      }, 0);
+    }
+    
+    if (changes['defenseData']) {
+      setTimeout(() => {
+        this.cdr.detectChanges();
+      }, 0);
     }
   }
 

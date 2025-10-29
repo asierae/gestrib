@@ -12,6 +12,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatSelectModule } from '@angular/material/select';
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
@@ -34,7 +35,7 @@ import { ProfessorsByPositionService, ProfessorByPosition } from '../../services
 @Component({
   selector: 'app-tribunals',
   standalone: true,
-  imports: [CommonModule, FormsModule, MatTableModule, MatPaginatorModule, MatFormFieldModule, MatInputModule, MatDatepickerModule, MatNativeDateModule, MatSortModule, MatIconModule, MatButtonModule, MatChipsModule, MatSelectModule, MatTooltipModule, MatSnackBarModule, MatDialogModule, TranslatePipe],
+  imports: [CommonModule, FormsModule, MatTableModule, MatPaginatorModule, MatFormFieldModule, MatInputModule, MatDatepickerModule, MatNativeDateModule, MatSortModule, MatIconModule, MatButtonModule, MatChipsModule, MatSelectModule, MatAutocompleteModule, MatTooltipModule, MatSnackBarModule, MatDialogModule, TranslatePipe],
   templateUrl: './tribunals.html',
   styleUrl: './tribunals.scss'
 })
@@ -71,6 +72,17 @@ export class TribunalsComponent implements OnInit {
   vocals: ProfessorByPosition[] = [];
   editingPresident: { [key: string]: boolean } = {};
   editingVocal: { [key: string]: boolean } = {};
+  editingCodirector: { [key: string]: boolean } = {};
+  editingReemplazo: { [key: string]: boolean } = {};
+  
+  // Propiedades para filtrado de profesores
+  filteredPresidents: { [key: string]: ProfessorByPosition[] } = {};
+  filteredVocals: { [key: string]: ProfessorByPosition[] } = {};
+  filteredCodirectors: { [key: string]: ProfessorByPosition[] } = {};
+  filteredReemplazos: { [key: string]: ProfessorByPosition[] } = {};
+  
+  // Propiedades para filtrado de lugares
+  filteredPlaces: { [key: string]: Aula[] } = {};
   
   // Propiedades para dropdowns de fecha y hora
   editingDate: { [key: string]: boolean } = {};
@@ -109,7 +121,6 @@ export class TribunalsComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    console.log('TribunalsComponent: ngOnInit ejecutado');
     this.loadDefensas();
     this.loadAulas();
     this.loadProfessors();
@@ -237,19 +248,16 @@ export class TribunalsComponent implements OnInit {
   }
 
   loadAulas(): void {
-    console.log('TribunalsComponent: Cargando aulas...');
     this.aulasService.getAllAulas().subscribe({
       next: (response) => {
         if (response.success && response.dataList) {
           this.aulas = response.dataList;
-          console.log('TribunalsComponent: Aulas cargadas:', this.aulas.length);
         } else {
-          console.warn('TribunalsComponent: No se pudieron cargar las aulas');
           this.aulas = [];
         }
       },
       error: (error) => {
-        console.error('TribunalsComponent: Error cargando aulas:', error);
+        console.error('Error cargando aulas:', error);
         this.aulas = [];
       }
     });
@@ -670,14 +678,27 @@ export class TribunalsComponent implements OnInit {
 
   togglePlaceEdit(row: any): void {
     const key = this.getRowKey(row);
+    
+    // Si no hay aulas, mostrar mensaje y recargar
+    if (this.aulas.length === 0) {
+      this.snackBar.open('No hay aulas disponibles. Recargando...', 'Cerrar', { duration: 2000 });
+      this.loadAulas();
+      return;
+    }
+    
     this.editingPlace[key] = !this.editingPlace[key];
     
-    // Auto-focus the select when it opens
+    // Inicializar lista filtrada con todas las aulas
     if (this.editingPlace[key]) {
+      this.filteredPlaces[key] = [...this.aulas];
+      
+      // Auto-focus y abrir el dropdown automáticamente
       setTimeout(() => {
-        const selectElement = document.querySelector(`[data-row-key="${key}"] .mat-mdc-select-trigger`) as HTMLElement;
-        if (selectElement) {
-          selectElement.click();
+        const inputElement = document.querySelector(`[data-row-key="${key}"] .place-input input`) as HTMLInputElement;
+        if (inputElement) {
+          inputElement.focus();
+          // Simular un click para abrir el dropdown automáticamente
+          inputElement.click();
         }
       }, 100);
     }
@@ -685,6 +706,18 @@ export class TribunalsComponent implements OnInit {
 
   isEditingPlace(row: any): boolean {
     return this.editingPlace[this.getRowKey(row)] || false;
+  }
+
+  filterPlaces(row: any, searchTerm: string): void {
+    const key = this.getRowKey(row);
+    if (!searchTerm || searchTerm.trim() === '') {
+      this.filteredPlaces[key] = [...this.aulas];
+    } else {
+      const term = searchTerm.toLowerCase().trim();
+      this.filteredPlaces[key] = this.aulas.filter(aula => 
+        aula.nombre.toLowerCase().includes(term)
+      );
+    }
   }
 
   hasDate(row: any): boolean {
@@ -980,12 +1013,17 @@ export class TribunalsComponent implements OnInit {
     const key = this.getRowKey(row);
     this.editingPresident[key] = !this.editingPresident[key];
     
-    // Auto-focus el select cuando se abre
+    // Inicializar lista filtrada con todos los presidentes
+    if (this.editingPresident[key]) {
+      this.filteredPresidents[key] = [...this.presidents];
+    }
+    
+    // Auto-focus el input cuando se abre
     if (this.editingPresident[key]) {
       setTimeout(() => {
-        const selectElement = document.querySelector(`[data-row-key="${key}"] .president-select .mat-mdc-select-trigger`) as HTMLElement;
-        if (selectElement) {
-          selectElement.click();
+        const inputElement = document.querySelector(`[data-row-key="${key}"] .president-input input`) as HTMLInputElement;
+        if (inputElement) {
+          inputElement.focus();
         }
       }, 100);
     }
@@ -993,6 +1031,18 @@ export class TribunalsComponent implements OnInit {
 
   isEditingPresident(row: any): boolean {
     return this.editingPresident[this.getRowKey(row)] || false;
+  }
+
+  filterPresidents(row: any, searchTerm: string): void {
+    const key = this.getRowKey(row);
+    if (!searchTerm || searchTerm.trim() === '') {
+      this.filteredPresidents[key] = [...this.presidents];
+    } else {
+      const term = searchTerm.toLowerCase().trim();
+      this.filteredPresidents[key] = this.presidents.filter(professor => 
+        professor.fullName.toLowerCase().includes(term)
+      );
+    }
   }
 
   onPresidentChange(row: any, presidentId: number): void {
@@ -1030,12 +1080,17 @@ export class TribunalsComponent implements OnInit {
     const key = this.getRowKey(row);
     this.editingVocal[key] = !this.editingVocal[key];
     
-    // Auto-focus el select cuando se abre
+    // Inicializar lista filtrada con todos los vocales
+    if (this.editingVocal[key]) {
+      this.filteredVocals[key] = [...this.vocals];
+    }
+    
+    // Auto-focus el input cuando se abre
     if (this.editingVocal[key]) {
       setTimeout(() => {
-        const selectElement = document.querySelector(`[data-row-key="${key}"] .vocal-select .mat-mdc-select-trigger`) as HTMLElement;
-        if (selectElement) {
-          selectElement.click();
+        const inputElement = document.querySelector(`[data-row-key="${key}"] .vocal-input input`) as HTMLInputElement;
+        if (inputElement) {
+          inputElement.focus();
         }
       }, 100);
     }
@@ -1043,6 +1098,18 @@ export class TribunalsComponent implements OnInit {
 
   isEditingVocal(row: any): boolean {
     return this.editingVocal[this.getRowKey(row)] || false;
+  }
+
+  filterVocals(row: any, searchTerm: string): void {
+    const key = this.getRowKey(row);
+    if (!searchTerm || searchTerm.trim() === '') {
+      this.filteredVocals[key] = [...this.vocals];
+    } else {
+      const term = searchTerm.toLowerCase().trim();
+      this.filteredVocals[key] = this.vocals.filter(professor => 
+        professor.fullName.toLowerCase().includes(term)
+      );
+    }
   }
 
   onVocalChange(row: any, vocalId: number): void {
@@ -1082,10 +1149,148 @@ export class TribunalsComponent implements OnInit {
     return false;
   }
 
+  // Métodos para manejar dropdowns de codirector
+  toggleCodirectorEdit(row: any): void {
+    const key = this.getRowKey(row);
+    this.editingCodirector[key] = !this.editingCodirector[key];
+    
+    // Inicializar lista filtrada con todos los profesores
+    if (this.editingCodirector[key]) {
+      this.filteredCodirectors[key] = [...this.presidents];
+    }
+    
+    // Auto-focus el input cuando se abre
+    if (this.editingCodirector[key]) {
+      setTimeout(() => {
+        const inputElement = document.querySelector(`[data-row-key="${key}"] .codirector-input input`) as HTMLInputElement;
+        if (inputElement) {
+          inputElement.focus();
+        }
+      }, 100);
+    }
+  }
+
+  isEditingCodirector(row: any): boolean {
+    return this.editingCodirector[this.getRowKey(row)] || false;
+  }
+
+  filterCodirectors(row: any, searchTerm: string): void {
+    const key = this.getRowKey(row);
+    if (!searchTerm || searchTerm.trim() === '') {
+      this.filteredCodirectors[key] = [...this.presidents];
+    } else {
+      const term = searchTerm.toLowerCase().trim();
+      this.filteredCodirectors[key] = this.presidents.filter((professor: any) => 
+        professor.fullName.toLowerCase().includes(term)
+      );
+    }
+  }
+
+  onCodirectorChange(row: any, codirectorId: number): void {
+    if (row.id) {
+      console.log('TribunalsComponent: Cambiando codirector de defensa:', {
+        id: row.id,
+        newCodirectorId: codirectorId
+      });
+      
+      const codirector = this.presidents.find((c: any) => c.id === codirectorId);
+      if (codirector) {
+        // Llamar al servicio para actualizar en la base de datos
+        this.defensasService.updateCodirector(row.id, codirectorId).subscribe({
+          next: (response) => {
+            console.log('TribunalsComponent: Codirector actualizado en BD:', response);
+            // Actualizar localmente
+            row.codirector = codirector.fullName;
+            // Forzar detección de cambios
+            this.cdr.detectChanges();
+            this.snackBar.open(`Codirector cambiado a: ${codirector.fullName}`, 'Cerrar', { duration: 2000 });
+          },
+          error: (error) => {
+            console.error('TribunalsComponent: Error actualizando codirector:', error);
+            this.snackBar.open('Error al actualizar el codirector', 'Cerrar', { duration: 3000 });
+          }
+        });
+      }
+    }
+    
+    // Cerrar el dropdown
+    this.editingCodirector[this.getRowKey(row)] = false;
+  }
+
+  // Métodos para manejar dropdowns de reemplazo
+  toggleReemplazoEdit(row: any): void {
+    const key = this.getRowKey(row);
+    this.editingReemplazo[key] = !this.editingReemplazo[key];
+    
+    // Inicializar lista filtrada con todos los profesores
+    if (this.editingReemplazo[key]) {
+      this.filteredReemplazos[key] = [...this.presidents];
+    }
+    
+    // Auto-focus el input cuando se abre
+    if (this.editingReemplazo[key]) {
+      setTimeout(() => {
+        const inputElement = document.querySelector(`[data-row-key="${key}"] .reemplazo-input input`) as HTMLInputElement;
+        if (inputElement) {
+          inputElement.focus();
+        }
+      }, 100);
+    }
+  }
+
+  isEditingReemplazo(row: any): boolean {
+    return this.editingReemplazo[this.getRowKey(row)] || false;
+  }
+
+  filterReemplazos(row: any, searchTerm: string): void {
+    const key = this.getRowKey(row);
+    if (!searchTerm || searchTerm.trim() === '') {
+      this.filteredReemplazos[key] = [...this.presidents];
+    } else {
+      const term = searchTerm.toLowerCase().trim();
+      this.filteredReemplazos[key] = this.presidents.filter((professor: any) => 
+        professor.fullName.toLowerCase().includes(term)
+      );
+    }
+  }
+
+  onReemplazoChange(row: any, reemplazoId: number): void {
+    if (row.id) {
+      console.log('TribunalsComponent: Cambiando reemplazo de defensa:', {
+        id: row.id,
+        newReemplazoId: reemplazoId
+      });
+      
+      const reemplazo = this.presidents.find((r: any) => r.id === reemplazoId);
+      if (reemplazo) {
+        // Llamar al servicio para actualizar en la base de datos
+        this.defensasService.updateReemplazo(row.id, reemplazoId).subscribe({
+          next: (response) => {
+            console.log('TribunalsComponent: Reemplazo actualizado en BD:', response);
+            // Actualizar localmente
+            row.replacement = reemplazo.fullName;
+            // Forzar detección de cambios
+            this.cdr.detectChanges();
+            this.snackBar.open(`Reemplazo cambiado a: ${reemplazo.fullName}`, 'Cerrar', { duration: 2000 });
+          },
+          error: (error) => {
+            console.error('TribunalsComponent: Error actualizando reemplazo:', error);
+            this.snackBar.open('Error al actualizar el reemplazo', 'Cerrar', { duration: 3000 });
+          }
+        });
+      }
+    }
+    
+    // Cerrar el dropdown
+    this.editingReemplazo[this.getRowKey(row)] = false;
+  }
+
   // Método para cerrar todos los dropdowns
   closeAllDropdowns(): void {
     this.editingPresident = {};
     this.editingVocal = {};
+    this.editingCodirector = {};
+    this.editingReemplazo = {};
     this.editingStatus = {};
     this.editingPlace = {};
     this.editingDate = {};
@@ -1097,12 +1302,15 @@ export class TribunalsComponent implements OnInit {
     const target = event.target as HTMLElement;
     
     // Verificar si el click fue fuera de cualquier dropdown o botón de cancelar
-    const isInsideDropdown = target.closest('.president-edit, .vocal-edit, .date-edit, .time-edit, .mat-mdc-select-panel, .mat-mdc-option, .cancel-button, .mat-datepicker-popup');
+    const isInsideDropdown = target.closest('.president-edit, .vocal-edit, .codirector-edit, .reemplazo-edit, .place-edit, .date-edit, .time-edit, .mat-mdc-select-panel, .mat-mdc-option, .mat-autocomplete-panel, .cancel-button, .mat-datepicker-popup');
     
     // También verificar si es un click en el icono de editar (para no cerrar inmediatamente)
     const isEditIcon = target.closest('.edit-icon');
     
-    if (!isInsideDropdown && !isEditIcon) {
+    // Verificar si es un click en el área de display (para permitir toggle)
+    const isDisplayArea = target.closest('.president-display, .vocal-display, .codirector-display, .reemplazo-display, .place-display');
+    
+    if (!isInsideDropdown && !isEditIcon && !isDisplayArea) {
       this.closeAllDropdowns();
     }
   }

@@ -236,6 +236,24 @@ export class DefensasService {
       );
   }
 
+  updateCodirector(id: number, idCodirector: number): Observable<DefensaResponse> {
+    const updateRequest = { IdCodirector: idCodirector };
+    return this.http.patch<DefensaResponse>(`${this.baseUrl}/${id}/codirector`, updateRequest)
+      .pipe(
+        timeout<DefensaResponse>(environment.timeout),
+        catchError(this.handleError)
+      );
+  }
+
+  updateReemplazo(id: number, idReemplazo: number): Observable<DefensaResponse> {
+    const updateRequest = { IdReemplazo: idReemplazo };
+    return this.http.patch<DefensaResponse>(`${this.baseUrl}/${id}/reemplazo`, updateRequest)
+      .pipe(
+        timeout<DefensaResponse>(environment.timeout),
+        catchError(this.handleError)
+      );
+  }
+
   updateProgramacion(id: number, fecha?: Date | null, hora?: string | null, lugar?: string | null): Observable<DefensaResponse> {
     const updateRequest: any = {};
     

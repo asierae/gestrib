@@ -257,7 +257,7 @@ export class DefensasComponent implements OnInit, OnDestroy {
     this.defensaForm = this.fb.group({
       curso: [`${this.currentYear}-${this.nextYear}`, Validators.required],
       grado: ['', Validators.required], // Sin valor por defecto
-      especialidad: ['', Validators.required], // Ahora obligatorio y sin valor por defecto
+      especialidad: ['', Validators.required], // Sin valor por defecto - usuario debe seleccionar
       titulo: ['', Validators.required],
       idioma: ['', Validators.required], // Sin valor por defecto
       estudiante: [null, Validators.required], // Cambiar a null para objetos
@@ -270,8 +270,8 @@ export class DefensasComponent implements OnInit, OnDestroy {
       especialidadesSuplente: [[]]
     });
     
-    // Configurar especialidades iniciales para GII
-    this.mostrarEspecialidades = true;
+    // No mostrar especialidades inicialmente - solo cuando se seleccione GII
+    this.mostrarEspecialidades = false;
     this.updateAreasConocimiento();
     this.updateEstudiantesFiltrados();
   }
@@ -380,19 +380,19 @@ export class DefensasComponent implements OnInit, OnDestroy {
         estudiante: null // Limpiar estudiante seleccionado
       });
       
-      // Actualizar áreas de conocimiento para IA
+      // Actualizar áreas de conocimiento solo si hay vocal o suplente
       this.updateAreasConocimiento();
     } else if (grado === TipoGrado.INGENIERIA_INFORMATICA) {
-      // Para Informática: agregar validador required y establecer especialidad por defecto
+      // Para Informática: agregar validador required pero sin establecer especialidad por defecto
       especialidadControl?.setValidators([Validators.required]);
       especialidadControl?.updateValueAndValidity();
       
       this.defensaForm.patchValue({
-        especialidad: TipoEspecialidad.INGENIERIA_COMPUTACION,
+        especialidad: null, // Sin valor por defecto - el usuario debe seleccionar
         estudiante: null // Limpiar estudiante seleccionado
       });
       
-      // Actualizar áreas de conocimiento para GII
+      // Actualizar áreas de conocimiento solo si hay vocal o suplente
       this.updateAreasConocimiento();
     }
     
@@ -401,7 +401,7 @@ export class DefensasComponent implements OnInit, OnDestroy {
   }
 
   onEspecialidadChange(): void {
-    // Actualizar las áreas de conocimiento según la especialidad elegida
+    // Actualizar las áreas de conocimiento solo si hay vocal o suplente seleccionado
     this.updateAreasConocimiento();
   }
   
@@ -466,18 +466,58 @@ export class DefensasComponent implements OnInit, OnDestroy {
   private updateAreasConocimiento(): void {
     const grado = this.defensaForm.get('grado')?.value as TipoGrado;
     const especialidad = this.defensaForm.get('especialidad')?.value as TipoEspecialidad;
+    const vocal = this.defensaForm.get('vocalTribunal')?.value;
+    const suplente = this.defensaForm.get('suplente')?.value;
     
-    if (grado === TipoGrado.INTELIGENCIA_ARTIFICIAL) {
-      // Para IA: siempre las mismas áreas de conocimiento
-      this.especialidadesVocal = this.areasConocimientoIA;
-      this.especialidadesSuplente = this.areasConocimientoIA;
-    } else if (grado === TipoGrado.INGENIERIA_INFORMATICA && especialidad) {
-      // Para GII: áreas según la especialidad elegida
-      this.especialidadesVocal = ESPECIALIDAD_OPTIONS[especialidad] || [];
-      this.especialidadesSuplente = ESPECIALIDAD_OPTIONS[especialidad] || [];
+    // Solo actualizar áreas si hay vocal o suplente seleccionado
+    if (!vocal && !suplente) {
+      // Si no hay vocal ni suplente, limpiar las áreas
+      this.especialidadesVocal = [];
+      this.especialidadesSuplente = [];
+      this.selectedVocalEspecialidades = [];
+      this.selectedSuplenteEspecialidades = [];
+      this.defensaForm.patchValue({
+        especialidadesVocal: [],
+        especialidadesSuplente: []
+      });
+      return;
     }
     
-    // Limpiar selecciones previas
+    // Si hay vocal o suplente, configurar las áreas según grado y especialidad
+    if (grado === TipoGrado.INTELIGENCIA_ARTIFICIAL) {
+      // Para IA: siempre las mismas áreas de conocimiento
+      if (vocal) {
+        this.especialidadesVocal = this.areasConocimientoIA;
+      } else {
+        this.especialidadesVocal = [];
+      }
+      
+      if (suplente) {
+        this.especialidadesSuplente = this.areasConocimientoIA;
+      } else {
+        this.especialidadesSuplente = [];
+      }
+    } else if (grado === TipoGrado.INGENIERIA_INFORMATICA && especialidad) {
+      // Para GII: áreas según la especialidad elegida
+      const areas = ESPECIALIDAD_OPTIONS[especialidad] || [];
+      if (vocal) {
+        this.especialidadesVocal = areas;
+      } else {
+        this.especialidadesVocal = [];
+      }
+      
+      if (suplente) {
+        this.especialidadesSuplente = areas;
+      } else {
+        this.especialidadesSuplente = [];
+      }
+    } else {
+      // Si no hay grado o especialidad completa, limpiar
+      this.especialidadesVocal = [];
+      this.especialidadesSuplente = [];
+    }
+    
+    // Limpiar selecciones previas solo si cambió la lista de áreas
     this.selectedVocalEspecialidades = [];
     this.selectedSuplenteEspecialidades = [];
     this.defensaForm.patchValue({
@@ -637,6 +677,24 @@ export class DefensasComponent implements OnInit, OnDestroy {
   }
   
   /**
+   * Determina si debe mostrar el error para el vocal
+   * @returns true si debe mostrar el error
+   */
+  shouldShowVocalError(): boolean {
+    const vocal = this.defensaForm.get('vocalTribunal')?.value;
+    return !!(vocal && this.especialidadesVocal.length > 0 && this.selectedVocalEspecialidades.length === 0);
+  }
+
+  /**
+   * Determina si debe mostrar el error para el suplente
+   * @returns true si debe mostrar el error
+   */
+  shouldShowSuplenteError(): boolean {
+    const suplente = this.defensaForm.get('suplente')?.value;
+    return !!(suplente && this.especialidadesSuplente.length > 0 && this.selectedSuplenteEspecialidades.length === 0);
+  }
+
+  /**
    * Valida que se hayan seleccionado áreas de conocimiento cuando sea necesario
    * @returns true si la validación es correcta, false si hay errores
    */
@@ -662,6 +720,18 @@ export class DefensasComponent implements OnInit, OnDestroy {
         { duration: 4000 }
       );
       return false;
+    }
+    
+    // Validación adicional: si se muestran áreas de conocimiento, debe haber al menos un vocal o suplente
+    if (this.especialidadesVocal.length > 0 || this.especialidadesSuplente.length > 0) {
+      if (!vocal && !suplente) {
+        this.snackBar.open(
+          'Debe seleccionar al menos un vocal o suplente cuando hay áreas de conocimiento disponibles',
+          'Cerrar',
+          { duration: 4000 }
+        );
+        return false;
+      }
     }
     
     return true;
@@ -749,10 +819,10 @@ export class DefensasComponent implements OnInit, OnDestroy {
   private resetForm(): void {
     this.defensaForm.reset({
       curso: `${this.currentYear}-${this.nextYear}`,
-      grado: TipoGrado.INGENIERIA_INFORMATICA,
-      especialidad: TipoEspecialidad.INGENIERIA_COMPUTACION,
+      grado: '', // Sin valor por defecto
+      especialidad: '', // Sin valor por defecto
       titulo: '',
-      idioma: 'es', // Resetear a español por defecto
+      idioma: '', // Sin valor por defecto
       estudiante: null, // Cambiar a null para objetos
       directorTribunal: '',
       codirectorTribunal: '',
@@ -763,9 +833,9 @@ export class DefensasComponent implements OnInit, OnDestroy {
       especialidadesSuplente: []
     });
     
-    // Restaurar validador required para especialidad (GII por defecto)
+    // No establecer validador required para especialidad inicialmente
     const especialidadControl = this.defensaForm.get('especialidad');
-    especialidadControl?.setValidators([Validators.required]);
+    especialidadControl?.clearValidators();
     especialidadControl?.updateValueAndValidity();
     
     this.selectedEstudiante = '';
@@ -783,8 +853,8 @@ export class DefensasComponent implements OnInit, OnDestroy {
     this.filteredVocales = [...this.profesores];
     this.filteredSuplentes = [...this.profesores];
     
-    // Restaurar configuración inicial para GII
-    this.mostrarEspecialidades = true;
+    // No mostrar especialidades inicialmente
+    this.mostrarEspecialidades = false;
     this.updateAreasConocimiento();
     this.updateEstudiantesFiltrados();
   }

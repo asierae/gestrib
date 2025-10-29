@@ -149,9 +149,24 @@ export class HorariosDialogComponent implements OnInit {
     console.log('Form valid:', this.isFormValid);
 
     try {
-      const dateTime = new Date(selectedDate);
+      // Crear la fecha correctamente preservando la hora local
+      const dateObj = new Date(selectedDate);
       const [hours, minutes] = selectedTime.split(':');
-      dateTime.setHours(parseInt(hours), parseInt(minutes), 0, 0);
+      
+      // Crear una nueva fecha con la hora local exacta (sin conversión a UTC)
+      const dateTime = new Date(
+        dateObj.getFullYear(),
+        dateObj.getMonth(),
+        dateObj.getDate(),
+        parseInt(hours),
+        parseInt(minutes),
+        0,
+        0
+      );
+
+      console.log('DateTime created:', dateTime);
+      console.log('DateTime ISO:', dateTime.toISOString());
+      console.log('DateTime local:', dateTime.toLocaleString());
 
       // Verificar si ya existe
       const exists = this.selectedDates.some(d => 
@@ -263,12 +278,28 @@ export class HorariosDialogComponent implements OnInit {
     }
 
     const dateTime = this.selectedDates[index];
+    
+    // Crear fecha UTC con la hora local preservada
+    // Esto evita que Angular convierta la hora al serializar a JSON
+    const year = dateTime.getFullYear();
+    const month = dateTime.getMonth();
+    const day = dateTime.getDate();
+    const hours = dateTime.getHours();
+    const minutes = dateTime.getMinutes();
+    const seconds = dateTime.getSeconds();
+    
+    // Crear fecha usando UTC para preservar la hora exacta
+    // Cuando Angular serializa con toISOString(), mantendrá la hora correcta
+    const fechaToSend = new Date(Date.UTC(year, month, day, hours, minutes, seconds));
+    
     const request: DefensaHorarioRequest = {
       idDefensa: this.data.idDefensa,
-      fecha: dateTime
+      fecha: fechaToSend
     };
 
-    console.log(`PASO 2.${index + 1}: Llamando a createHorario (INSERT) para horario ${index + 1}/${this.selectedDates.length}:`, dateTime);
+    console.log(`PASO 2.${index + 1}: Llamando a createHorario (INSERT) para horario ${index + 1}/${this.selectedDates.length}`);
+    console.log('Fecha original (local):', dateTime.toLocaleString());
+    console.log('Fecha a enviar (UTC preservando hora local):', fechaToSend.toISOString());
     console.log('Request:', request);
 
     this.defensasHorariosService.createHorario(request).subscribe({

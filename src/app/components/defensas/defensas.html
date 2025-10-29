@@ -155,7 +155,7 @@
         </div>
       
         <!-- Áreas de conocimiento del Vocal -->
-        <mat-card *ngIf="especialidadesVocal.length > 0" class="especialidades-section mat-elevation-z4">
+        <mat-card *ngIf="defensaForm.get('vocalTribunal')?.value && especialidadesVocal.length > 0" class="especialidades-section mat-elevation-z4">
           <mat-card-header>
             <mat-card-title>Áreas de conocimiento del vocal</mat-card-title>
           </mat-card-header>
@@ -168,6 +168,11 @@
                 class="checkbox-item">
                 {{ especialidad.label }}
               </mat-checkbox>
+            </div>
+            <div *ngIf="shouldShowVocalError()" 
+                 class="error-message">
+              <mat-icon color="warn">warning</mat-icon>
+              <span>Debe seleccionar al menos un área de conocimiento para el vocal</span>
             </div>
           </mat-card-content>
         </mat-card>
@@ -193,7 +198,7 @@
         </div>
         
         <!-- Áreas de conocimiento del Suplente -->
-        <mat-card *ngIf="especialidadesSuplente.length > 0" class="especialidades-section mat-elevation-z4">
+        <mat-card *ngIf="defensaForm.get('suplente')?.value && especialidadesSuplente.length > 0" class="especialidades-section mat-elevation-z4">
           <mat-card-header>
             <mat-card-title>Áreas de conocimiento del suplente</mat-card-title>
           </mat-card-header>
@@ -206,6 +211,11 @@
                 class="checkbox-item">
                 {{ especialidad.label }}
               </mat-checkbox>
+            </div>
+            <div *ngIf="shouldShowSuplenteError()" 
+                 class="error-message">
+              <mat-icon color="warn">warning</mat-icon>
+              <span>Debe seleccionar al menos un área de conocimiento para el suplente</span>
             </div>
           </mat-card-content>
         </mat-card>
